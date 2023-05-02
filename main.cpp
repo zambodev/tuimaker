@@ -7,9 +7,7 @@ int main()
 {
 	setlocale(LC_ALL, "");
 
-	Draw draw;
-
-	draw.hline(5, 5, 10, 5);
+	Window draw;
 
 	draw.refresh();
 

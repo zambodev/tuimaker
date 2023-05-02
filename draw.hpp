@@ -8,7 +8,7 @@
 #iclude <windows.h>
 #endif
 
-class Draw
+class Window
 {
 	private:
 		int cols, rows;
@@ -30,7 +30,8 @@ class Draw
 		};
 
 	public:
-		Draw();
+		Window();
 		void refresh();
-		void hline(int x1, int y1, int x2, int y2);
+		void box(int, int, int, int, std::string = "");
+		void hline(int, int, int, int);
 };
