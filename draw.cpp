@@ -2,7 +2,7 @@
 #include "draw.hpp"
 
 
-Window::Window()
+Window::Window(std::string title)
 {	
 #ifdef __linux__
 	struct winsize w;
@@ -23,7 +23,7 @@ Window::Window()
 	for(int i = 0; i < cols * rows; ++i)
 		buffer[i] = u'\u0020';
 
-	box(0, 0, cols-1, rows-1, "TUILIB TESTING");
+	box(0, 0, cols-1, rows-1, title);
 
 }
 

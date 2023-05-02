@@ -30,7 +30,7 @@ class Window
 		};
 
 	public:
-		Window();
+		Window(std::string = "");
 		void refresh();
 		void box(int, int, int, int, std::string = "");
 		void hline(int, int, int, int);

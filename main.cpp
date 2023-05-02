@@ -7,7 +7,7 @@ int main()
 {
 	setlocale(LC_ALL, "");
 
-	Window draw;
+	Window draw("TUILIB testing");
 
 	draw.refresh();
 
