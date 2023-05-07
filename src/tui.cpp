@@ -1,5 +1,5 @@
 #include <cstring>
-#include "Window.hpp"
+#include "tui.hpp"
 
 
 /* class Box*/
