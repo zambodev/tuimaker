@@ -2,6 +2,7 @@
 #define DRAW_HPP
 
 #include <iostream>
+#include <vector>
 #ifdef __linux__
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -9,13 +10,10 @@
 #include <windows.h>
 #endif
 
+
 class Window
 {
 	private:
-		int cols, rows;
-		int input_pos[2] = {-1, -1};
-		wchar_t *buffer;
-
 		enum : wchar_t
 		{
 			hbar 	= u'\u2501',
@@ -31,11 +29,27 @@ class Window
 			bint 	= u'\u253B'
 		};
 
+		class Box {
+			private:
+				int x1, y1, x2, y2;
+				std::string title, text;
+
+			public:
+				Box(int, int, int, int, std::string = "", std::string = "");
+				~Box();
+				void draw(void);
+				void write(std::string);
+				void clear_text(void);
+				void clear(void);
+		};
+
+		std::vector<Box *> boxes;
+		inline static int cols = -1, rows = -1;
+		inline static wchar_t *buffer = nullptr;
+
 	public:
 		Window(std::string = "");
 		void refresh(void);
-		void box(int, int, int, int, int type = 0, std::string = "");
-		void hrzline(int, int, int, int);
 };
 
 

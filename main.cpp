@@ -1,17 +1,15 @@
 #include <iostream>
 #include <clocale>
-#include "draw.hpp"
+#include "Window.hpp"
 
 
 int main()
 {
 	setlocale(LC_ALL, "");
 
-	Window draw("TUILIB testing");
+	Window window("TUILIB testing");
 
-	draw.box(1, 1, 40, 17, 1, "Message");
-
-	draw.refresh();
+	window.refresh();
 
 
 	while(1);
