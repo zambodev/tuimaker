@@ -1,17 +1,19 @@
-#include <iostream>
-#include <tuple>
+#ifndef DRAW_HPP
+#define DRAW_HPP
 
+#include <iostream>
 #ifdef __linux__
 #include <sys/ioctl.h>
 #include <unistd.h>
 #elif _WIN32
-#iclude <windows.h>
+#include <windows.h>
 #endif
 
 class Window
 {
 	private:
 		int cols, rows;
+		int input_pos[2] = {-1, -1};
 		wchar_t *buffer;
 
 		enum : wchar_t
@@ -31,7 +33,10 @@ class Window
 
 	public:
 		Window(std::string = "");
-		void refresh();
-		void box(int, int, int, int, std::string = "");
-		void hline(int, int, int, int);
+		void refresh(void);
+		void box(int, int, int, int, int type = 0, std::string = "");
+		void hrzline(int, int, int, int);
 };
+
+
+#endif
