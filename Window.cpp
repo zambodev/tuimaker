@@ -118,9 +118,15 @@ void Window::refresh(void)
 	fflush(stdout);
 }
 
-void Window::set_box(std::string id, int x1, int y1, int x2, int y2, std::string title, std::string text)
+void Window::create_box(std::string id, int x1, int y1, int x2, int y2, std::string title, std::string text)
 {
 	boxes.try_emplace(id, new Box(x1, y1, x2, y2, title, text));
+}
+
+void Window::delete_box(std::string id)
+{
+	boxes[id]->~Box();
+	boxes.erase("id");
 }
 
 Window::Box * Window::get_box(std::string id)

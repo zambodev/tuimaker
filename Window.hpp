@@ -50,7 +50,8 @@ class Window
 	public:
 
 		Window(std::string = "");
-		void set_box(std::string, int, int, int, int, std::string = "", std::string = "");
+		void create_box(std::string, int, int, int, int, std::string = "", std::string = "");
+		void delete_box(std::string);
 		Box * get_box(std::string);
 		void refresh(void);
 };
