@@ -12,9 +12,13 @@ Window::Box::Box(int x1, int y1, int x2, int y2, std::string title, std::string 
 	this->y2 = y2;
 
 	if(title != "") this->title = title;
-	if(text != "") this->text = text;
-
 	draw();
+
+	if(text != "")
+	{
+		this->text = text;
+		write(text);
+	}
 }
 
 Window::Box::~Box()
