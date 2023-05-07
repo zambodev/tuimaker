@@ -9,7 +9,7 @@ int main()
 
 	Window draw("TUILIB testing");
 
-	draw.box(1, 1, 40, 17, 1);
+	draw.box(1, 1, 40, 17, 1, "Message");
 
 	draw.refresh();
 

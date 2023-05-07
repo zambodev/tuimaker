@@ -64,7 +64,7 @@ void Window::box(int x1, int y1, int x2, int y2, int type, std::string title)
 	}
 	// Print title
 	for(int i = 0; i < title.length(); ++i)
-		buffer[cols * (y1 + 1) + (x2 - x1) / 2 - title.length() / 2 + i] = title[i];
+		buffer[cols * (y1 + 1) + x1 + (x2 - x1) / 2 - title.length() / 2 + i] = title[i];
 
 	if(type)
 	{
