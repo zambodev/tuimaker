@@ -2,7 +2,7 @@
 #define DRAW_HPP
 
 #include <iostream>
-#include <vector>
+#include <map>
 #ifdef __linux__
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -43,11 +43,12 @@ class Window
 				void clear(void);
 		};
 
-		std::vector<Box *> boxes;
 		inline static int cols = -1, rows = -1;
 		inline static wchar_t *buffer = nullptr;
 
 	public:
+		std::map<std::string, Box *> boxes;
+
 		Window(std::string = "");
 		void refresh(void);
 };

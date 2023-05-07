@@ -11,6 +11,13 @@ int main()
 
 	window.refresh();
 
+	window.boxes["main"]->write("Prova testo");
+	window.refresh();
+
+	sleep(4);
+
+	window.boxes["main"]->clear_text();
+	window.refresh();
 
 	while(1);
 }

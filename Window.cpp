@@ -47,14 +47,25 @@ void Window::Box::draw(void)
 		buffer[Window::cols * (y1 + 1) + (x2 - x1) / 2 - title.length() / 2 + i] = title[i];
 }
 
-void Window::Box::write(std::string)
+void Window::Box::write(std::string text)
 {
+	int i = y1 + 2, idx = 0
+	;
+	if(!this->title.empty()) ++i;
 
+	for(i; i < y2; ++i)
+		for(int j = x1 + 2; j < x2; ++j)
+			if(text[idx])
+				Window::buffer[Window::cols * i + j] = text[idx++];
+			else break;
 }
 
 void Window::Box::clear_text(void)
 {
-	for(int i = y1 + 1; i < y2; ++i)
+	int i = y1 + 1;
+	if(!this->title.empty()) ++i;
+
+	for(i; i < y2; ++i)
 		for(int j = x1 + 1; j < x2; ++j)
 			Window::buffer[Window::cols * i + j] = L' ';
 }
@@ -90,7 +101,7 @@ Window::Window(std::string title)
 	for(int i = 0; i < cols * rows; ++i)
 		buffer[i] = u'\u0020';
 
-	boxes.push_back(new Box(0, 0, cols-1, rows-1, title));
+	boxes.insert({"main", new Box(0, 0, cols-1, rows-1, title)});
 }
 
 void Window::refresh(void)
