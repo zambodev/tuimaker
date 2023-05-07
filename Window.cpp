@@ -19,32 +19,32 @@ Window::Box::Box(int x1, int y1, int x2, int y2, std::string title, std::string 
 
 Window::Box::~Box()
 {
-
+	clear();
 }
 
 void Window::Box::draw(void)
 {
 	// Top corner
-	Window::buffer[Window::cols * y1 + x1] = tlcrn;
-	buffer[Window::cols * y1 + (x2 - x1)] = trcrn;
+	buffer[cols * y1 + x1] = tlcrn;
+	buffer[cols * y1 + x1 + (x2 - x1)] = trcrn;
 	// Bottom corner
-	buffer[Window::cols * y2 + x1] = blcrn;
-	buffer[Window::cols * y2 + (x2 - x1)] = brcrn;
+	buffer[cols * y2 + x1] = blcrn;
+	buffer[cols * y2 + x1 + (x2 - x1)] = brcrn;
 	// Fill top and bottom lines
 	for(int i = x1 + 1; i < x2; ++i)
 	{
-		buffer[i] = hbar;
-		buffer[Window::cols * (y2 - y1) + i] = hbar;	
+		buffer[cols * y1 + i] = hbar;
+		buffer[cols * y2 + i] = hbar;	
 	}
 	// Left and right lines
 	for(int i = y1 + 1; i < y2; ++i)
 	{
-		buffer[Window::cols * i] = vbar;
-		buffer[Window::cols * i + (x2 - x1)] = vbar;
+		buffer[cols * i + x1] = vbar;
+		buffer[cols * i + x1 + (x2 - x1)] = vbar;
 	}
 	// Print title
 	for(int i = 0; i < title.length(); ++i)
-		buffer[Window::cols * (y1 + 1) + (x2 - x1) / 2 - title.length() / 2 + i] = title[i];
+		buffer[cols * (y1 + 1) + x1 + (x2 - x1) / 2 - title.length() / 2 + i] = title[i];
 }
 
 void Window::Box::write(std::string text)
@@ -112,4 +112,14 @@ void Window::refresh(void)
 		wprintf(L"%lc", buffer[i]);
 
 	fflush(stdout);
+}
+
+void Window::set_box(std::string id, int x1, int y1, int x2, int y2, std::string title, std::string text)
+{
+	boxes.try_emplace(id, new Box(x1, y1, x2, y2, title, text));
+}
+
+Window::Box * Window::get_box(std::string id)
+{
+	return boxes[id];
 }

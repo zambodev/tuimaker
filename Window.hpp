@@ -45,11 +45,13 @@ class Window
 
 		inline static int cols = -1, rows = -1;
 		inline static wchar_t *buffer = nullptr;
-
-	public:
 		std::map<std::string, Box *> boxes;
 
+	public:
+
 		Window(std::string = "");
+		void set_box(std::string, int, int, int, int, std::string = "", std::string = "");
+		Box * get_box(std::string);
 		void refresh(void);
 };
 

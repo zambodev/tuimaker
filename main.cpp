@@ -11,12 +11,13 @@ int main()
 
 	window.refresh();
 
-	window.boxes["main"]->write("Prova testo");
+	window.get_box("main")->write("Prova testo");
+	window.set_box("Inbox", 10, 10, 40, 30, "Inbox", "Nessun messagio");
 	window.refresh();
 
 	sleep(4);
 
-	window.boxes["main"]->clear_text();
+	window.get_box("Inbox")->~Box();
 	window.refresh();
 
 	while(1);
