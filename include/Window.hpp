@@ -1,5 +1,5 @@
-#ifndef DRAW_HPP
-#define DRAW_HPP
+#ifndef WINDOW_HPP
+#define WINDOW_HPP
 
 #include <iostream>
 #include <map>
