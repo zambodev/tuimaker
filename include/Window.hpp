@@ -38,6 +38,7 @@ class Window
 				Box(int, int, int, int, std::string = "", std::string = "");
 				~Box();
 				void draw(void);
+				void move(int, int, int = -1, int = -1);
 				void write(std::string);
 				void clear_text(void);
 				void clear(void);
