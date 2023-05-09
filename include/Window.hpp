@@ -2,6 +2,7 @@
 #define WINDOW_HPP
 
 #include <iostream>
+#include <cstring>
 #include <map>
 #ifdef __linux__
 #include <sys/ioctl.h>
