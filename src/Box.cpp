@@ -79,7 +79,7 @@ void Window::Box::write(std::string text)
 	for(i; i < y2; ++i)
 		for(int j = x1 + 2; j < x2; ++j)
 			if(text[idx])
-				Window::buffer[Window::cols * i + j] = text[idx++];
+				buffer[cols * i + j] = text[idx++];
 			else break;
 }
 
@@ -90,12 +90,12 @@ void Window::Box::clear_text(void)
 
 	for(i; i < y2; ++i)
 		for(int j = x1 + 1; j < x2; ++j)
-			Window::buffer[Window::cols * i + j] = L' ';
+			buffer[cols * i + j] = L' ';
 }
 
 void Window::Box::clear(void)
 {
 	for(int i = y1; i <= y2; ++i)
 		for(int j = x1; j <= x2; ++j)
-			Window::buffer[Window::cols * i + j] = L' ';
+			buffer[cols * i + j] = L' ';
 }

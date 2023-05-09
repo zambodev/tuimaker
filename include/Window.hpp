@@ -3,7 +3,9 @@
 
 #include <iostream>
 #include <cstring>
+#include <functional>
 #include <map>
+#include <vector>
 #ifdef __linux__
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -45,16 +47,41 @@ class Window
 				void clear(void);
 		};
 
+		class Selectable {
+			private:
+				struct Option
+				{
+					Option(std::string name, std::function<void()> func) : name(name), func(func) {}
+					std::string name;
+					std::function<void()> func;
+				};
+
+				int x, y;
+				std::map<int, Option *> options;
+
+			public:
+				Selectable(int, int, std::vector<std::string>, std::vector<std::function<void()>>);
+				~Selectable();
+				void draw(void);
+				void clear(void);
+		};
+
 		inline static int cols = -1, rows = -1;
 		inline static wchar_t *buffer = nullptr;
 		std::map<std::string, Box *> boxes;
+		std::map<std::string, Selectable *> selecs;
 
 	public:
 
 		Window(std::string = "");
+
 		void create_box(std::string, int, int, int, int, std::string = "", std::string = "");
 		void delete_box(std::string);
 		Box * get_box(std::string);
+		
+		void create_selec(std::string, int, int, std::vector<std::string>, std::vector<std::function<void()>>);
+		Selectable * get_selec(std::string);
+
 		void refresh(void);
 };
 

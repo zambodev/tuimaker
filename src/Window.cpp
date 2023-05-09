@@ -51,3 +51,13 @@ Window::Box * Window::get_box(std::string id)
 {
 	return boxes[id];
 }
+
+void Window::create_selec(std::string id, int x, int y, std::vector<std::string> options, std::vector<std::function<void(void)>> funcs)
+{
+	selecs.try_emplace(id, new Selectable(x, y, options, funcs));
+}
+
+Window::Selectable * Window::get_selec(std::string id)
+{
+	return selecs[id];
+}
