@@ -3,7 +3,7 @@ VERSION = 0.2.0
 
 # Compiler settings
 CC = g++
-CFLAGS = -std=c++17
+CFLAGS = -std=c++17 -Werror
 
 # Folders
 SRC = src
@@ -55,8 +55,7 @@ $(LIBA): $(OBJS)
 
 # Compile the test file
 $(TESTFILE): $(LIBA)
-	@ $(CC) $(CFLAGS) -o $(BIN)/$(EXE) $(TEST)/$(TESTFILE) -l$(LIBNAME) -I$(INCLUDE)/ -L$(LIB)/
-	./$(BIN)/$(EXE)
+	@ $(CC) $(CFLAGS) -o $(BIN)/$(EXE) $(TEST)/$(TESTFILE) -l$(LIBNAME) -I$(INCLUDE)/ -L$(LIB)/ && ./$(BIN)/$(EXE)
 
 # Check if all needed directory exists, if not, creates it
 $(CFL):
