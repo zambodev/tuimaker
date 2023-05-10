@@ -20,7 +20,7 @@ Window::Window(std::string title)
 
 	// Fill with blank
 	for(int i = 0; i < cols * rows; ++i)
-		buffer[i] = u'\u0020';
+		buffer[i] = L' ';
 
 	boxes.insert({"main", new Box(0, 0, cols-1, rows-1, title)});
 }
