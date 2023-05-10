@@ -3,7 +3,7 @@ VERSION = 0.2.0
 
 # Compiler settings
 CC = g++
-CFLAGS = -std=c++17 -Werror
+CFLAGS = -std=c++20 -Werror
 
 # Folders
 SRC = src
