@@ -6,13 +6,17 @@
 #include <functional>
 #include <map>
 #include <vector>
+#include <fcntl.h>
 #include <thread>
 #include <atomic>
 #ifdef __linux__
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <clocale>
 #elif _WIN32
 #include <windows.h>
+#include <io.h>
+#include <fcntl.h>
 #endif
 
 

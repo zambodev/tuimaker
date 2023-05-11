@@ -4,11 +4,15 @@
 Window::Window(std::string title)
 {	
 #ifdef __linux__
+	setlocale(LC_ALL, "");
+
 	struct winsize w;
 	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 	cols = w.ws_col;
 	rows = w.ws_row;
 #elif _WIN32
+	_setmode(_fileno(stdout), _O_U16TEXT);
+
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
