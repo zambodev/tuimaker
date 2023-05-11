@@ -6,6 +6,8 @@
 #include <functional>
 #include <map>
 #include <vector>
+#include <thread>
+#include <atomic>
 #ifdef __linux__
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -64,6 +66,7 @@ class Window
 				~Selectable();
 				void draw(void);
 				void clear(void);
+				void select(int);
 		};
 
 		inline static int cols = -1, rows = -1;
@@ -74,7 +77,6 @@ class Window
 	public:
 
 		Window(std::string = "");
-
 		void create_box(std::string, int, int, int, int, std::string = "", std::string = "");
 		void delete_box(std::string);
 		Box * get_box(std::string);

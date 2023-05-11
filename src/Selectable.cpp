@@ -51,3 +51,8 @@ void Window::Selectable::clear(void)
 		for(int j = y; j <= y + maxlen + 2; ++j)
 			buffer[cols * i + j] = L' ';
 }
+
+void Window::Selectable::select(int id)
+{
+	options.at(id - 1)->func();
+}
