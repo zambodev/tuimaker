@@ -51,8 +51,7 @@ $(BUILD)/%.o: $(SRC)/%.cpp
 $(LIBA): $(OBJS)
 	@echo -n 'Creating static library archive: '
 	@ ar -rcs $@ $^
-	@ cp -p $@ $(LIB)/
-	@ rm $@
+	@ mv $@ $(LIB)/
 	@echo -e '	$(GREEN)Done$(RESET)'
 
 # Compile the test file
@@ -73,16 +72,21 @@ sysinfo:
 
 # Clear folders
 clean:
-	rm $(BIN)/* $(BUILD)/* $(LIB)/*
+	@echo -n 'Cleaning directories: '
+	@rm $(BIN)/* $(BUILD)/* $(LIB)/* 2> /dev/null || true
+	@echo -e '			$(GREEN)Done$(RESET)'
 
 # Clear folders and delete the directories
 cleanall:
-	rm -r $(BIN)/ $(BUILD)/ $(LIB)/
+	@echo -n 'Deleting directories: '
+	@rm -r $(BIN)/ $(BUILD)/ $(LIB)/
+	@echo -e '			$(GREEN)Done$(RESET)'
 
-zip: $(CFL)
-	@echo OS: $(OS)
+zip: $(CFL) clean $(OBJS)
 ifeq ($(OS), win64)
-	@echo 'To DO: Windows zip'
+	@ ar -rcs libtui.lib $(OBJS)
+	@ mv libtui.lib $(LIB)/
+	zip $(RELEASE)/$(VERSION)_win64.zip $(INCLUDE) $(LIB)
 else
 	tar -czvf $(RELEASE)/$(VERSION)_linux_x64.tar.gz $(INCLUDE) $(LIB)
 endif
