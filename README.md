@@ -1,8 +1,6 @@
 # libtui
 A cross platform library that aims to simplify TUIs creation
 
-<br>
-
 ## How to use
 
 **Linux**:
@@ -26,8 +24,6 @@ Link to the project:
 ```bash
 c++ -o <output> <your_files> -ltui -Llib -Iinclude
 ```
-<br>
-
 ## Build from source
 Clone the repository [link](https://github.com/zambodev/libtui.git)
 

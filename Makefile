@@ -1,9 +1,9 @@
 # Version
-VERSION = 0.2.0
+VERSION = 0.3.0
 
 # Compiler settings
-CC = g++
-CFLAGS = -std=c++17
+CC = 
+CFLAGS = -std=c++20 -Werror -static -static-libgcc -static-libstdc++
 
 # Folders
 SRC = src
@@ -23,13 +23,15 @@ SRCS := $(wildcard $(SRC)/*.cpp)
 OBJS := $(addprefix $(BUILD)/, $(notdir $(SRCS:.cpp=.o)))
 
 # Executables
-EXE = $(basename $(TESTFILE))
+EXE = 
 
 # OS
-ifeq ($(OS), Windows_NT)
-	OS = Windows
-else
-	OS = Linux
+ifeq ($(OS), win64)
+	CC = x86_64-w64-mingw32-g++
+	EXE = $(basename $(TESTFILE)).exe
+else ifeq ($(OS), linux64)
+	CC = g++
+	EXE = $(basename $(TESTFILE))
 endif
 
 # Aesthetics
@@ -49,14 +51,12 @@ $(BUILD)/%.o: $(SRC)/%.cpp
 $(LIBA): $(OBJS)
 	@echo -n 'Creating static library archive: '
 	@ ar -rcs $@ $^
-	@ cp -p *.a $(LIB)/
-	@ rm *.a
+	@ mv $@ $(LIB)/
 	@echo -e '	$(GREEN)Done$(RESET)'
 
 # Compile the test file
-$(TESTFILE): $(LIBA)
-	@ $(CC) $(CFLAGS) -o $(BIN)/$(EXE) $(TEST)/$(TESTFILE) -l$(LIBNAME) -I$(INCLUDE)/ -L$(LIB)/
-	./$(BIN)/$(EXE)
+$(TESTFILE): all
+	@ $(CC) $(CFLAGS) -o $(BIN)/$(EXE) $(TEST)/$(TESTFILE) -I$(INCLUDE)/ -L$(LIB)/ -l$(LIBNAME) && ./$(BIN)/$(EXE)
 
 # Check if all needed directory exists, if not, creates it
 $(CFL):
@@ -72,16 +72,21 @@ sysinfo:
 
 # Clear folders
 clean:
-	rm $(BIN)/* $(BUILD)/* $(LIB)/*
+	@echo -n 'Cleaning directories: '
+	@rm $(BIN)/* $(BUILD)/* $(LIB)/* 2> /dev/null || true
+	@echo -e '			$(GREEN)Done$(RESET)'
 
 # Clear folders and delete the directories
 cleanall:
-	rm -r $(BIN)/ $(BUILD)/ $(LIB)/
+	@echo -n 'Deleting directories: '
+	@rm -r $(BIN)/ $(BUILD)/ $(LIB)/
+	@echo -e '			$(GREEN)Done$(RESET)'
 
-zip: $(CFL)
-	@echo OS: $(OS)
-ifeq ($(OS), Linux)
-	tar -czvf $(RELEASE)/$(VERSION)_linux_x64.tar.gz $(INCLUDE) $(LIB)
+zip: $(CFL) clean $(OBJS)
+ifeq ($(OS), win64)
+	@ ar -rcs libtui.lib $(OBJS)
+	@ mv libtui.lib $(LIB)/
+	zip -r $(RELEASE)/$(VERSION)_win64.zip $(INCLUDE) $(LIB)
 else
-	@echo 'To DO: Windows zip'
+	tar -czvf $(RELEASE)/$(VERSION)_linux_x64.tar.gz $(INCLUDE) $(LIB)
 endif

@@ -2,12 +2,21 @@
 #define WINDOW_HPP
 
 #include <iostream>
+#include <cstring>
+#include <functional>
 #include <map>
+#include <vector>
+#include <fcntl.h>
+#include <thread>
+#include <atomic>
 #ifdef __linux__
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <clocale>
 #elif _WIN32
 #include <windows.h>
+#include <io.h>
+#include <fcntl.h>
 #endif
 
 
@@ -38,14 +47,36 @@ class Window
 				Box(int, int, int, int, std::string = "", std::string = "");
 				~Box();
 				void draw(void);
+				void move(int, int, int = -1, int = -1);
 				void write(std::string);
 				void clear_text(void);
 				void clear(void);
 		};
 
+		class Selectable {
+			private:
+				struct Option
+				{
+					Option(std::string name, std::function<void()> func) : name(name), func(func) {}
+					std::string name;
+					std::function<void()> func;
+				};
+
+				int x, y;
+				std::map<int, Option *> options;
+
+			public:
+				Selectable(int, int, std::vector<std::string>, std::vector<std::function<void()>>);
+				~Selectable();
+				void draw(void);
+				void clear(void);
+				void select(int);
+		};
+
 		inline static int cols = -1, rows = -1;
 		inline static wchar_t *buffer = nullptr;
 		std::map<std::string, Box *> boxes;
+		std::map<std::string, Selectable *> selecs;
 
 	public:
 
@@ -53,6 +84,10 @@ class Window
 		void create_box(std::string, int, int, int, int, std::string = "", std::string = "");
 		void delete_box(std::string);
 		Box * get_box(std::string);
+		
+		void create_selec(std::string, int, int, std::vector<std::string>, std::vector<std::function<void()>>);
+		Selectable * get_selec(std::string);
+
 		void refresh(void);
 };
 
