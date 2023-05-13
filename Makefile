@@ -86,7 +86,7 @@ zip: $(CFL) clean $(OBJS)
 ifeq ($(OS), win64)
 	@ ar -rcs libtui.lib $(OBJS)
 	@ mv libtui.lib $(LIB)/
-	zip $(RELEASE)/$(VERSION)_win64.zip $(INCLUDE) $(LIB)
+	zip -r $(RELEASE)/$(VERSION)_win64.zip $(INCLUDE) $(LIB)
 else
 	tar -czvf $(RELEASE)/$(VERSION)_linux_x64.tar.gz $(INCLUDE) $(LIB)
 endif
