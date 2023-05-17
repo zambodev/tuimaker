@@ -34,7 +34,7 @@ endif
 
 # OS (Run on OS)
 ifeq ($(OS), win64)
-	CC = x86_64-w64-mingw32-g++
+	CC = x86_64-w64-mingw32-g++-posix
 	EXE = $(basename $(TESTFILE)).exe
 else ifeq ($(OS), linux64)
 	CC = g++

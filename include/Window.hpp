@@ -85,6 +85,7 @@ class Window
 		Box * get_box(std::string);
 		
 		void create_selec(std::string, int, int, std::vector<std::string>, std::vector<std::function<void()>>);
+		void delete_selec(std::string);
 		Selectable * get_selec(std::string);
 };
 
