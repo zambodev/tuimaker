@@ -3,7 +3,7 @@ VERSION = 0.3.0
 
 #Compiler settings
 CC = 
-CFLAGS = -std=c++20 -Werror -static -static-libgcc -static-libstdc++
+CFLAGS = -std=c++20 -Werror -static -static-libgcc -static-libstdc++ -lpthread
 
 #Folders
 SRC = src
