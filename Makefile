@@ -1,11 +1,11 @@
-# Version
+#Version
 VERSION = 0.3.0
 
-# Compiler settings
+#Compiler settings
 CC = 
-CFLAGS = -std=c++20 -Werror -static -static-libgcc -static-libstdc++
+CFLAGS = -std=c++20 -Werror -static -static-libgcc -static-libstdc++ -lpthread
 
-# Folders
+#Folders
 SRC = src
 INCLUDE = include
 BIN = bin
@@ -15,19 +15,26 @@ TEST = test
 RELEASE = release
 CFL := $(BIN) $(BUILD) $(LIB) $(RELEASE)	# Create Folders List
 
-# Files
-LIBA = libtui.a
+#Files
+LIBA = libtui
 LIBNAME = tui
-TESTFILE = $(filter-out sysinfo clean cleanall zip, $(MAKECMDGOALS))
+TESTFILE = $(filter %.c %.cpp, $(MAKECMDGOALS))
 SRCS := $(wildcard $(SRC)/*.cpp)
 OBJS := $(addprefix $(BUILD)/, $(notdir $(SRCS:.cpp=.o)))
 
 # Executables
 EXE = 
 
-# OS
+# COS (Compile on OS)
+ifeq ($(COS), win)
+	LIBA := $(addsuffix .lib, $(LIBA))
+else ifeq ($(COS), linux)
+	LIBA := $(addsuffix .a, $(LIBA))
+endif
+
+# OS (Run on OS)
 ifeq ($(OS), win64)
-	CC = x86_64-w64-mingw32-g++
+	CC = x86_64-w64-mingw32-g++-posix
 	EXE = $(basename $(TESTFILE)).exe
 else ifeq ($(OS), linux64)
 	CC = g++
@@ -42,45 +49,49 @@ all: sysinfo $(CFL) $(LIBA)
 
 # Build c files into object files
 $(BUILD)/%.o: $(SRC)/%.cpp
-	@echo -n 'Building object $^: '
+	@echo -n "Compiling $^: "
 	@ $(CC) -c $(CFLAGS) $^
 	@ mv *.o $(BUILD)
-	@echo -e '	$(GREEN)Done$(RESET)'
+	@echo  "  $(GREEN)Done$(RESET)"
 
 # Create static library archive
 $(LIBA): $(OBJS)
-	@echo -n 'Creating static library archive: '
+	@echo -n "Creating archive: "
 	@ ar -rcs $@ $^
 	@ mv $@ $(LIB)/
-	@echo -e '	$(GREEN)Done$(RESET)'
+	@echo  "  $(GREEN)Done$(RESET)"
 
 # Compile the test file
 $(TESTFILE): all
-	@ $(CC) $(CFLAGS) -o $(BIN)/$(EXE) $(TEST)/$(TESTFILE) -I$(INCLUDE)/ -L$(LIB)/ -l$(LIBNAME) && ./$(BIN)/$(EXE)
+	@echo -n "Linking: "
+	@ $(CC) $(CFLAGS) -o $(BIN)/$(EXE) $(TEST)/$(TESTFILE) -I$(INCLUDE)/ -L$(LIB)/ -l$(LIBNAME)
+	@echo  "  $(GREEN)Done$(RESET)"
+	@echo -n "Starting program..."
+	./$(BIN)/$(EXE)
 
 # Check if all needed directory exists, if not, creates it
 $(CFL):
 ifeq ("$(wildcard $@)", "")
-	@echo -n 'Creating $@ folder: '
+	@echo -n "Creating $@ folder: "
 	@ mkdir $@
-	@echo -e '			$(GREEN)Done$(RESET)'
+	@echo  "  $(GREEN)Done$(RESET)"
 endif
 
 # Print architecture info
 sysinfo:
-	@echo 'Building for $(OS)'
+	@echo "Building for $(OS)"
 
 # Clear folders
 clean:
-	@echo -n 'Cleaning directories: '
+	@echo -n "Cleaning directories: "
 	@rm $(BIN)/* $(BUILD)/* $(LIB)/* 2> /dev/null || true
-	@echo -e '			$(GREEN)Done$(RESET)'
+	@echo  "  $(GREEN)Done$(RESET)"
 
 # Clear folders and delete the directories
 cleanall:
-	@echo -n 'Deleting directories: '
+	@echo -n "Deleting directories: "
 	@rm -r $(BIN)/ $(BUILD)/ $(LIB)/
-	@echo -e '			$(GREEN)Done$(RESET)'
+	@echo  "  $(GREEN)Done$(RESET)"
 
 zip: $(CFL) clean $(OBJS)
 ifeq ($(OS), win64)
@@ -88,5 +99,7 @@ ifeq ($(OS), win64)
 	@ mv libtui.lib $(LIB)/
 	zip -r $(RELEASE)/$(VERSION)_win64.zip $(INCLUDE) $(LIB)
 else
+	@ ar -rcs libtui.a $(OBJS)
+	@ mv libtui.a $(LIB)/
 	tar -czvf $(RELEASE)/$(VERSION)_linux_x64.tar.gz $(INCLUDE) $(LIB)
 endif

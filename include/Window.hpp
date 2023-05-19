@@ -7,8 +7,6 @@
 #include <map>
 #include <vector>
 #include <fcntl.h>
-#include <thread>
-#include <atomic>
 #ifdef __linux__
 #include <sys/ioctl.h>
 #include <unistd.h>
@@ -79,16 +77,16 @@ class Window
 		std::map<std::string, Selectable *> selecs;
 
 	public:
-
 		Window(std::string = "");
+		void refresh(void);
+
 		void create_box(std::string, int, int, int, int, std::string = "", std::string = "");
 		void delete_box(std::string);
 		Box * get_box(std::string);
 		
 		void create_selec(std::string, int, int, std::vector<std::string>, std::vector<std::function<void()>>);
+		void delete_selec(std::string);
 		Selectable * get_selec(std::string);
-
-		void refresh(void);
 };
 
 

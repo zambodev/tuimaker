@@ -47,13 +47,13 @@ void Window::create_box(std::string id, int x1, int y1, int x2, int y2, std::str
 void Window::delete_box(std::string id)
 {
 	boxes[id]->~Box();
-	boxes.erase("id");
+	boxes.erase(id);
 }
 
 
 Window::Box * Window::get_box(std::string id)
 {
-	return boxes[id];
+	return boxes.at(id);
 }
 
 void Window::create_selec(std::string id, int x, int y, std::vector<std::string> options, std::vector<std::function<void(void)>> funcs)
@@ -61,7 +61,13 @@ void Window::create_selec(std::string id, int x, int y, std::vector<std::string>
 	selecs.try_emplace(id, new Selectable(x, y, options, funcs));
 }
 
+void Window::delete_selec(std::string id)
+{
+	selecs.at(id)->clear();
+	selecs.erase(id);
+}
+
 Window::Selectable * Window::get_selec(std::string id)
 {
-	return selecs[id];
+	return selecs.at(id);
 }

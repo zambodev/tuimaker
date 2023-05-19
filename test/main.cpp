@@ -1,27 +1,23 @@
 #include <iostream>
+#include <thread>
 #include <tui.hpp>
 
 void ciao(void)
 {
-	wprintf(L"\x1b[10;10HCIAO");
+	wprintf(L"\x1b[30;30HCIAO");
 	fflush(stdout);
 }
 
 int main()
 {
-	Window window("TUILIB testing");
-	window.get_box("main")->write("Prova testo");
-	window.create_box("Inbox", 10, 10, 40, 20, "Inbox", "Nessun messaggio");
-	window.refresh();
+	Tui *tui;
+	tui = tui->get_instance("Prova");
 
-	window.delete_box("Inbox");
-	window.refresh();
+	tui->create_box("box1", 10, 10, 40, 20, "Messagges", "Nothing to see");
+	tui->create_selec("sel1", 50, 10, {"Say 'Ciao'"}, {ciao});
+	tui->refresh();
 
-	window.create_selec("prova", 5, 5, {"provetta", "prina", "provaccia"}, {&ciao, &ciao, &ciao});
-	window.refresh();
-
-	window.get_selec("prova")->clear();
-	window.refresh();
+	tui->input_selec("sel1");
 
 	while(1);
 }
