@@ -25,24 +25,52 @@ Window::Box::~Box()
 
 void Window::Box::draw(void)
 {
-	// Top corner
-	buffer[cols * y1 + x1] = tlcrn;
-	buffer[cols * y1 + x1 + (x2 - x1)] = trcrn;
-	// Bottom corner
-	buffer[cols * y2 + x1] = blcrn;
-	buffer[cols * y2 + x1 + (x2 - x1)] = brcrn;
+	// Top left corner
+	if(buffer[cols * y1 + x1] == hbar) 
+		buffer[cols * y1 + x1] = tint;
+	else if(buffer[cols * y1 + x1] == vbar) 
+		buffer[cols * y1 + x1] = lint;
+	else
+		buffer[cols * y1 + x1] = tlcrn;
+
+	// Top right corner
+	if(buffer[cols * y1 + x1 + (x2 - x1)] == hbar) 
+		buffer[cols * y1 + x1 + (x2 - x1)] = tint;
+	else if(buffer[cols * y1 + x1 + (x2 - x1)] == vbar) 
+		buffer[cols * y1 + x1 + (x2 - x1)] = rint;
+	else
+		buffer[cols * y1 + x1 + (x2 - x1)] = trcrn;
+
+	// Bottom left corner
+	if(buffer[cols * y2 + x1] == hbar) 
+		buffer[cols * y2 + x1] = bint;
+	else if(buffer[cols * y2 + x1] == vbar) 
+		buffer[cols * y2 + x1] = lint;
+	else
+		buffer[cols * y2 + x1] = blcrn;
+
+	// Bottom right corner
+	if(buffer[cols * y2 + x1 + (x2 - x1)] == hbar) 
+		buffer[cols * y2 + x1 + (x2 - x1)] = bint;
+	else if(buffer[cols * y2 + x1 + (x2 - x1)] == vbar) 
+		buffer[cols * y2 + x1 + (x2 - x1)] = rint;
+	else
+		buffer[cols * y2 + x1 + (x2 - x1)] = brcrn;
+
 	// Fill top and bottom lines
 	for(int i = x1 + 1; i < x2; ++i)
 	{
 		buffer[cols * y1 + i] = hbar;
 		buffer[cols * y2 + i] = hbar;	
 	}
+
 	// Left and right lines
 	for(int i = y1 + 1; i < y2; ++i)
 	{
 		buffer[cols * i + x1] = vbar;
 		buffer[cols * i + x1 + (x2 - x1)] = vbar;
 	}
+	
 	// Print title
 	for(int i = 0; i < title.length(); ++i)
 		buffer[cols * (y1 + 1) + x1 + (x2 - x1) / 2 - title.length() / 2 + i] = title[i];
