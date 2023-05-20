@@ -77,7 +77,7 @@ void Window::Box::write(std::string text)
 	if(!this->title.empty()) ++i;
 
 	for(i; i < y2; ++i)
-		for(int j = x1 + 2; j < x2; ++j)
+		for(int j = x1 + 2; j < x2 - 1; ++j)
 			if(text[idx])
 				buffer[cols * i + j] = text[idx++];
 			else break;

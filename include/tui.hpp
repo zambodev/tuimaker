@@ -3,6 +3,7 @@
 
 #include <thread>
 #include <atomic>
+#include <array>
 #ifdef __linux__
 #include <termios.h>
 #elif _WIN32
@@ -27,6 +28,7 @@ class Tui
 		static Tui * get_instance(std::string title);
 
 		void refresh(void);
+		std::array<int, 2> get_size(void);
 		/* Box */
 		void create_box(std::string, int, int, int, int, std::string = "", std::string = "");
 		void delete_box(std::string);

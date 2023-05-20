@@ -6,6 +6,7 @@
 #include <functional>
 #include <map>
 #include <vector>
+#include <array>
 #include <fcntl.h>
 #ifdef __linux__
 #include <sys/ioctl.h>
@@ -79,6 +80,7 @@ class Window
 	public:
 		Window(std::string = "");
 		void refresh(void);
+		std::array<int, 2> get_size(void);
 
 		void create_box(std::string, int, int, int, int, std::string = "", std::string = "");
 		void delete_box(std::string);

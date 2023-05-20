@@ -1,5 +1,6 @@
 #include <iostream>
 #include <thread>
+#include <array>
 #include <tui.hpp>
 
 void ciao(void)
@@ -11,10 +12,13 @@ void ciao(void)
 int main()
 {
 	Tui *tui;
-	tui = tui->get_instance("Prova");
+	tui = tui->get_instance("Test App");
 
-	tui->create_box("box1", 10, 10, 40, 20, "Messagges", "Nothing to see");
-	tui->create_selec("sel1", 50, 10, {"Say 'Ciao'"}, {ciao});
+	int cols, rows;
+	std::array<int, 2> size = tui->get_size();
+
+
+	tui->create_box("box1", size[0] - 30, size[1] - 20, size[0] - 1, size[1] - 1, "Files", "test.exepokemon.datbrowser.exe");
 	tui->refresh();
 
 	tui->input_selec("sel1");

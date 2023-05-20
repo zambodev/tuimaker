@@ -1,26 +1,18 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 # libtui
 A cross platform library that aims to simplify TUIs creation
 
 ## How to use
 
-**Linux**:
+Dwonload the [latest release](https://github.com/zambodev/libtui/releases/latest) and add **include** and **lib** folders in the project folder
 
-Dwonload the [latest release](https://github.com/zambodev/libtui/releases/latest)
-
-Add include/ and lib/ in the project folder
-
-Include in files:
+Include:
 ```cpp
 // C++ example
-
 #include <tui.hpp>
-
-int main()
-{
-	...
-}
 ```
-Link to the project:
+Link:
 ```bash
 c++ -o <output> <your_files> -ltui -Llib -Iinclude
 ```

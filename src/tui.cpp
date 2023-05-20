@@ -5,7 +5,7 @@ Tui * Tui::instance = nullptr;
 
 Tui::Tui(std::string title)
 {
-	window = new Window("title");
+	window = new Window(title);
 }
 
 Tui::~Tui()
@@ -35,6 +35,20 @@ void Tui::refresh(void)
 		locked.notify_all();
 	});
 }
+
+std::array<int, 2> Tui::get_size(void)
+{	
+	locked.wait(true);
+	locked = true;
+	
+	std::array<int, 2> size = window->get_size();
+
+	locked = false;
+	locked.notify_all();
+
+	return size;
+}
+
 
 void Tui::create_box(std::string id, int x1, int y1, int x2, int y2, std::string title, std::string text)
 {
