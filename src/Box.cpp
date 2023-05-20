@@ -100,15 +100,26 @@ void Window::Box::move(int x1, int y1, int x2, int y2)
 
 void Window::Box::write(std::string text)
 {
-	int i = y1 + 2, idx = 0
-	;
+	int i = y1 + 2, idx = 0;
 	if(!this->title.empty()) ++i;
 
 	for(i; i < y2; ++i)
+	{
 		for(int j = x1 + 2; j < x2 - 1; ++j)
-			if(text[idx])
+		{
+			if(text[idx] == '\n')
+			{
+				++idx;
+				break;
+			}
+			else if(text[idx])
+			{
 				buffer[cols * i + j] = text[idx++];
+			}
 			else break;
+		}
+		if(!text[idx]) break;
+	}
 }
 
 void Window::Box::clear_text(void)
