@@ -20,7 +20,7 @@ Window::Window(std::string title)
 	rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 #endif
 
-	buffer = (wchar_t *)malloc(sizeof(wchar_t) * cols * rows);
+	buffer = (wchar_t *)malloc(cols * rows * sizeof(wchar_t));
 
 	// Fill with blank
 	for(int i = 0; i < cols * rows; ++i)

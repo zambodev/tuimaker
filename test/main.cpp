@@ -18,10 +18,13 @@ int main()
 	std::array<int, 2> size = tui->get_size();
 
 
-	tui->create_box("box1", size[0] - 30, size[1] - 20, size[0] - 1, size[1] - 1, "Files", "test.exepokemon.datbrowser.exe");
+	tui->create_box("box1", size[0] - 30, size[1] - 20, size[0] - 1, size[1] - 1, "Notifications", "User123: You're welcome\nUser365: Nvm");
 	tui->refresh();
 
-	tui->input_selec("sel1");
+	sleep(1);
+
+	tui->delete_box("box1");
+	tui->refresh();
 
 	while(1);
 }

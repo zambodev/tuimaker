@@ -8,6 +8,13 @@ Window::Box::Box(int x1, int y1, int x2, int y2, std::string title, std::string 
 	this->x2 = x2;
 	this->y2 = y2;
 
+	copy = (wchar_t *)malloc((x2 - x1 + 1) * (y2 - y1 + 1) * sizeof(wchar_t));
+	int idx = 0;
+
+	for(int i = y1; i <= y2; ++i)
+		for(int j = x1; j <= x2; ++j)
+			copy[idx++] = buffer[cols * i + j];
+
 	if(title != "") this->title = title;
 	draw();
 
@@ -134,7 +141,9 @@ void Window::Box::clear_text(void)
 
 void Window::Box::clear(void)
 {
+	int idx = 0;
+
 	for(int i = y1; i <= y2; ++i)
 		for(int j = x1; j <= x2; ++j)
-			buffer[cols * i + j] = L' ';
+			buffer[cols * i + j] = copy[idx++];
 }

@@ -40,6 +40,7 @@ class Window
 		class Box {
 			private:
 				int x1, y1, x2, y2;
+				wchar_t *copy = nullptr;
 				std::string title, text;
 
 			public:
