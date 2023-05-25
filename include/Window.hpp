@@ -41,14 +41,15 @@ class Window
 			private:
 				int x1, y1, x2, y2;
 				wchar_t *copy = nullptr;
-				std::string title, text;
+				std::string title;
+				std::vector<std::string> text;
 
 			public:
-				Box(int, int, int, int, std::string = "", std::string = "");
+				Box(int, int, int, int, std::string = "");
 				~Box();
 				void draw(void);
 				void move(int, int, int = -1, int = -1);
-				void write(std::string);
+				void write(std::vector<std::string>);
 				void clear_text(void);
 				void clear(void);
 		};
@@ -83,7 +84,7 @@ class Window
 		void refresh(void);
 		std::array<int, 2> get_size(void);
 
-		void create_box(std::string, int, int, int, int, std::string = "", std::string = "");
+		void create_box(std::string, int, int, int, int, std::string = "");
 		void delete_box(std::string);
 		Box * get_box(std::string);
 		

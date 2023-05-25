@@ -1,7 +1,7 @@
 #include "../include/Window.hpp"
 
 
-Window::Box::Box(int x1, int y1, int x2, int y2, std::string title, std::string text)
+Window::Box::Box(int x1, int y1, int x2, int y2, std::string title)
 {
 	this->x1 = x1;
 	this->y1 = y1;
@@ -17,12 +17,6 @@ Window::Box::Box(int x1, int y1, int x2, int y2, std::string title, std::string 
 
 	if(title != "") this->title = title;
 	draw();
-
-	if(text != "")
-	{
-		this->text = text;
-		write(text);
-	}
 }
 
 Window::Box::~Box()
@@ -105,27 +99,17 @@ void Window::Box::move(int x1, int y1, int x2, int y2)
 	write(text);
 }
 
-void Window::Box::write(std::string text)
+void Window::Box::write(std::vector<std::string> text)
 {
-	int i = y1 + 2, idx = 0;
+	int i = y1 + 2;
 	if(!this->title.empty()) ++i;
 
-	for(i; i < y2; ++i)
+	for(std::string str : text)
 	{
-		for(int j = x1 + 2; j < x2 - 1; ++j)
-		{
-			if(text[idx] == '\n')
-			{
-				++idx;
-				break;
-			}
-			else if(text[idx])
-			{
-				buffer[cols * i + j] = text[idx++];
-			}
-			else break;
-		}
-		if(!text[idx]) break;
+		for(int j = x1 + 2, idx = 0; j < x2 && idx < str.size(); ++j, ++idx)
+			buffer[cols * i + j] = str[idx];
+
+		++i;
 	}
 }
 

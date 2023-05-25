@@ -18,13 +18,9 @@ int main()
 	std::array<int, 2> size = tui->get_size();
 
 
-	tui->create_box("box1", size[0] - 30, size[1] - 20, size[0] - 1, size[1] - 1, "Notifications", "User123: You're welcome\nUser365: Nvm");
+	tui->create_box("box1", size[0] - 30, size[1] - 20, size[0] - 1, size[1] - 1, "Notification Area");
+	tui->write_box("box1", {"Ciao come va? IO tutto bene zio pino ha fatto una cosa che ", "Tutto bene"});
 	tui->refresh();
-
-	sleep(1);
-
-	tui->delete_box("box1");
-	tui->refresh();
-
+	
 	while(1);
 }

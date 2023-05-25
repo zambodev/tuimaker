@@ -50,14 +50,14 @@ std::array<int, 2> Tui::get_size(void)
 }
 
 
-void Tui::create_box(std::string id, int x1, int y1, int x2, int y2, std::string title, std::string text)
+void Tui::create_box(std::string id, int x1, int y1, int x2, int y2, std::string title)
 {
-	thd = new std::jthread([this, id, x1, y1, x2, y2, title, text]()
+	thd = new std::jthread([this, id, x1, y1, x2, y2, title]()
 	{
 		locked.wait(true);
 		locked = true;
 		
-		window->create_box(id, x1, y1, x2, y2, title, text);
+		window->create_box(id, x1, y1, x2, y2, title);
 		
 		locked = false;
 		locked.notify_all();
@@ -92,7 +92,7 @@ void Tui::move_box(std::string id, int x1, int y1, int x2, int y2)
 	});
 }
 
-void Tui::write_box(std::string id, std::string text)
+void Tui::write_box(std::string id, std::vector<std::string> text)
 {
 	thd = new std::jthread([this, id, text]()
 	{

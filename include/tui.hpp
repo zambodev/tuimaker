@@ -30,10 +30,10 @@ class Tui
 		void refresh(void);
 		std::array<int, 2> get_size(void);
 		/* Box */
-		void create_box(std::string, int, int, int, int, std::string = "", std::string = "");
+		void create_box(std::string, int, int, int, int, std::string = "");
 		void delete_box(std::string);
 		void move_box(std::string, int, int, int = -1, int = -1);
-		void write_box(std::string, std::string);
+		void write_box(std::string, std::vector<std::string>);
 		void clear_text_box(std::string);
 		/* Selectable */
 		void create_selec(std::string, int, int, std::vector<std::string>, std::vector<std::function<void(void)>>);
