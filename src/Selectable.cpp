@@ -1,10 +1,11 @@
 #include "../include/Window.hpp"
 
 
-Window::Selectable::Selectable(int x, int y, std::vector<std::string> options, std::vector<std::function<void()>> funcs) 
+Window::Selectable::Selectable(int x, int y, int dir, std::vector<std::string> options, std::vector<std::function<void()>> funcs) 
 {	
 	this->x = x;
 	this->y = y;
+	this->dir = dir;
 
 	for(int i = 0; i < options.size(); ++i)
 	{
@@ -23,6 +24,8 @@ void Window::Selectable::draw(void)
 {
 	int xt = x;
 	int yt = y;
+
+
 	for(int i = 0; i < options.size(); ++i)
 	{
 		buffer[cols * yt + xt] = 0x030 + i + 1;
@@ -33,7 +36,11 @@ void Window::Selectable::draw(void)
 		{
 			buffer[cols * yt + xt + j + 2] = tmp[j];
 		}
-		++yt;
+
+		if(dir)
+			++yt;
+		else 
+			xt += tmp.length() + 4;
 	}
 }
 

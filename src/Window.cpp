@@ -61,9 +61,9 @@ Window::Box * Window::get_box(std::string id)
 	return boxes.at(id);
 }
 
-void Window::create_selec(std::string id, int x, int y, std::vector<std::string> options, std::vector<std::function<void(void)>> funcs)
+void Window::create_selec(std::string id, int x, int y, int dir, std::vector<std::string> options, std::vector<std::function<void(void)>> funcs)
 {
-	selecs.try_emplace(id, new Selectable(x, y, options, funcs));
+	selecs.try_emplace(id, new Selectable(x, y, dir, options, funcs));
 }
 
 void Window::delete_selec(std::string id)

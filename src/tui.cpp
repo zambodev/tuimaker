@@ -120,14 +120,14 @@ void Tui::clear_text_box(std::string id)
 	});
 }
 
-void Tui::create_selec(std::string id, int x, int y, std::vector<std::string> options, std::vector<std::function<void(void)>> funcs)
+void Tui::create_selec(std::string id, int x, int y, int dir, std::vector<std::string> options, std::vector<std::function<void(void)>> funcs)
 {
-	thd = new std::jthread([this, id, x, y, options, funcs]()
+	thd = new std::jthread([this, id, x, y, dir, options, funcs]()
 	{
 		locked.wait(true);
 		locked = true;
 		
-		window->create_selec(id, x, y, options, funcs);
+		window->create_selec(id, x, y,dir, options, funcs);
 		
 		locked = false;
 		locked.notify_all();
