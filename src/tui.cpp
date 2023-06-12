@@ -221,7 +221,6 @@ void Tui::input_selec(std::string id)
 		}
 		while(value < '1' || value > '9');
 #endif
-
 		locked = false;
 		locked.notify_one();
 

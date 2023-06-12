@@ -37,6 +37,5 @@ int main()
 	tui->input_selec("options");
 	tui->input_selec("options");
 
-	
 	while(1);
 }
