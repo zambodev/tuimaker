@@ -32,13 +32,17 @@ class Tui
 		/* Box */
 		void create_box(std::string, int, int, int, int, std::string = "");
 		void delete_box(std::string);
+		void draw_box(std::string);
 		void move_box(std::string, int, int, int = -1, int = -1);
 		void write_box(std::string, std::vector<std::string>);
+		void clear_box(std::string);
 		void clear_text_box(std::string);
 		/* Selectable */
 		void create_selec(std::string, int, int, int, std::vector<std::string>, std::vector<std::function<void(void)>>);
 		void delete_selec(std::string);
+		void draw_selec(std::string);
 		void input_selec(std::string id);
+		void clear_selec(std::string);
 };
 
 #endif

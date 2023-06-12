@@ -11,8 +11,6 @@ Window::Selectable::Selectable(int x, int y, int dir, std::vector<std::string> o
 	{
 		this->options.try_emplace(i, new Option(options.at(i), funcs.at(i)));
 	}
-
-	draw();
 }
 
 Window::Selectable::~Selectable()

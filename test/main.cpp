@@ -14,13 +14,14 @@ int main()
 	Tui *tui;
 	tui = tui->get_instance("Test App");
 
-	int cols, rows;
-	std::array<int, 2> size = tui->get_size();
+	tui->create_box("notification", tui->get_size()[0] - 30, tui->get_size()[1] - 20, tui->get_size()[0], tui->get_size()[1], "Notifications");
 
-
-	tui->create_box("box1", size[0] - 30, size[1] - 20, size[0] - 1, size[1] - 1, "Notification Area");
-	tui->write_box("box1", {"Ciao come va? IO tutto bene zio pino ha fatto una cosa che ", "Tutto bene"});
+	tui->create_selec("options", 2, tui->get_size()[1] - 1, 0, {"Notifcation", "GINO"}, {[tui](){tui->draw_box("notification"); tui->write_box("notification", {"Nothing to see"}); tui->refresh();}, ciao});
+	tui->draw_selec("options");
 	tui->refresh();
+
+
+	tui->input_selec("options");
 	
 	while(1);
 }

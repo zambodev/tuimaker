@@ -27,6 +27,7 @@ Window::Window(std::string title)
 		buffer[i] = L' ';
 
 	boxes.insert({"main", new Box(0, 0, cols-1, rows-1, title)});
+	boxes.at("main")->draw();
 }
 
 void Window::refresh(void)
@@ -41,7 +42,7 @@ void Window::refresh(void)
 
 std::array<int, 2> Window::get_size()
 {
-	return std::array<int, 2>{cols, rows};
+	return std::array<int, 2>{cols - 1, rows - 1};
 }
 
 void Window::create_box(std::string id, int x1, int y1, int x2, int y2, std::string title)

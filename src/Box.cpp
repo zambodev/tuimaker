@@ -16,7 +16,6 @@ Window::Box::Box(int x1, int y1, int x2, int y2, std::string title)
 			copy[idx++] = buffer[cols * i + j];
 
 	if(title != "") this->title = title;
-	draw();
 }
 
 Window::Box::~Box()
@@ -94,9 +93,6 @@ void Window::Box::move(int x1, int y1, int x2, int y2)
 
 	this->x1 = x1;
 	this->y1 = y1;
-
-	draw();
-	write(text);
 }
 
 void Window::Box::write(std::vector<std::string> text)
