@@ -45,7 +45,7 @@ endif
 GREEN = \033[0;32m
 RESET = \033[0m
 
-all: sysinfo $(CFL) $(LIBA)
+all: clean sysinfo $(CFL) $(LIBA)
 
 # Build c files into object files
 $(BUILD)/%.o: $(SRC)/%.cpp
