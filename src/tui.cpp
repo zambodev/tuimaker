@@ -15,7 +15,7 @@ Tui::~Tui()
 }
 
 Tui * Tui::get_instance(std::string title)
-{
+{	
 	if(!instance)
 		instance = new Tui(title);
 
@@ -24,11 +24,12 @@ Tui * Tui::get_instance(std::string title)
 
 void Tui::refresh(void)
 {
+	locked.wait(true);
+	locked = true;
+
 	thd = new std::jthread([this]()
 	{
-		locked.wait(true);
-		locked = true;
-		
+		std::wcout << "WINDOW REFRESH";
 		window->refresh();
 		
 		locked = false;
@@ -40,7 +41,7 @@ std::array<int, 2> Tui::get_size(void)
 {	
 	locked.wait(true);
 	locked = true;
-	
+
 	std::array<int, 2> size = window->get_size();
 
 	locked = false;
@@ -52,11 +53,11 @@ std::array<int, 2> Tui::get_size(void)
 
 void Tui::create_box(std::string id, int x1, int y1, int x2, int y2, std::string title)
 {
+	locked.wait(true);
+	locked = true;
+
 	thd = new std::jthread([this, id, x1, y1, x2, y2, title]()
 	{
-		locked.wait(true);
-		locked = true;
-		
 		window->create_box(id, x1, y1, x2, y2, title);
 		
 		locked = false;
@@ -66,11 +67,11 @@ void Tui::create_box(std::string id, int x1, int y1, int x2, int y2, std::string
 
 void Tui::delete_box(std::string id)
 {
+	locked.wait(true);
+	locked = true;
+
 	thd = new std::jthread([this, id]()
 	{
-		locked.wait(true);
-		locked = true;
-		
 		window->delete_box(id);
 		
 		locked = false;
@@ -80,11 +81,11 @@ void Tui::delete_box(std::string id)
 
 void Tui::draw_box(std::string id)
 {
-		thd = new std::jthread([this, id]()
+	locked.wait(true);
+	locked = true;
+
+	thd = new std::jthread([this, id]()
 	{
-		locked.wait(true);
-		locked = true;
-		
 		window->get_box(id)->draw();
 		
 		locked = false;
@@ -94,11 +95,11 @@ void Tui::draw_box(std::string id)
 
 void Tui::move_box(std::string id, int x1, int y1, int x2, int y2)
 {
+	locked.wait(true);
+	locked = true;
+
 	thd = new std::jthread([this, id, x1, y1, x2, y2]()
 	{
-		locked.wait(true);
-		locked = true;
-		
 		window->get_box(id)->move(x1, y1, x2, y2);
 		
 		locked = false;
@@ -108,11 +109,11 @@ void Tui::move_box(std::string id, int x1, int y1, int x2, int y2)
 
 void Tui::write_box(std::string id, std::vector<std::string> text)
 {
+	locked.wait(true);
+	locked = true;
+
 	thd = new std::jthread([this, id, text]()
 	{
-		locked.wait(true);
-		locked = true;
-		
 		window->get_box(id)->write(text);
 		
 		locked = false;
@@ -122,11 +123,11 @@ void Tui::write_box(std::string id, std::vector<std::string> text)
 
 void Tui::clear_box(std::string id)
 {
+	locked.wait(true);
+	locked = true;
+
 	thd = new std::jthread([this, id]()
-	{
-		locked.wait(true);
-		locked = true;
-		
+	{		
 		window->get_box(id)->clear();
 		
 		locked = false;
@@ -136,11 +137,11 @@ void Tui::clear_box(std::string id)
 
 void Tui::clear_text_box(std::string id)
 {
+	locked.wait(true);
+	locked = true;
+
 	thd = new std::jthread([this, id]()
 	{
-		locked.wait(true);
-		locked = true;
-		
 		window->get_box(id)->clear_text();
 		
 		locked = false;
@@ -150,11 +151,11 @@ void Tui::clear_text_box(std::string id)
 
 void Tui::create_selec(std::string id, int x, int y, int dir, std::vector<std::string> options, std::vector<std::function<void(void)>> funcs)
 {
+	locked.wait(true);
+	locked = true;
+
 	thd = new std::jthread([this, id, x, y, dir, options, funcs]()
 	{
-		locked.wait(true);
-		locked = true;
-		
 		window->create_selec(id, x, y,dir, options, funcs);
 		
 		locked = false;
@@ -164,11 +165,11 @@ void Tui::create_selec(std::string id, int x, int y, int dir, std::vector<std::s
 
 void Tui::draw_selec(std::string id)
 {
+	locked.wait(true);
+	locked = true;
+
 	thd = new std::jthread([this, id]()
 	{
-		locked.wait(true);
-		locked = true;
-		
 		window->get_selec(id)->draw();
 
 		locked = false;
@@ -178,11 +179,11 @@ void Tui::draw_selec(std::string id)
 
 void Tui::delete_selec(std::string id)
 {
+	locked.wait(true);
+	locked = true;
+
 	thd = new std::jthread([this, id]()
 	{
-		locked.wait(true);
-		locked = true;
-		
 		window->delete_selec(id);
 
 		locked = false;
@@ -192,11 +193,11 @@ void Tui::delete_selec(std::string id)
 
 void Tui::input_selec(std::string id)
 {
+	locked.wait(true);
+	locked = true;
+
 	thd = new std::jthread([this, id]()
 	{
-		locked.wait(true);
-		locked = true;
-
 		unsigned char value;
 #ifdef __linux__
 		struct termios old_tio, new_tio;
@@ -220,20 +221,21 @@ void Tui::input_selec(std::string id)
 		}
 		while(value < '1' || value > '9');
 #endif
-		window->get_selec(id)->select(value - '0');
 
 		locked = false;
 		locked.notify_one();
+
+		window->get_selec(id)->select(value - '0');
 	});
 }
 
 void Tui::clear_selec(std::string id)
 {
+	locked.wait(true);
+	locked = true;
+
 	thd = new std::jthread([this, id]()
 	{
-		locked.wait(true);
-		locked = true;
-		
 		window->get_selec(id)->clear();
 		
 		locked = false;

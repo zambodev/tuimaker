@@ -7,6 +7,7 @@
 #include <map>
 #include <vector>
 #include <array>
+#include <tuple>
 #include <fcntl.h>
 #ifdef __linux__
 #include <sys/ioctl.h>
