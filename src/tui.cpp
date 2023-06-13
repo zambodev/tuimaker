@@ -22,13 +22,18 @@ void Tui::check_queue()
 	{
 		if(queue.empty()) continue;
 
-		std::wcout << "Found a func!\n";
 		do
 		{
 			auto f = queue.front();
 			queue.pop();
 
+			locked.wait(true);
+			locked = true;
+			
 			f();
+			
+			locked = false;
+			locked.notify_one();
 		}
 		while(!queue.empty());
 	}
@@ -62,119 +67,143 @@ std::array<int, 2> Tui::get_size(void)
 
 void Tui::create_box(std::string id, int x1, int y1, int x2, int y2, std::string title)
 {
-	thd = new std::jthread([this, id, x1, y1, x2, y2, title]()
-	{
-		window->create_box(id, x1, y1, x2, y2, title);
-	});
+	std::function<void()> f = [this, id, x1, y1, x2, y2, title]()
+		{
+			window->create_box(id, x1, y1, x2, y2, title);
+		};
+
+	queue.push(f);
 }
 
 void Tui::delete_box(std::string id)
 {
-	thd = new std::jthread([this, id]()
-	{
-		window->delete_box(id);
-	});
+	std::function<void()> f = [this, id]()
+		{
+			window->delete_box(id);
+		};
+
+	queue.push(f);
 }
 
 void Tui::draw_box(std::string id)
 {
-	thd = new std::jthread([this, id]()
-	{
-		window->get_box(id)->draw();
-	});
+	std::function<void()> f = [this, id]()
+		{
+			window->get_box(id)->draw();
+		};
+
+	queue.push(f);
 }
 
 void Tui::move_box(std::string id, int x1, int y1, int x2, int y2)
 {
-	thd = new std::jthread([this, id, x1, y1, x2, y2]()
-	{
-		window->get_box(id)->move(x1, y1, x2, y2);
-	});
+	std::function<void()> f = [this, id, x1, y1, x2, y2]()
+		{
+			window->get_box(id)->move(x1, y1, x2, y2);
+		};
+
+	queue.push(f);
 }
 
 void Tui::write_box(std::string id, std::vector<std::string> text)
 {
-	thd = new std::jthread([this, id, text]()
-	{
-		window->get_box(id)->write(text);
-	});
+	std::function<void()> f = [this, id, text]()
+		{
+			window->get_box(id)->write(text);
+		};
+
+	queue.push(f);
 }
 
 void Tui::clear_box(std::string id)
 {
-	thd = new std::jthread([this, id]()
-	{		
-		window->get_box(id)->clear();
-	});
+	std::function<void()> f = [this, id]()
+		{		
+			window->get_box(id)->clear();
+		};
+	
+	queue.push(f);
 }
 
 void Tui::clear_text_box(std::string id)
 {
-	thd = new std::jthread([this, id]()
-	{
-		window->get_box(id)->clear_text();
-	});
+	std::function<void()> f = [this, id]()
+		{
+			window->get_box(id)->clear_text();
+		};
+
+	queue.push(f);
 }
 
 void Tui::create_selec(std::string id, int x, int y, int dir, std::vector<std::string> options, std::vector<std::function<void(void)>> funcs)
 {
-	thd = new std::jthread([this, id, x, y, dir, options, funcs]()
-	{
-		window->create_selec(id, x, y,dir, options, funcs);
-	});
+	std::function<void()> f = [this, id, x, y, dir, options, funcs]()
+		{
+			window->create_selec(id, x, y,dir, options, funcs);
+		};
+
+	queue.push(f);
 }
 
 void Tui::draw_selec(std::string id)
 {
-	thd = new std::jthread([this, id]()
-	{
-		window->get_selec(id)->draw();
-	});
+	std::function<void()> f = [this, id]()
+		{
+			window->get_selec(id)->draw();
+		};
+
+	queue.push(f);
 }
 
 void Tui::delete_selec(std::string id)
 {
-	thd = new std::jthread([this, id]()
-	{
-		window->delete_selec(id);
-	});
+	std::function<void()> f = [this, id]()
+		{
+			window->delete_selec(id);
+		};
+
+	queue.push(f);
 }
 
 void Tui::input_selec(std::string id)
 {
-	thd = new std::jthread([this, id]()
-	{
-		unsigned char value;
+	std::function<void()> f = [this, id]()
+		{
+			unsigned char value;
 #ifdef __linux__
-		struct termios old_tio, new_tio;
+			struct termios old_tio, new_tio;
 
-		tcgetattr(STDIN_FILENO, &old_tio);
-		new_tio = old_tio;
-		new_tio.c_lflag &=(~ICANON & ~ECHO);
-		tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
+			tcgetattr(STDIN_FILENO, &old_tio);
+			new_tio = old_tio;
+			new_tio.c_lflag &=(~ICANON & ~ECHO);
+			tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
 
-		do
-		{
-			value = getchar();
-		}
-		while(value < '1' || value > '9');
+			do
+			{
+				value = getchar();
+			}
+			while(value < '1' || value > '9');
 
-		tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
+			tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
 #elif _WIN32
-		do
-		{
-			value = getch();
-		}
-		while(value < '1' || value > '9');
+			do
+			{
+				value = getch();
+			}
+			while(value < '1' || value > '9');
 #endif
-		window->get_selec(id)->select(value - '0');
-	});
+			window->get_selec(id)->select(value - '0');
+		};
+
+	queue.push(f);
 }
 
 void Tui::clear_selec(std::string id)
 {
-	thd = new std::jthread([this, id]()
+	std::function<void()> f = [this, id]()
 	{
 		window->get_selec(id)->clear();
-	});
+	};
+
+	queue.push(f);
 }
