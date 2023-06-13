@@ -4,6 +4,7 @@
 #include <thread>
 #include <atomic>
 #include <array>
+#include <queue>
 #ifdef __linux__
 #include <termios.h>
 #elif _WIN32
@@ -17,10 +18,13 @@ class Tui
 	private:
 		std::jthread *thd;
 		std::atomic<bool> locked;
+		std::queue<std::function<void()>> queue;
+		std::thread *queue_thd;
 		static Tui *instance;
 		Window *window;
 		Tui(std::string title);
 		~Tui();
+		void check_queue();
 
 	public:
 		void operator=(const Tui &) = delete;
