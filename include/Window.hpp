@@ -64,11 +64,12 @@ class Window
 					std::function<void()> func;
 				};
 
-				int x, y, dir;
+				int x, y;
+				bool is_row;
 				std::map<int, Option *> options;
 
 			public:
-				Selectable(int, int, int, std::vector<std::string>, std::vector<std::function<void()>>);
+				Selectable(int, int, bool, std::vector<std::string>, std::vector<std::function<void()>>);
 				~Selectable();
 				void draw(void);
 				void clear(void);
@@ -89,7 +90,7 @@ class Window
 		void delete_box(std::string);
 		Box * get_box(std::string);
 		
-		void create_selec(std::string, int, int, int, std::vector<std::string>, std::vector<std::function<void()>>);
+		void create_selec(std::string, int, int, bool, std::vector<std::string>, std::vector<std::function<void()>>);
 		void delete_selec(std::string);
 		Selectable * get_selec(std::string);
 };

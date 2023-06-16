@@ -12,7 +12,7 @@ void notif(Tui *tui, int *show)
 int main()
 {
 	Tui *tui;
-	tui = tui->get_instance("Test App");
+	tui = tui->get_instance("Test");
 	
 	int show = 0;
 
@@ -34,11 +34,10 @@ int main()
 		tui->refresh();
 	};
 
-	tui->create_selec("options", 2, tui->get_size()[1] - 1, 0, {"Notification"}, {notify});
-	tui->draw_selec("options");
+	tui->input_mode("command");
+	tui->create_selec("Test", 2, tui->get_size()[1] - 1, true, {"Notification"}, {notify});
+	tui->draw_selec("Test");
 	tui->refresh();
-
-	tui->input_selec("options");
 
 	while(1);
 }

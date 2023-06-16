@@ -16,15 +16,21 @@
 class Tui
 {
 	private:
-		std::jthread *thd;
-		std::atomic<bool> locked;
+		bool is_running;
+		bool is_input;
+		std::string title;
 		std::queue<std::function<void()>> queue;
 		std::thread *queue_thd;
+		std::thread *input_thd;
+		std::atomic<bool> input_lock;
+		std::atomic<bool> queue_lock;
 		static Tui *instance;
 		Window *window;
+
 		Tui(std::string title);
 		~Tui();
 		void check_queue();
+		void check_input();
 
 	public:
 		void operator=(const Tui &) = delete;
@@ -32,6 +38,7 @@ class Tui
 		static Tui * get_instance(std::string title);
 
 		void refresh(void);
+		void input_mode(std::string);
 		std::array<int, 2> get_size(void);
 		/* Box */
 		void create_box(std::string, int, int, int, int, std::string = "");
@@ -42,10 +49,9 @@ class Tui
 		void clear_box(std::string);
 		void clear_text_box(std::string);
 		/* Selectable */
-		void create_selec(std::string, int, int, int, std::vector<std::string>, std::vector<std::function<void(void)>>);
+		void create_selec(std::string, int, int, bool, std::vector<std::string>, std::vector<std::function<void(void)>>);
 		void delete_selec(std::string);
 		void draw_selec(std::string);
-		void input_selec(std::string id);
 		void clear_selec(std::string);
 };
 
