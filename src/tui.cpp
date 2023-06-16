@@ -67,7 +67,6 @@ void Tui::check_input()
 			do
 			{
 				value = getchar();
-				std::wcout << value << std::fflush;
 			}
 			while(value < '0' || value > '9');
 
@@ -82,7 +81,7 @@ void Tui::check_input()
 		}
 		else 			// Text mode
 		{
-			//std::wcout << "input mode";
+			
 			continue;
 		}
 	}
