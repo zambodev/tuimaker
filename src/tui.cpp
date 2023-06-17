@@ -225,6 +225,39 @@ void Tui::draw_selec(std::string id)
 	queue.push(f);
 }
 
+void Tui::input_selec(std::string id)
+{
+	std::function<void()> f = [this, id]()
+	{
+		unsigned char value;
+#ifdef __linux__
+		struct termios old_tio, new_tio;
+
+		tcgetattr(STDIN_FILENO, &old_tio);
+		new_tio = old_tio;
+		new_tio.c_lflag &=(~ICANON & ~ECHO);
+		tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
+
+		do
+		{
+			value = getchar();
+		}
+		while(value < '1' || value > '9');
+
+		tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
+#elif _WIN32
+		do
+		{
+			value = getch();
+		}
+		while(value < '1' || value > '9');
+#endif
+		window->get_selec(id)->select(value - '0');
+	};
+
+	queue.push(f);
+}
+
 void Tui::delete_selec(std::string id)
 {
 	std::function<void()> f = [this, id]()

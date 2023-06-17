@@ -51,6 +51,7 @@ class Tui
 		/* Selectable */
 		void create_selec(std::string, int, int, bool, std::vector<std::string>, std::vector<std::function<void(void)>>);
 		void delete_selec(std::string);
+		void input_selec(std::string);
 		void draw_selec(std::string);
 		void clear_selec(std::string);
 };
