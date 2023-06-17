@@ -45,12 +45,12 @@ std::array<int, 2> Window::get_size()
 	return std::array<int, 2>{cols - 1, rows - 1};
 }
 
-void Window::create_box(std::string id, int x1, int y1, int x2, int y2, std::string title)
+void Window::box_create(std::string id, int x1, int y1, int x2, int y2, std::string title)
 {
 	boxes.try_emplace(id, new Box(x1, y1, x2, y2, title));
 }
 
-void Window::delete_box(std::string id)
+void Window::box_delete(std::string id)
 {
 	boxes[id]->~Box();
 	boxes.erase(id);
@@ -62,12 +62,12 @@ Window::Box * Window::get_box(std::string id)
 	return boxes.at(id);
 }
 
-void Window::create_selec(std::string id, int x, int y, bool is_row, std::vector<std::string> options, std::vector<std::function<void(void)>> funcs)
+void Window::selec_create(std::string id, int x, int y, bool is_row, std::vector<std::string> options, std::vector<std::function<void(void)>> funcs)
 {
 	selecs.try_emplace(id, new Selectable(x, y, is_row, options, funcs));
 }
 
-void Window::delete_selec(std::string id)
+void Window::selec_delete(std::string id)
 {
 	selecs.at(id)->clear();
 	selecs.erase(id);

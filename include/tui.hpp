@@ -38,22 +38,22 @@ class Tui
 		static Tui * get_instance(std::string title);
 
 		void refresh(void);
-		void input_mode(std::string);
+		void input_mode(std::string mode);
 		std::array<int, 2> get_size(void);
 		/* Box */
-		void create_box(std::string, int, int, int, int, std::string = "");
-		void delete_box(std::string);
-		void draw_box(std::string);
-		void move_box(std::string, int, int, int = -1, int = -1);
-		void write_box(std::string, std::vector<std::string>);
-		void clear_box(std::string);
-		void clear_text_box(std::string);
+		void box_create(std::string id, int x1, int y1, int x2, int y2, std::string title = "");
+		void box_delete(std::string id);
+		void box_draw(std::string id);
+		void box_move(std::string id, int x1, int y1, int x2 = -1, int y2 = -1);
+		void box_write(std::string id, std::vector<std::string> str_arr);
+		void box_clear(std::string id);
+		void box_clear_text(std::string id);
 		/* Selectable */
-		void create_selec(std::string, int, int, bool, std::vector<std::string>, std::vector<std::function<void(void)>>);
-		void delete_selec(std::string);
-		void input_selec(std::string);
-		void draw_selec(std::string);
-		void clear_selec(std::string);
+		void selec_create(std::string id, int x, int y, bool is_row, std::vector<std::string> options, std::vector<std::function<void(void)>> funcs);
+		void selec_delete(std::string id);
+		void selec_input(std::string id);
+		void selec_draw(std::string id);
+		void selec_clear(std::string id);
 };
 
 #endif

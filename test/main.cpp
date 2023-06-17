@@ -16,18 +16,18 @@ int main()
 	
 	int show = 0;
 
-	tui->create_box("notification", tui->get_size()[0] - 30, tui->get_size()[1] - 20, tui->get_size()[0], tui->get_size()[1], "Notifications");
+	tui->box_create("notification", tui->get_size()[0] - 30, tui->get_size()[1] - 20, tui->get_size()[0], tui->get_size()[1], "Notifications");
 
 	std::function<void()> notify = [tui, &show](){
 		if(show == 0)
 		{
-			tui->draw_box("notification");
-			tui->write_box("notification", {"Nothing to see"});
+			tui->box_draw("notification");
+			tui->box_write("notification", {"Nothing to see"});
 			show = 1;
 		}
 		else
 		{
-			tui->clear_box("notification");
+			tui->box_clear("notification");
 			show = 0;
 		}
 
@@ -35,8 +35,8 @@ int main()
 	};
 
 	tui->input_mode("command");
-	tui->create_selec("Test", 2, tui->get_size()[1] - 1, true, {"Notification"}, {notify});
-	tui->draw_selec("Test");
+	tui->selec_create("Test", 2, tui->get_size()[1] - 1, true, {"Notification"}, {notify});
+	tui->selec_draw("Test");
 	tui->refresh();
 
 	while(1);

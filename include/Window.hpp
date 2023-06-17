@@ -86,12 +86,12 @@ class Window
 		void refresh(void);
 		std::array<int, 2> get_size(void);
 
-		void create_box(std::string, int, int, int, int, std::string = "");
-		void delete_box(std::string);
+		void box_create(std::string, int, int, int, int, std::string = "");
+		void box_delete(std::string);
 		Box * get_box(std::string);
 		
-		void create_selec(std::string, int, int, bool, std::vector<std::string>, std::vector<std::function<void()>>);
-		void delete_selec(std::string);
+		void selec_create(std::string, int, int, bool, std::vector<std::string>, std::vector<std::function<void()>>);
+		void selec_delete(std::string);
 		Selectable * get_selec(std::string);
 };
 

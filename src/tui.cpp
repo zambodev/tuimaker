@@ -135,27 +135,27 @@ std::array<int, 2> Tui::get_size(void)
 }
 
 
-void Tui::create_box(std::string id, int x1, int y1, int x2, int y2, std::string title)
+void Tui::box_create(std::string id, int x1, int y1, int x2, int y2, std::string title)
 {
 	std::function<void()> f = [this, id, x1, y1, x2, y2, title]()
 	{
-		window->create_box(id, x1, y1, x2, y2, title);
+		window->box_create(id, x1, y1, x2, y2, title);
 	};
 
 	queue.push(f);
 }
 
-void Tui::delete_box(std::string id)
+void Tui::box_delete(std::string id)
 {
 	std::function<void()> f = [this, id]()
 	{
-		window->delete_box(id);
+		window->box_delete(id);
 	};
 
 	queue.push(f);
 }
 
-void Tui::draw_box(std::string id)
+void Tui::box_draw(std::string id)
 {
 	std::function<void()> f = [this, id]()
 	{
@@ -165,7 +165,7 @@ void Tui::draw_box(std::string id)
 	queue.push(f);
 }
 
-void Tui::move_box(std::string id, int x1, int y1, int x2, int y2)
+void Tui::box_move(std::string id, int x1, int y1, int x2, int y2)
 {
 	std::function<void()> f = [this, id, x1, y1, x2, y2]()
 	{
@@ -175,17 +175,17 @@ void Tui::move_box(std::string id, int x1, int y1, int x2, int y2)
 	queue.push(f);
 }
 
-void Tui::write_box(std::string id, std::vector<std::string> text)
+void Tui::box_write(std::string id, std::vector<std::string> str_arr)
 {
-	std::function<void()> f = [this, id, text]()
+	std::function<void()> f = [this, id, str_arr]()
 	{
-		window->get_box(id)->write(text);
+		window->get_box(id)->write(str_arr);
 	};
 
 	queue.push(f);
 }
 
-void Tui::clear_box(std::string id)
+void Tui::box_clear(std::string id)
 {
 	std::function<void()> f = [this, id]()
 	{		
@@ -195,7 +195,7 @@ void Tui::clear_box(std::string id)
 	queue.push(f);
 }
 
-void Tui::clear_text_box(std::string id)
+void Tui::box_clear_text(std::string id)
 {
 	std::function<void()> f = [this, id]()
 	{
@@ -205,17 +205,17 @@ void Tui::clear_text_box(std::string id)
 	queue.push(f);
 }
 
-void Tui::create_selec(std::string id, int x, int y, bool is_row, std::vector<std::string> options, std::vector<std::function<void(void)>> funcs)
+void Tui::selec_create(std::string id, int x, int y, bool is_row, std::vector<std::string> options, std::vector<std::function<void(void)>> funcs)
 {
 	std::function<void()> f = [this, id, x, y, is_row, options, funcs]()
 	{
-		window->create_selec(id, x, y,is_row, options, funcs);
+		window->selec_create(id, x, y,is_row, options, funcs);
 	};
 
 	queue.push(f);
 }
 
-void Tui::draw_selec(std::string id)
+void Tui::selec_draw(std::string id)
 {
 	std::function<void()> f = [this, id]()
 	{
@@ -225,7 +225,7 @@ void Tui::draw_selec(std::string id)
 	queue.push(f);
 }
 
-void Tui::input_selec(std::string id)
+void Tui::selec_input(std::string id)
 {
 	std::function<void()> f = [this, id]()
 	{
@@ -258,17 +258,17 @@ void Tui::input_selec(std::string id)
 	queue.push(f);
 }
 
-void Tui::delete_selec(std::string id)
+void Tui::selec_delete(std::string id)
 {
 	std::function<void()> f = [this, id]()
 	{
-		window->delete_selec(id);
+		window->selec_delete(id);
 	};
 
 	queue.push(f);
 }
 
-void Tui::clear_selec(std::string id)
+void Tui::selec_clear(std::string id)
 {
 	std::function<void()> f = [this, id]()
 	{
