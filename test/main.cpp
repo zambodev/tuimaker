@@ -4,40 +4,39 @@
 #include <tui.hpp>
 
 
-void notif(Tui *tui, int *show)
-{
-
-}
-
 int main()
 {
 	Tui *tui;
 	tui = tui->get_instance("Test");
 	
-	int show = 0;
+	bool show = false;
+	bool running = true;
 
 	tui->box_create("notification", tui->get_size()[0] - 30, tui->get_size()[1] - 20, tui->get_size()[0], tui->get_size()[1], "Notifications");
 
 	std::function<void()> notify = [tui, &show](){
-		if(show == 0)
+		if(!show)
 		{
 			tui->box_draw("notification");
 			tui->box_write("notification", {"Nothing to see"});
-			show = 1;
+			show = true;
 		}
 		else
 		{
 			tui->box_clear("notification");
-			show = 0;
+			show = false;
 		}
 
 		tui->refresh();
 	};
+	std::function<void()> exit = [tui, &running](){
+		running = false;
+	};
 
 	tui->input_mode("command");
-	tui->selec_create("Test", 2, tui->get_size()[1] - 1, true, {"Notification"}, {notify});
+	tui->selec_create("Test", 2, tui->get_size()[1] - 1, true, {"Notification", "Exit"}, {notify, exit});
 	tui->selec_draw("Test");
 	tui->refresh();
 
-	while(1);
+	while(running);
 }

@@ -17,9 +17,14 @@ Tui::Tui(std::string title)
 
 Tui::~Tui()
 {
+	is_running = false;
+	while(!queue_thd->joinable());
 	queue_thd->join();
+	while(!input_thd->joinable());
 	input_thd->join();
 	delete [] window;
+	delete [] instance;
+	instance = nullptr;
 	window = nullptr;
 }
 
