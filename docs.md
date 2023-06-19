@@ -62,7 +62,7 @@ Parameters:
 **box_move()**<br>
 Change box coordinates and size
 ```
-void Tui::box_move 	(
+void Tui::box_move(
 	std::string		id,
 	int  			x1,
 	int  			y1,
@@ -106,7 +106,7 @@ Parameters:
 **get_size()**<br>
 Return size of the terminal {max_x, max_y}
 ```
-std::array< int, 2 > Tui::get_size(void)
+std::array<int, 2> Tui::get_size(void)
 ```
 <br>
 
@@ -145,8 +145,8 @@ void Tui::selec_create(
 	int  						x,
 	int  						y,
 	bool  						is_row,
-	std::vector<std::string>  		options,
-	std::vector<std::function< void(void)>>  	funcs 
+	std::vector<std::string>  			options,
+	std::vector<std::function<void(void)>>  	funcs 
 )
 ```
 Parameters:
@@ -182,7 +182,7 @@ Parameters:
 **selec_input()**<br>
 Get user input for the desired selectable It uses the auxiliary thread, not the input thread
 ```
-void Tui::selec_input(std::stringid)
+void Tui::selec_input(std::string id)
 ```
 Parameters:
 * **id** &ensp; Id of the selectable instance
