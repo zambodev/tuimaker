@@ -12,7 +12,7 @@ Include:
 // C++ example
 #include <tui.hpp>
 ```
-Read the [documentation](https://github.com/zambodev/libtui/docs.md)
+Read the [documentation](docs.md)
 
 Link:
 ```bash
