@@ -12,6 +12,8 @@ Include:
 // C++ example
 #include <tui.hpp>
 ```
+Read the [documentation](https://github.com/zambodev/libtui/docs.md)
+
 Link:
 ```bash
 c++ -o <output> <your_files> -ltui -Llib -Iinclude
