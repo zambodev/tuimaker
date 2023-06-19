@@ -106,7 +106,7 @@ class Tui
 		 * Create a new selectable instance
 		 * \param id Id of the selectable instance
 		 * \param x x value of the leftmost point of the list
-		 * \param y value of the leftmost point of the list
+		 * \param y y value of the leftmost point of the list
 		 * \param is_row Selectable rotation, true if is a row, false if is a clumn
 		 * \param options List of option names
 		 * \param funcs List of functions associated to the options
