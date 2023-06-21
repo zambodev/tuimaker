@@ -38,5 +38,8 @@ int main()
 	tui->selec_draw("Test");
 	tui->refresh();
 
+	std::string & s = tui->get_stream();
+	int idx = 0;
+
 	while(running);
 }

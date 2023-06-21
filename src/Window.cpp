@@ -32,11 +32,12 @@ Window::Window(std::string title)
 
 void Window::refresh(void)
 {
-	wprintf(L"\x1b[0;0H");
+	wprintf(L"\x1b[s\x1b[0;0H");
 
 	for(int i = 0; i < cols * rows; ++i)
 		wprintf(L"%lc", buffer[i]);
 
+	wprintf(L"\x1b[u");
 	fflush(stdout);
 }
 
@@ -75,5 +76,12 @@ void Window::selec_delete(std::string id)
 
 Window::Selectable * Window::get_selec(std::string id)
 {
-	return selecs.at(id);
+	try
+	{
+		return selecs.at(id);
+	}
+	catch(std::out_of_range)
+	{
+		return nullptr;
+	}
 }

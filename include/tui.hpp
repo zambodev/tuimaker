@@ -1,6 +1,7 @@
 #ifndef TUI_HPP
 #define TUI_HPP
 
+#include <fstream>
 #include <thread>
 #include <atomic>
 #include <array>
@@ -20,7 +21,7 @@ class Tui
 	private:
 		bool is_running;
 		bool is_input;
-		std::string title;
+		std::string title, stream;
 		std::queue<std::function<void()>> queue;
 		std::thread *queue_thd;
 		std::thread *input_thd;
@@ -55,6 +56,10 @@ class Tui
 		 * Return size of the terminal {max_x, max_y}
 		*/
 		std::array<int, 2> get_size(void);
+		/** \fn FILE * get_stream(void);
+		 * Return file stream
+		*/
+		std::string & get_stream(void);
 
 		/******** Box ********/
 		/** \fn void box_create(std::string id, int x1, int y1, int x2, int y2, std::string title = "")

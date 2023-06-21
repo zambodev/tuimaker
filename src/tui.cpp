@@ -10,6 +10,7 @@ Tui::Tui(std::string title)
 	is_running = true;
 	input_lock = false;
 	queue_lock = false;
+	stream = "";
 	window = new Window(title);
 	queue_thd = new std::thread(&Tui::check_queue, this);
 	input_thd = new std::thread(&Tui::check_input, this);
@@ -18,10 +19,13 @@ Tui::Tui(std::string title)
 Tui::~Tui()
 {
 	is_running = false;
+
 	while(!queue_thd->joinable());
 	queue_thd->join();
+	
 	while(!input_thd->joinable());
 	input_thd->join();
+	
 	delete [] window;
 	delete [] instance;
 	instance = nullptr;
@@ -48,8 +52,6 @@ void Tui::check_queue()
 void Tui::check_input()
 {
 	unsigned char value;
-
-#ifdef __linux__
 	struct termios old_tio, new_tio;
 
 	while(is_running)
@@ -71,32 +73,73 @@ void Tui::check_input()
 
 			do
 			{
+#ifdef __linux__
 				value = getchar();
+#elif _WIN32
+				value = getch();
+#endif
 			}
-			while(value < '0' || value > '9');
+			while((value < '0' || value > '9') && value != 'i');
 
 			tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
 
-			std::function<void()> f = [this, value]()
+			if(value == 'i')
 			{
-				window->get_selec(title)->select(value - 48);
-			};
+				input_lock.wait(true);
+				input_lock = true;
 
-			queue.push(f);
+				this->is_input = true;
+
+				input_lock = false;
+				input_lock.notify_all();
+			}
+			else if(window->get_selec(title) != nullptr)
+			{
+				std::function<void()> f = [this, value]()
+				{
+					window->get_selec(title)->select(value - 48);
+				};
+
+				queue.push(f);
+			}
 		}
 		else 			// Text mode
 		{
-			
-			continue;
+			wprintf(L"\x1b[u");
+
+			tcgetattr(STDIN_FILENO, &old_tio);
+			new_tio = old_tio;
+			new_tio.c_lflag &=(~ICANON & ~ECHO);
+			tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
+#ifdef __linux__
+			value = getchar();
+#elif _WIN32	
+			value = getch();
+#endif
+			tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
+
+			/* if ESC is pressed exit input mode*/
+			if(value == 27)
+			{
+				wprintf(L"\x1b[s");
+
+				input_lock.wait(true);	
+				input_lock = true;
+
+				this->is_input = false;
+
+				input_lock = false;
+				input_lock.notify_all();
+			}
+			else
+			{
+				stream.append(1, value);
+				wprintf(L"%c\x1b[s", value);
+				if(stream.length() > 256)
+					stream.erase(0, stream.length() - 256);
+			}
 		}
 	}
-#elif _WIN32
-	do
-	{
-		value = getch();
-	}
-	while(value == EOF);
-#endif
 }
 
 void Tui::input_mode(std::string mode)
@@ -105,9 +148,14 @@ void Tui::input_mode(std::string mode)
 	input_lock = true;
 
 	if(mode == "input")
+	{
 		this->is_input = true;
+	}
 	else if(mode == "command")
+	{
+		wprintf(L"\x1b[s");
 		this->is_input = false;
+	}
 
 	input_lock = false;
 	input_lock.notify_all();
@@ -139,6 +187,10 @@ std::array<int, 2> Tui::get_size(void)
 	return size;
 }
 
+std::string & Tui::get_stream(void)
+{
+	return stream;
+}
 
 void Tui::box_create(std::string id, int x1, int y1, int x2, int y2, std::string title)
 {
