@@ -38,8 +38,11 @@ int main()
 	tui->selec_draw("Test");
 	tui->refresh();
 
-	std::string & s = tui->get_stream();
-	int idx = 0;
+	std::string val;
 
-	while(running);
+	while(running)
+	{
+		if(!(val = tui->get_input()).empty())
+			std::wcout << val.c_str();
+	}
 }

@@ -5,12 +5,16 @@ Tui * Tui::instance = nullptr;
 
 Tui::Tui(std::string title)
 {	
+	tcgetattr(STDIN_FILENO, &old_tio);
+	new_tio = old_tio;
+	new_tio.c_lflag &=(~ICANON & ~ECHO);
+	tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
+
 	this->title = title;
 	is_input = true;
 	is_running = true;
 	input_lock = false;
 	queue_lock = false;
-	stream = "";
 	window = new Window(title);
 	queue_thd = new std::thread(&Tui::check_queue, this);
 	input_thd = new std::thread(&Tui::check_input, this);
@@ -30,6 +34,8 @@ Tui::~Tui()
 	delete [] instance;
 	instance = nullptr;
 	window = nullptr;
+
+	tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
 }
 
 void Tui::check_queue()
@@ -52,7 +58,7 @@ void Tui::check_queue()
 void Tui::check_input()
 {
 	unsigned char value;
-	struct termios old_tio, new_tio;
+	std::string str = "";
 
 	while(is_running)
 	{	
@@ -107,40 +113,73 @@ void Tui::check_input()
 		{
 			wprintf(L"\x1b[u");
 
-			tcgetattr(STDIN_FILENO, &old_tio);
-			new_tio = old_tio;
-			new_tio.c_lflag &=(~ICANON & ~ECHO);
-			tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
 #ifdef __linux__
 			value = getchar();
 #elif _WIN32	
 			value = getch();
 #endif
-			tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
-
 			/* if ESC is pressed exit input mode*/
 			if(value == 27)
 			{
 				wprintf(L"\x1b[s");
 
+				str.append(1, '\n');
+
 				input_lock.wait(true);	
 				input_lock = true;
+			
+				input_queue.push(str);
+				str.clear();
 
 				this->is_input = false;
 
 				input_lock = false;
+				input_lock.notify_all();				
+			}
+			/* If BACKSPACE is pressed delete the last char from str*/
+			else if(value == 127)
+			{
+				wprintf(L"\x1b[1D \x1b[1D\x1b[s");
+				if(!str.empty())
+					str.pop_back();
+			}
+			/* if ENTER is pressed end the str and ini a new onw*/
+			else if(value == 10)
+			{
+				str.append(1, '\n');
+				
+				input_lock.wait(true);	
+				input_lock = true;
+				
+				input_queue.push(str);
+				
+				input_lock = false;
 				input_lock.notify_all();
+				
+				str.clear();
 			}
 			else
 			{
-				stream.append(1, value);
-				wprintf(L"%c\x1b[s", value);
-				if(stream.length() > 256)
-					stream.erase(0, stream.length() - 256);
+				wprintf(L"\x1b[u%c\x1b[s", value);
+				str.append(1, value);
 			}
 		}
 	}
 }
+
+std::string Tui::get_input()
+{
+	if(!input_queue.empty())
+	{
+		std::string tmp = input_queue.front();
+		input_queue.pop();
+
+		return tmp;
+	}
+
+	return "";
+}
+
 
 void Tui::input_mode(std::string mode)
 {
@@ -185,11 +224,6 @@ std::array<int, 2> Tui::get_size(void)
 	std::array<int, 2> size = window->get_size();
 
 	return size;
-}
-
-std::string & Tui::get_stream(void)
-{
-	return stream;
 }
 
 void Tui::box_create(std::string id, int x1, int y1, int x2, int y2, std::string title)
@@ -288,20 +322,11 @@ void Tui::selec_input(std::string id)
 	{
 		unsigned char value;
 #ifdef __linux__
-		struct termios old_tio, new_tio;
-
-		tcgetattr(STDIN_FILENO, &old_tio);
-		new_tio = old_tio;
-		new_tio.c_lflag &=(~ICANON & ~ECHO);
-		tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
-
 		do
 		{
 			value = getchar();
 		}
 		while(value < '1' || value > '9');
-
-		tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
 #elif _WIN32
 		do
 		{
