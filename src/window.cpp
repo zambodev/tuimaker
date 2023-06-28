@@ -46,6 +46,11 @@ std::array<int, 2> Window::get_size()
 	return std::array<int, 2>{cols - 1, rows - 1};
 }
 
+void Window::write(int x, int y, char c)
+{
+	buffer[cols * (y - 1) + (x - 1)] = c;
+}
+
 void Window::box_create(std::string id, int x1, int y1, int x2, int y2, std::string title)
 {
 	boxes.try_emplace(id, new Box(x1, y1, x2, y2, title));

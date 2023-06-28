@@ -33,6 +33,7 @@ int main()
 		running = false;
 	};
 
+	tui->input_cords(2, 3);
 	tui->input_mode("command");
 	tui->selec_create("Test", 2, tui->get_size()[1] - 1, true, {"Notification", "Exit"}, {notify, exit});
 	tui->selec_draw("Test");
@@ -40,9 +41,5 @@ int main()
 
 	std::string val;
 
-	while(running)
-	{
-		if(!(val = tui->get_input()).empty())
-			std::wcout << val.c_str();
-	}
+	while(running);
 }

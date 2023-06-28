@@ -85,6 +85,7 @@ class Window
 		Window(std::string = "");
 		void refresh(void);
 		std::array<int, 2> get_size(void);
+		void write(int x, int y, char c);
 
 		void box_create(std::string, int, int, int, int, std::string = "");
 		void box_delete(std::string);

@@ -19,13 +19,11 @@
 class Tui
 {
 	private:
-		bool is_running;
-		bool is_input;
+		int input_x, input_y;
+		bool input_adv, is_running, is_input;
 		std::string title;
-		std::thread *queue_thd;
-		std::thread *input_thd;
-		std::atomic<bool> input_lock;
-		std::atomic<bool> queue_lock;
+		std::thread *queue_thd, *input_thd;
+		std::atomic<bool> input_lock, queue_lock;
 		std::queue<std::function<void()>> queue;
 		std::queue<std::string> input_queue;
 		struct termios old_tio, new_tio;
@@ -45,11 +43,25 @@ class Tui
 		 * \param title Title of the Program
 		*/
 		static Tui * get_instance(std::string title);
-		std::string get_input();
+		/** \fn void write(int x, int y, char c);
+		 * Write char into buffer
+		 * \param x x cord
+		 * \param y y cord
+		 * \param c char to be written
+		*/
+		void write(int x, int y, char c);
 		/** \fn void refresh(void)
 		 * Write the buffer to screen
 		*/
 		void refresh(void);
+		std::string get_input();
+		/** \fn void input_cords(int x, int y)
+		 * Set input cords
+		 * \param x input x cord
+		 * \param y input y cord
+		 * \param adv increment y when ENTER is pressed (default: false)
+		*/
+		void input_cords(int x, int y, bool adv = false);
 		/** \fn void input_mode(std::string mode)
 		 * Change input mode for the input thread
 		 * \param mode "input" for text mode, "command" for command mode

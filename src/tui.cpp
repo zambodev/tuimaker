@@ -118,7 +118,7 @@ void Tui::check_input()
 		}
 		else 			// Text mode
 		{
-			wprintf(L"\x1b[u");
+			wprintf(L"\x1b[%d;%dH", input_y, input_x);
 
 #ifdef __linux__
 			value = getchar();
@@ -128,8 +128,6 @@ void Tui::check_input()
 			/* if ESC is pressed exit input mode*/
 			if(value == 27)
 			{
-				wprintf(L"\x1b[s");
-
 				str.append(eof);
 
 				input_lock.wait(true);	
@@ -147,12 +145,15 @@ void Tui::check_input()
 			else if(value == 127)
 			{
 				wprintf(L"\x1b[1D \x1b[1D\x1b[s");
+				--input_x;
 				if(!str.empty())
 					str.pop_back();
 			}
 			/* if ENTER is pressed end the str and ini a new onw*/
 			else if(value == 10)
 			{
+				if(input_adv) ++input_y;
+
 				str.append(eof);
 				
 				input_lock.wait(true);	
@@ -167,8 +168,10 @@ void Tui::check_input()
 			}
 			else
 			{
-				wprintf(L"\x1b[u%c\x1b[s", value);
+				wprintf(L"%c", value);
+				write(input_x, input_y, value);
 				str.append(1, value);
+				++input_x;
 			}
 		}
 	}
@@ -187,6 +190,12 @@ std::string Tui::get_input()
 	return "";
 }
 
+void Tui::input_cords(int x, int y, bool adv)
+{
+	input_x = x;
+	input_y = y;
+	input_adv = adv;
+}
 
 void Tui::input_mode(std::string mode)
 {
@@ -214,6 +223,16 @@ Tui * Tui::get_instance(std::string title)
 		instance = new Tui(title);
 
 	return instance;
+}
+
+void Tui::write(int x, int y, char c)
+{	
+	std::function<void()> f = [this, x, y, c]()
+	{
+		window->write(x, y, c);
+	};
+
+	queue.push(f);
 }
 
 void Tui::refresh(void)
