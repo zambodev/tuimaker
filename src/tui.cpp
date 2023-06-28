@@ -59,6 +59,13 @@ void Tui::check_input()
 {
 	unsigned char value;
 	std::string str = "";
+	std::string eof;
+
+#ifdef __linux__
+	eof = "\n";
+#elif _WIN32
+	eof = "\r\n";
+#endif
 
 	while(is_running)
 	{	
@@ -123,7 +130,7 @@ void Tui::check_input()
 			{
 				wprintf(L"\x1b[s");
 
-				str.append(1, '\n');
+				str.append(eof);
 
 				input_lock.wait(true);	
 				input_lock = true;
@@ -146,7 +153,7 @@ void Tui::check_input()
 			/* if ENTER is pressed end the str and ini a new onw*/
 			else if(value == 10)
 			{
-				str.append(1, '\n');
+				str.append(eof);
 				
 				input_lock.wait(true);	
 				input_lock = true;
