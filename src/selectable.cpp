@@ -1,17 +1,16 @@
-#include "../include/Window.hpp"
+#include "../include/window.hpp"
 
 
-Window::Selectable::Selectable(int x, int y, std::vector<std::string> options, std::vector<std::function<void()>> funcs) 
+Window::Selectable::Selectable(int x, int y, bool is_row, std::vector<std::string> options, std::vector<std::function<void()>> funcs) 
 {	
 	this->x = x;
 	this->y = y;
+	this->is_row = is_row;
 
 	for(int i = 0; i < options.size(); ++i)
 	{
 		this->options.try_emplace(i, new Option(options.at(i), funcs.at(i)));
 	}
-
-	draw();
 }
 
 Window::Selectable::~Selectable()
@@ -23,6 +22,8 @@ void Window::Selectable::draw(void)
 {
 	int xt = x;
 	int yt = y;
+
+
 	for(int i = 0; i < options.size(); ++i)
 	{
 		buffer[cols * yt + xt] = 0x030 + i + 1;
@@ -33,7 +34,11 @@ void Window::Selectable::draw(void)
 		{
 			buffer[cols * yt + xt + j + 2] = tmp[j];
 		}
-		++yt;
+
+		if(!is_row)
+			++yt;
+		else 
+			xt += tmp.length() + 4;
 	}
 }
 
@@ -54,5 +59,12 @@ void Window::Selectable::clear(void)
 
 void Window::Selectable::select(int id)
 {
-	options.at(id - 1)->func();
+	try
+	{
+		options.at(id - 1)->func();
+	}
+	catch(std::out_of_range)
+	{
+		return;
+	}
 }

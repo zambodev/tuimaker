@@ -4,159 +4,355 @@
 Tui * Tui::instance = nullptr;
 
 Tui::Tui(std::string title)
-{
-	window = new Window("title");
+{	
+	tcgetattr(STDIN_FILENO, &old_tio);
+	new_tio = old_tio;
+	new_tio.c_lflag &=(~ICANON & ~ECHO);
+	tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
+
+	this->title = title;
+	is_input = true;
+	is_running = true;
+	input_lock = false;
+	queue_lock = false;
+	window = new Window(title);
+	queue_thd = new std::thread(&Tui::check_queue, this);
+	input_thd = new std::thread(&Tui::check_input, this);
 }
 
 Tui::~Tui()
 {
+	is_running = false;
+
+	while(!queue_thd->joinable());
+	queue_thd->join();
+	
+	while(!input_thd->joinable());
+	input_thd->join();
+	
 	delete [] window;
+	delete [] instance;
+	instance = nullptr;
 	window = nullptr;
+
+	tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
+}
+
+void Tui::check_queue()
+{
+	while(1)
+	{
+		if(queue.empty()) continue;
+
+		do
+		{
+			auto f = queue.front();
+			queue.pop();
+			
+			f();
+		}
+		while(!queue.empty());
+	}
+}
+
+void Tui::check_input()
+{
+	unsigned char value;
+	std::string str = "";
+	std::string eof;
+
+#ifdef __linux__
+	eof = "\n";
+#elif _WIN32
+	eof = "\r\n";
+#endif
+
+	while(is_running)
+	{	
+		input_lock.wait(true);
+		input_lock = true;
+		
+		bool mode = this->is_input;
+		
+		input_lock = false;
+		input_lock.notify_all();
+
+		if(!mode)	// Command mode
+		{
+			tcgetattr(STDIN_FILENO, &old_tio);
+			new_tio = old_tio;
+			new_tio.c_lflag &=(~ICANON & ~ECHO);
+			tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
+
+			do
+			{
+#ifdef __linux__
+				value = getchar();
+#elif _WIN32
+				value = getch();
+#endif
+			}
+			while((value < '0' || value > '9') && value != 'i');
+
+			tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
+
+			if(value == 'i')
+			{
+				input_lock.wait(true);
+				input_lock = true;
+
+				this->is_input = true;
+
+				input_lock = false;
+				input_lock.notify_all();
+			}
+			else if(window->get_selec(title) != nullptr)
+			{
+				std::function<void()> f = [this, value]()
+				{
+					window->get_selec(title)->select(value - 48);
+				};
+
+				queue.push(f);
+			}
+		}
+		else 			// Text mode
+		{
+			wprintf(L"\x1b[%d;%dH", input_y, input_x);
+
+#ifdef __linux__
+			value = getchar();
+#elif _WIN32	
+			value = getch();
+#endif
+			/* if ESC is pressed exit input mode*/
+			if(value == 27)
+			{
+				str.append(eof);
+
+				input_lock.wait(true);	
+				input_lock = true;
+			
+				input_queue.push(str);
+				str.clear();
+
+				this->is_input = false;
+
+				input_lock = false;
+				input_lock.notify_all();				
+			}
+			/* If BACKSPACE is pressed delete the last char from str*/
+			else if(value == 127)
+			{
+				wprintf(L"\x1b[1D \x1b[1D\x1b[s");
+				--input_x;
+				if(!str.empty())
+					str.pop_back();
+			}
+			/* if ENTER is pressed end the str and ini a new onw*/
+			else if(value == 10)
+			{
+				if(input_adv) ++input_y;
+
+				str.append(eof);
+				
+				input_lock.wait(true);	
+				input_lock = true;
+				
+				input_queue.push(str);
+				
+				input_lock = false;
+				input_lock.notify_all();
+				
+				str.clear();
+			}
+			else
+			{
+				wprintf(L"%c", value);
+				write(input_x, input_y, value);
+				str.append(1, value);
+				++input_x;
+			}
+		}
+	}
+}
+
+std::string Tui::get_input()
+{
+	if(!input_queue.empty())
+	{
+		std::string tmp = input_queue.front();
+		input_queue.pop();
+
+		return tmp;
+	}
+
+	return "";
+}
+
+void Tui::input_cords(int x, int y, bool adv)
+{
+	input_x = x;
+	input_y = y;
+	input_adv = adv;
+}
+
+void Tui::input_mode(std::string mode)
+{
+	input_lock.wait(true);
+	input_lock = true;
+
+	if(mode == "input")
+	{
+		this->is_input = true;
+	}
+	else if(mode == "command")
+	{
+		wprintf(L"\x1b[s");
+		this->is_input = false;
+	}
+
+	input_lock = false;
+	input_lock.notify_all();
+
 }
 
 Tui * Tui::get_instance(std::string title)
-{
+{	
 	if(!instance)
 		instance = new Tui(title);
 
 	return instance;
 }
 
+void Tui::write(int x, int y, char c)
+{	
+	std::function<void()> f = [this, x, y, c]()
+	{
+		window->write(x, y, c);
+	};
+
+	queue.push(f);
+}
+
 void Tui::refresh(void)
 {
-	thd = new std::jthread([this]()
+	std::function<void()> f = [this]()
 	{
-		locked.wait(true);
-		locked = true;
-		
 		window->refresh();
-		
-		locked = false;
-		locked.notify_all();
-	});
+	};
+
+	queue.push(f);
 }
 
-void Tui::create_box(std::string id, int x1, int y1, int x2, int y2, std::string title, std::string text)
-{
-	thd = new std::jthread([this, id, x1, y1, x2, y2, title, text]()
-	{
-		locked.wait(true);
-		locked = true;
-		
-		window->create_box(id, x1, y1, x2, y2, title, text);
-		
-		locked = false;
-		locked.notify_all();
-	});
+std::array<int, 2> Tui::get_size(void)
+{	
+	std::array<int, 2> size = window->get_size();
+
+	return size;
 }
 
-void Tui::delete_box(std::string idx)
+void Tui::box_create(std::string id, int x1, int y1, int x2, int y2, std::string title)
 {
-	thd = new std::jthread([this, idx]()
+	std::function<void()> f = [this, id, x1, y1, x2, y2, title]()
 	{
-		locked.wait(true);
-		locked = true;
-		
-		window->delete_box(idx);
-		
-		locked = false;
-		locked.notify_all();
-	});
+		window->box_create(id, x1, y1, x2, y2, title);
+	};
+
+	queue.push(f);
 }
 
-void Tui::move_box(std::string id, int x1, int y1, int x2, int y2)
+void Tui::box_delete(std::string id)
 {
-	thd = new std::jthread([this, id, x1, y1, x2, y2]()
+	std::function<void()> f = [this, id]()
 	{
-		locked.wait(true);
-		locked = true;
-		
+		window->box_delete(id);
+	};
+
+	queue.push(f);
+}
+
+void Tui::box_draw(std::string id)
+{
+	std::function<void()> f = [this, id]()
+	{
+		window->get_box(id)->draw();
+	};
+
+	queue.push(f);
+}
+
+void Tui::box_move(std::string id, int x1, int y1, int x2, int y2)
+{
+	std::function<void()> f = [this, id, x1, y1, x2, y2]()
+	{
 		window->get_box(id)->move(x1, y1, x2, y2);
-		
-		locked = false;
-		locked.notify_all();
-	});
+	};
+
+	queue.push(f);
 }
 
-void Tui::write_box(std::string id, std::string text)
+void Tui::box_write(std::string id, std::vector<std::string> str_arr)
 {
-	thd = new std::jthread([this, id, text]()
+	std::function<void()> f = [this, id, str_arr]()
 	{
-		locked.wait(true);
-		locked = true;
-		
-		window->get_box(id)->write(text);
-		
-		locked = false;
-		locked.notify_all();
-	});
+		window->get_box(id)->write(str_arr);
+	};
+
+	queue.push(f);
 }
 
-void Tui::clear_text_box(std::string id)
+void Tui::box_clear(std::string id)
 {
-	thd = new std::jthread([this, id]()
+	std::function<void()> f = [this, id]()
+	{		
+		window->get_box(id)->clear();
+	};
+	
+	queue.push(f);
+}
+
+void Tui::box_clear_text(std::string id)
+{
+	std::function<void()> f = [this, id]()
 	{
-		locked.wait(true);
-		locked = true;
-		
 		window->get_box(id)->clear_text();
-		
-		locked = false;
-		locked.notify_all();
-	});
+	};
+
+	queue.push(f);
 }
 
-void Tui::create_selec(std::string id, int x, int y, std::vector<std::string> options, std::vector<std::function<void(void)>> funcs)
+void Tui::selec_create(std::string id, int x, int y, bool is_row, std::vector<std::string> options, std::vector<std::function<void(void)>> funcs)
 {
-	thd = new std::jthread([this, id, x, y, options, funcs]()
+	std::function<void()> f = [this, id, x, y, is_row, options, funcs]()
 	{
-		locked.wait(true);
-		locked = true;
-		
-		window->create_selec(id, x, y, options, funcs);
-		
-		locked = false;
-		locked.notify_all();
-	});
+		window->selec_create(id, x, y,is_row, options, funcs);
+	};
+
+	queue.push(f);
 }
 
-void Tui::delete_selec(std::string id)
+void Tui::selec_draw(std::string id)
 {
-	thd = new std::jthread([this, id]()
+	std::function<void()> f = [this, id]()
 	{
-		locked.wait(true);
-		locked = true;
-		
-		window->delete_selec(id);
+		window->get_selec(id)->draw();
+	};
 
-		locked = false;
-		locked.notify_all();
-	});
+	queue.push(f);
 }
 
-void Tui::input_selec(std::string id)
+void Tui::selec_input(std::string id)
 {
-	thd = new std::jthread([this, id]()
+	std::function<void()> f = [this, id]()
 	{
-		locked.wait(true);
-		locked = true;
-
 		unsigned char value;
 #ifdef __linux__
-		struct termios old_tio, new_tio;
-
-		tcgetattr(STDIN_FILENO, &old_tio);
-		new_tio = old_tio;
-		new_tio.c_lflag &=(~ICANON & ~ECHO);
-		tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
-
 		do
 		{
 			value = getchar();
 		}
 		while(value < '1' || value > '9');
-
-		tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
 #elif _WIN32
 		do
 		{
@@ -165,8 +361,27 @@ void Tui::input_selec(std::string id)
 		while(value < '1' || value > '9');
 #endif
 		window->get_selec(id)->select(value - '0');
+	};
 
-		locked = false;
-		locked.notify_all();
-	});
+	queue.push(f);
+}
+
+void Tui::selec_delete(std::string id)
+{
+	std::function<void()> f = [this, id]()
+	{
+		window->selec_delete(id);
+	};
+
+	queue.push(f);
+}
+
+void Tui::selec_clear(std::string id)
+{
+	std::function<void()> f = [this, id]()
+	{
+		window->get_selec(id)->clear();
+	};
+
+	queue.push(f);
 }

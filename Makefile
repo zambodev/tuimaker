@@ -1,5 +1,5 @@
 #Version
-VERSION = 0.3.0
+VERSION = 0.4.0
 
 #Compiler settings
 CC = 
@@ -34,7 +34,7 @@ endif
 
 # OS (Run on OS)
 ifeq ($(OS), win64)
-	CC = x86_64-w64-mingw32-g++-posix
+	CC = /mnt/c/mingw64/bin/g++.exe
 	EXE = $(basename $(TESTFILE)).exe
 else ifeq ($(OS), linux64)
 	CC = g++
@@ -45,7 +45,7 @@ endif
 GREEN = \033[0;32m
 RESET = \033[0m
 
-all: sysinfo $(CFL) $(LIBA)
+all: clean sysinfo $(CFL) $(LIBA)
 
 # Build c files into object files
 $(BUILD)/%.o: $(SRC)/%.cpp

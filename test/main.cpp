@@ -1,23 +1,45 @@
 #include <iostream>
 #include <thread>
+#include <array>
 #include <tui.hpp>
 
-void ciao(void)
-{
-	wprintf(L"\x1b[30;30HCIAO");
-	fflush(stdout);
-}
 
 int main()
 {
 	Tui *tui;
-	tui = tui->get_instance("Prova");
+	tui = tui->get_instance("Test");
+	
+	bool show = false;
+	bool running = true;
 
-	tui->create_box("box1", 10, 10, 40, 20, "Messagges", "Nothing to see");
-	tui->create_selec("sel1", 50, 10, {"Say 'Ciao'"}, {ciao});
+	tui->box_create("notification", tui->get_size()[0] - 30, tui->get_size()[1] - 20, tui->get_size()[0], tui->get_size()[1], "Notifications");
+
+	std::function<void()> notify = [tui, &show](){
+		if(!show)
+		{
+			tui->box_draw("notification");
+			tui->box_write("notification", {"Nothing to see"});
+			show = true;
+		}
+		else
+		{
+			tui->box_clear("notification");
+			show = false;
+		}
+
+		tui->refresh();
+	};
+	std::function<void()> exit = [tui, &running](){
+		running = false;
+	};
+
+	tui->input_cords(2, 3);
+	tui->input_mode("command");
+	tui->selec_create("Test", 2, tui->get_size()[1] - 1, true, {"Notification", "Exit"}, {notify, exit});
+	tui->selec_draw("Test");
 	tui->refresh();
 
-	tui->input_selec("sel1");
+	std::string val;
 
-	while(1);
+	while(running);
 }

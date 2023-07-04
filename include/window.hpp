@@ -6,6 +6,8 @@
 #include <functional>
 #include <map>
 #include <vector>
+#include <array>
+#include <tuple>
 #include <fcntl.h>
 #ifdef __linux__
 #include <sys/ioctl.h>
@@ -39,14 +41,16 @@ class Window
 		class Box {
 			private:
 				int x1, y1, x2, y2;
-				std::string title, text;
+				wchar_t *copy = nullptr;
+				std::string title;
+				std::vector<std::string> text;
 
 			public:
-				Box(int, int, int, int, std::string = "", std::string = "");
+				Box(int, int, int, int, std::string = "");
 				~Box();
 				void draw(void);
 				void move(int, int, int = -1, int = -1);
-				void write(std::string);
+				void write(std::vector<std::string>);
 				void clear_text(void);
 				void clear(void);
 		};
@@ -61,10 +65,11 @@ class Window
 				};
 
 				int x, y;
+				bool is_row;
 				std::map<int, Option *> options;
 
 			public:
-				Selectable(int, int, std::vector<std::string>, std::vector<std::function<void()>>);
+				Selectable(int, int, bool, std::vector<std::string>, std::vector<std::function<void()>>);
 				~Selectable();
 				void draw(void);
 				void clear(void);
@@ -79,13 +84,15 @@ class Window
 	public:
 		Window(std::string = "");
 		void refresh(void);
+		std::array<int, 2> get_size(void);
+		void write(int x, int y, char c);
 
-		void create_box(std::string, int, int, int, int, std::string = "", std::string = "");
-		void delete_box(std::string);
+		void box_create(std::string, int, int, int, int, std::string = "");
+		void box_delete(std::string);
 		Box * get_box(std::string);
 		
-		void create_selec(std::string, int, int, std::vector<std::string>, std::vector<std::function<void()>>);
-		void delete_selec(std::string);
+		void selec_create(std::string, int, int, bool, std::vector<std::string>, std::vector<std::function<void()>>);
+		void selec_delete(std::string);
 		Selectable * get_selec(std::string);
 };
 

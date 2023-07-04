@@ -1,4 +1,4 @@
-#include "../include/Window.hpp"
+#include "../include/window.hpp"
 
 
 Window::Window(std::string title)
@@ -20,31 +20,43 @@ Window::Window(std::string title)
 	rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 #endif
 
-	buffer = (wchar_t *)malloc(sizeof(wchar_t) * cols * rows);
+	buffer = (wchar_t *)malloc(cols * rows * sizeof(wchar_t));
 
 	// Fill with blank
 	for(int i = 0; i < cols * rows; ++i)
 		buffer[i] = L' ';
 
 	boxes.insert({"main", new Box(0, 0, cols-1, rows-1, title)});
+	boxes.at("main")->draw();
 }
 
 void Window::refresh(void)
 {
-	wprintf(L"\x1b[0;0H");
+	wprintf(L"\x1b[s\x1b[0;0H");
 
 	for(int i = 0; i < cols * rows; ++i)
 		wprintf(L"%lc", buffer[i]);
 
+	wprintf(L"\x1b[u");
 	fflush(stdout);
 }
 
-void Window::create_box(std::string id, int x1, int y1, int x2, int y2, std::string title, std::string text)
+std::array<int, 2> Window::get_size()
 {
-	boxes.try_emplace(id, new Box(x1, y1, x2, y2, title, text));
+	return std::array<int, 2>{cols - 1, rows - 1};
 }
 
-void Window::delete_box(std::string id)
+void Window::write(int x, int y, char c)
+{
+	buffer[cols * (y - 1) + (x - 1)] = c;
+}
+
+void Window::box_create(std::string id, int x1, int y1, int x2, int y2, std::string title)
+{
+	boxes.try_emplace(id, new Box(x1, y1, x2, y2, title));
+}
+
+void Window::box_delete(std::string id)
 {
 	boxes[id]->~Box();
 	boxes.erase(id);
@@ -56,12 +68,12 @@ Window::Box * Window::get_box(std::string id)
 	return boxes.at(id);
 }
 
-void Window::create_selec(std::string id, int x, int y, std::vector<std::string> options, std::vector<std::function<void(void)>> funcs)
+void Window::selec_create(std::string id, int x, int y, bool is_row, std::vector<std::string> options, std::vector<std::function<void(void)>> funcs)
 {
-	selecs.try_emplace(id, new Selectable(x, y, options, funcs));
+	selecs.try_emplace(id, new Selectable(x, y, is_row, options, funcs));
 }
 
-void Window::delete_selec(std::string id)
+void Window::selec_delete(std::string id)
 {
 	selecs.at(id)->clear();
 	selecs.erase(id);
@@ -69,5 +81,12 @@ void Window::delete_selec(std::string id)
 
 Window::Selectable * Window::get_selec(std::string id)
 {
-	return selecs.at(id);
+	try
+	{
+		return selecs.at(id);
+	}
+	catch(std::out_of_range)
+	{
+		return nullptr;
+	}
 }
