@@ -26,7 +26,7 @@ OBJS := $(addprefix $(BUILD)/, $(notdir $(SRCS:.cpp=.o)))
 EXE = 
 
 # LOS (Library for OS)
-ifeq ($(CCS), win)
+ifeq ($(LOS), win)
 	LIBA := $(addsuffix .lib, $(LIBA))
 else ifeq ($(COS), linux)
 	LIBA := $(addsuffix .a, $(LIBA))
