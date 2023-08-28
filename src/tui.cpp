@@ -4,7 +4,7 @@
 Tui::Tui(std::string title)
 {	
 	this->title = title;
-	is_input = true;
+	is_input = false;
 	is_running = true;
 	input_lock = false;
 	run_lock = false;
