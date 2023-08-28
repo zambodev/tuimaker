@@ -2,7 +2,9 @@
 
 
 Window::Window(std::string title)
-{	
+{
+	std::cerr << "Window(): Creating window object";
+
 #ifdef __linux__
 	setlocale(LC_ALL, "");
 
@@ -26,7 +28,9 @@ Window::Window(std::string title)
 	for(int i = 0; i < cols * rows; ++i)
 		buffer[i] = L' ';
 
+	std::cerr << "Window(): inserting new box";
 	boxes.insert({"main", new Box(0, 0, cols-1, rows-1, title)});
+	std::cerr << "Widnow(): drawing 'main' box";
 	boxes.at("main")->draw();
 }
 

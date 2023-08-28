@@ -28,7 +28,7 @@ EXE =
 # LOS (Library for OS)
 ifeq ($(LOS), win)
 	LIBA := $(addsuffix .lib, $(LIBA))
-else ifeq ($(COS), linux)
+else ifeq ($(LOS), linux)
 	LIBA := $(addsuffix .a, $(LIBA))
 endif
 
