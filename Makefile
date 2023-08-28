@@ -25,8 +25,13 @@ OBJS := $(addprefix $(BUILD)/, $(notdir $(SRCS:.cpp=.o)))
 # Executables
 EXE = 
 
+# Debug option
+ifeq ($(DEBUG), 1)
+	CFLAGS += -DDEBUG
+endif
+
 # LOS (Library for OS)
-ifeq ($(LOS), win)
+ifeq ($(LOS), windows)
 	LIBA := $(addsuffix .lib, $(LIBA))
 else ifeq ($(LOS), linux)
 	LIBA := $(addsuffix .a, $(LIBA))
@@ -68,6 +73,13 @@ $(TESTFILE): all
 	@echo  "  $(GREEN)Done$(RESET)"
 	@echo -n "Starting program..."
 # ./$(BIN)/$(EXE)
+
+run:
+ifdef DEBUG
+	./$(BIN)/$(EXE) 2> logfile.log
+else
+	./$(BIN)/$(EXE)
+endif
 
 # Check if all needed directory exists, if not, creates it
 $(CFL):
