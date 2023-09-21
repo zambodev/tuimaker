@@ -1,19 +1,13 @@
 #include "../include/tui.hpp"
 
 
-Tui * Tui::instance = nullptr;
-
 Tui::Tui(std::string title)
 {	
-	tcgetattr(STDIN_FILENO, &old_tio);
-	new_tio = old_tio;
-	new_tio.c_lflag &=(~ICANON & ~ECHO);
-	tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
-
 	this->title = title;
-	is_input = true;
+	is_input = false;
 	is_running = true;
 	input_lock = false;
+	run_lock = false;
 	queue_lock = false;
 	window = new Window(title);
 	queue_thd = new std::thread(&Tui::check_queue, this);
@@ -22,27 +16,45 @@ Tui::Tui(std::string title)
 
 Tui::~Tui()
 {
+	run_lock.wait(true);
+	run_lock = true;
+	
 	is_running = false;
+	
+	run_lock = false;
+	run_lock.notify_all();
+
+	while(!input_thd->joinable());
+	input_thd->join();
 
 	while(!queue_thd->joinable());
 	queue_thd->join();
-	
-	while(!input_thd->joinable());
-	input_thd->join();
-	
-	delete [] window;
-	delete [] instance;
-	instance = nullptr;
+
+	wprintf(L"CHECKMATE!");
+	fflush(stdout);
+
+	delete window;
 	window = nullptr;
 
-	tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
+	wprintf(L"\x1b[0;0H");
 }
 
 void Tui::check_queue()
 {
-	while(1)
+	bool run = true;
+
+	while(run)
 	{
+		run_lock.wait(true);
+		run_lock = true;
+		
+		run = is_running;
+		
+		run_lock = false;
+		run_lock.notify_all();
 		if(queue.empty()) continue;
+
+		if(!run) break;
 
 		do
 		{
@@ -58,17 +70,30 @@ void Tui::check_queue()
 void Tui::check_input()
 {
 	unsigned char value;
+	bool run = true;
+	fd_set rfds;
+	struct timeval tv;
 	std::string str = "";
 	std::string eof;
 
-#ifdef __linux__
+	#ifdef __linux__
 	eof = "\n";
-#elif _WIN32
+	#elif _WIN32
 	eof = "\r\n";
-#endif
+	#endif
 
-	while(is_running)
+	while(run)
 	{	
+		run_lock.wait(true);
+		run_lock = true;
+		
+		run = is_running;
+		
+		run_lock = false;
+		run_lock.notify_all();
+
+		if(!run) return;
+
 		input_lock.wait(true);
 		input_lock = true;
 		
@@ -84,17 +109,27 @@ void Tui::check_input()
 			new_tio.c_lflag &=(~ICANON & ~ECHO);
 			tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
 
-			do
+			FD_ZERO(&rfds);
+			FD_SET(0, &rfds);
+
+			tv.tv_sec = 0;
+			tv.tv_usec = 100;
+
+			if(select(1, &rfds, NULL, NULL, &tv) <= 0)
 			{
-#ifdef __linux__
-				value = getchar();
-#elif _WIN32
-				value = getch();
-#endif
+				tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
+				continue;
 			}
-			while((value < '0' || value > '9') && value != 'i');
+
+			#ifdef __linux__
+			value = getchar();
+			#elif _WIN32
+			value = getch();
+			#endif
 
 			tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
+
+			if((value < '0' || value > '9') && value != 'i') continue;
 
 			if(value == 'i')
 			{
@@ -119,59 +154,78 @@ void Tui::check_input()
 		else 			// Text mode
 		{
 			wprintf(L"\x1b[%d;%dH", input_y, input_x);
-
-#ifdef __linux__
-			value = getchar();
-#elif _WIN32	
-			value = getch();
-#endif
-			/* if ESC is pressed exit input mode*/
-			if(value == 27)
-			{
-				str.append(eof);
-
-				input_lock.wait(true);	
-				input_lock = true;
 			
-				input_queue.push(str);
-				str.clear();
+			tcgetattr(STDIN_FILENO, &old_tio);
+			new_tio = old_tio;
+			new_tio.c_lflag &=(~ICANON & ~ECHO);
+			tcsetattr(STDIN_FILENO, TCSANOW, &new_tio);
 
-				this->is_input = false;
+			FD_ZERO(&rfds);
+			FD_SET(0, &rfds);
 
-				input_lock = false;
-				input_lock.notify_all();				
-			}
-			/* If BACKSPACE is pressed delete the last char from str*/
-			else if(value == 127)
-			{
-				wprintf(L"\x1b[1D \x1b[1D\x1b[s");
-				--input_x;
-				if(!str.empty())
-					str.pop_back();
-			}
-			/* if ENTER is pressed end the str and ini a new onw*/
-			else if(value == 10)
-			{
-				if(input_adv) ++input_y;
+			tv.tv_sec = 0;
+			tv.tv_usec = 100;
 
-				str.append(eof);
-				
-				input_lock.wait(true);	
-				input_lock = true;
-				
-				input_queue.push(str);
-				
-				input_lock = false;
-				input_lock.notify_all();
-				
-				str.clear();
-			}
-			else
+			if(select(1, &rfds, NULL, NULL, &tv) <= 0)
 			{
-				wprintf(L"%c", value);
-				write(input_x, input_y, value);
-				str.append(1, value);
-				++input_x;
+				tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
+				continue;
+			}
+
+			#ifdef __linux__
+			value = getchar();
+			#elif _WIN32	
+			value = getch();
+			#endif
+
+			tcsetattr(STDIN_FILENO, TCSANOW, &old_tio);
+
+			switch(value)
+			{
+				case 27:					// ESC
+					str.append(eof);
+
+					input_lock.wait(true);	
+					input_lock = true;
+				
+					input_queue.push(str);
+					str.clear();
+
+					this->is_input = false;
+
+					input_lock = false;
+					input_lock.notify_all();				
+					break;
+
+				case 127:					// BACKSPACE
+					wprintf(L"\x1b[1D \x1b[1D\x1b[s");
+					--input_x;
+					if(!str.empty())
+						str.pop_back();
+					break;
+
+				case 10:					// ENTER
+					if(input_adv) ++input_y;
+
+					str.append(eof);
+					
+					input_lock.wait(true);	
+					input_lock = true;
+					
+					input_queue.push(str);
+					
+					input_lock = false;
+					input_lock.notify_all();
+					
+					str.clear();
+					break;
+
+				default:
+					wprintf(L"%c", value);
+					write(input_x, input_y, value);
+					str.append(1, value);
+					++input_x;
+					break;
 			}
 		}
 	}
@@ -215,14 +269,6 @@ void Tui::input_mode(std::string mode)
 	input_lock = false;
 	input_lock.notify_all();
 
-}
-
-Tui * Tui::get_instance(std::string title)
-{	
-	if(!instance)
-		instance = new Tui(title);
-
-	return instance;
 }
 
 void Tui::write(int x, int y, char c)

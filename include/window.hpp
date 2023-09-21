@@ -83,6 +83,7 @@ class Window
 
 	public:
 		Window(std::string = "");
+		~Window();
 		void refresh(void);
 		std::array<int, 2> get_size(void);
 		void write(int x, int y, char c);

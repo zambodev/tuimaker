@@ -3,9 +3,16 @@
 
 Window::Selectable::Selectable(int x, int y, bool is_row, std::vector<std::string> options, std::vector<std::function<void()>> funcs) 
 {	
+#ifdef DEBUG
+	std::cerr << "Selectable(): creating selectable object\n";
+#endif
 	this->x = x;
 	this->y = y;
 	this->is_row = is_row;
+
+#ifdef DEBUG
+	std::cerr << "Selectable(): emplacing options\n";
+#endif
 
 	for(int i = 0; i < options.size(); ++i)
 	{
@@ -15,11 +22,26 @@ Window::Selectable::Selectable(int x, int y, bool is_row, std::vector<std::strin
 
 Window::Selectable::~Selectable()
 {
+#ifdef DEBUG
+std::cerr << "~Selectable()\n";
+#endif
+
 	clear();
+
+	/* Clear options */
+	for(const auto& option : options)
+	{
+		delete option.second;
+	}
+	options.clear();
 }
 
 void Window::Selectable::draw(void)
 {
+#ifdef DEBUG
+	std::cerr << "draw(): drawing selectable to buffer\n";
+#endif
+
 	int xt = x;
 	int yt = y;
 
@@ -44,6 +66,10 @@ void Window::Selectable::draw(void)
 
 void Window::Selectable::clear(void)
 {
+#ifdef DEBUG
+	std::cerr << "clear(): removing selectable from buffer\n";
+#endif
+
 	size_t maxlen = 0;
 	for(int i = 0; i < options.size(); ++i)
 	{
@@ -59,12 +85,19 @@ void Window::Selectable::clear(void)
 
 void Window::Selectable::select(int id)
 {
+#ifdef DEBUG
+	std::cerr << "select(): selecting option from selectable\n";
+#endif
 	try
 	{
 		options.at(id - 1)->func();
 	}
 	catch(std::out_of_range)
 	{
+#ifdef DEBUG
+	std::cerr << "select(): invalid option\n";
+#endif
+
 		return;
 	}
 }

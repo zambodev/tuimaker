@@ -3,6 +3,10 @@
 
 Window::Box::Box(int x1, int y1, int x2, int y2, std::string title)
 {
+#ifdef DEBUG
+	std::cerr << "box(): creating box object\n";
+#endif
+
 	this->x1 = x1;
 	this->y1 = y1;
 	this->x2 = x2;
@@ -20,11 +24,17 @@ Window::Box::Box(int x1, int y1, int x2, int y2, std::string title)
 
 Window::Box::~Box()
 {
+	delete copy;
+
 	clear();
 }
 
 void Window::Box::draw(void)
 {
+#ifdef DEBUG
+	std::cerr << "draw(): drwaing box into the buffer\n";
+#endif
+
 	// Top left corner
 	if(buffer[cols * y1 + x1] == hbar) 
 		buffer[cols * y1 + x1] = tint;
@@ -70,7 +80,11 @@ void Window::Box::draw(void)
 		buffer[cols * i + x1] = vbar;
 		buffer[cols * i + x1 + (x2 - x1)] = vbar;
 	}
-	
+
+#ifdef DEBUG
+	std::cerr << "draw(): writing box' title into the buffer\n";
+#endif
+
 	// Print title
 	for(int i = 0; i < title.length(); ++i)
 		buffer[cols * (y1 + 1) + x1 + (x2 - x1) / 2 - title.length() / 2 + i] = title[i];
@@ -79,6 +93,10 @@ void Window::Box::draw(void)
 void Window::Box::move(int x1, int y1, int x2, int y2)
 {
 	clear();
+
+#ifdef DEBUG
+	std::cerr << "move(): changing box coordinates\n";
+#endif
 
 	if(x2 == -1 && y2 == -1)
 	{
@@ -97,6 +115,10 @@ void Window::Box::move(int x1, int y1, int x2, int y2)
 
 void Window::Box::write(std::vector<std::string> text)
 {
+#ifdef DEBUG
+	std::cerr << "write(): writing box' text into the buffer\n";
+#endif
+
 	int i = y1 + 2;
 	if(!this->title.empty()) ++i;
 
@@ -111,6 +133,10 @@ void Window::Box::write(std::vector<std::string> text)
 
 void Window::Box::clear_text(void)
 {
+#ifdef DEBUG
+	std::cerr << "clear_text(): removing box' text from the buffer\n";
+#endif
+
 	int i = y1 + 1;
 	if(!this->title.empty()) ++i;
 
@@ -121,6 +147,10 @@ void Window::Box::clear_text(void)
 
 void Window::Box::clear(void)
 {
+#ifdef DEBUG
+	std::cerr << "clear(): removing box from the buffer\n";
+#endif
+
 	int idx = 0;
 
 	for(int i = y1; i <= y2; ++i)

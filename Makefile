@@ -3,7 +3,7 @@ VERSION = 0.4.0
 
 #Compiler settings
 CC = 
-CFLAGS = -std=c++20 -Werror -static -static-libgcc -static-libstdc++ -lpthread
+CFLAGS = -std=c++20 -Werror -static -static-libgcc -static-libstdc++ -lpthread -g -Og
 
 #Folders
 SRC = src
@@ -25,8 +25,9 @@ OBJS := $(addprefix $(BUILD)/, $(notdir $(SRCS:.cpp=.o)))
 # Executables
 EXE = 
 
-# COS (Compile on OS)
-ifeq ($(COS), win)
+
+# COS (Library for OS)
+ifeq ($(COS), windows)
 	LIBA := $(addsuffix .lib, $(LIBA))
 else ifeq ($(COS), linux)
 	LIBA := $(addsuffix .a, $(LIBA))
@@ -67,7 +68,14 @@ $(TESTFILE): all
 	@ $(CC) $(CFLAGS) -o $(BIN)/$(EXE) $(TEST)/$(TESTFILE) -I$(INCLUDE)/ -L$(LIB)/ -l$(LIBNAME)
 	@echo  "  $(GREEN)Done$(RESET)"
 	@echo -n "Starting program..."
+# ./$(BIN)/$(EXE)
+
+run:
+ifdef DEBUG
+	./$(BIN)/$(EXE) 2> logfile.log
+else
 	./$(BIN)/$(EXE)
+endif
 
 # Check if all needed directory exists, if not, creates it
 $(CFL):
