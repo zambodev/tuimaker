@@ -23,11 +23,10 @@ class Tui
 		bool input_adv, is_running, is_input;
 		std::string title;
 		std::thread *queue_thd, *input_thd;
-		std::atomic<bool> input_lock, queue_lock;
+		std::atomic<bool> input_lock __attribute__ ((aligned (16))), queue_lock __attribute__ ((aligned (16))), run_lock __attribute__ ((aligned (16)));
 		std::queue<std::function<void()>> queue;
 		std::queue<std::string> input_queue;
 		struct termios old_tio, new_tio;
-		static Tui *instance;
 		Window *window;
 
 		Tui(std::string title);
@@ -37,12 +36,15 @@ class Tui
 
 	public:
 		void operator=(const Tui &) = delete;
-		Tui(Tui &) = delete;
 		/** \fn static Tui * get_instance(std::string title)
 		 * Get a unique instance of the class
 		 * \param title Title of the Program
 		*/
-		static Tui * get_instance(std::string title);
+		static Tui &get_instance(std::string title)
+		{
+			static Tui instance(title);
+			return instance;
+		}
 		/** \fn void write(int x, int y, char c);
 		 * Write char into buffer
 		 * \param x x cord

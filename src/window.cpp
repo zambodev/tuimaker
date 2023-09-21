@@ -30,6 +30,27 @@ Window::Window(std::string title)
 	boxes.at("main")->draw();
 }
 
+Window::~Window()
+{
+	/* Destroy boxes */
+	std::map<std::string, Box *>::iterator itr = boxes.begin();
+	if (itr != boxes.end())
+	{
+		delete itr->second;
+		boxes.erase(itr);
+	}
+
+	/* Destory selecs */
+	std::map<std::string, Selectable *>::iterator itr2 = selecs.begin();
+	if (itr2 != selecs.end())
+	{
+		delete itr2->second;
+		selecs.erase(itr2);
+	}
+
+	refresh();
+}
+
 void Window::refresh(void)
 {
 	wprintf(L"\x1b[s\x1b[0;0H");

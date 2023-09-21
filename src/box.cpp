@@ -20,6 +20,7 @@ Window::Box::Box(int x1, int y1, int x2, int y2, std::string title)
 
 Window::Box::~Box()
 {
+	delete copy;
 	clear();
 }
 

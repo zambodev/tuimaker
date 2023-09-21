@@ -16,6 +16,13 @@ Window::Selectable::Selectable(int x, int y, bool is_row, std::vector<std::strin
 Window::Selectable::~Selectable()
 {
 	clear();
+
+	/* Clear options */
+	for(const auto& option : options)
+	{
+		delete option.second;
+	}
+	options.clear();
 }
 
 void Window::Selectable::draw(void)

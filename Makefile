@@ -3,7 +3,7 @@ VERSION = 0.4.0
 
 #Compiler settings
 CC = 
-CFLAGS = -std=c++20 -Werror -static -static-libgcc -static-libstdc++ -lpthread
+CFLAGS = -std=c++20 -Werror -static -static-libgcc -static-libstdc++ -lpthread -g -Og
 
 #Folders
 SRC = src
@@ -67,7 +67,7 @@ $(TESTFILE): all
 	@ $(CC) $(CFLAGS) -o $(BIN)/$(EXE) $(TEST)/$(TESTFILE) -I$(INCLUDE)/ -L$(LIB)/ -l$(LIBNAME)
 	@echo  "  $(GREEN)Done$(RESET)"
 	@echo -n "Starting program..."
-	./$(BIN)/$(EXE)
+# ./$(BIN)/$(EXE)
 
 # Check if all needed directory exists, if not, creates it
 $(CFL):
