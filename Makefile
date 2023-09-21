@@ -25,15 +25,11 @@ OBJS := $(addprefix $(BUILD)/, $(notdir $(SRCS:.cpp=.o)))
 # Executables
 EXE = 
 
-# Debug option
-ifeq ($(DEBUG), 1)
-	CFLAGS += -DDEBUG
-endif
 
-# LOS (Library for OS)
-ifeq ($(LOS), windows)
+# COS (Library for OS)
+ifeq ($(COS), windows)
 	LIBA := $(addsuffix .lib, $(LIBA))
-else ifeq ($(LOS), linux)
+else ifeq ($(COS), linux)
 	LIBA := $(addsuffix .a, $(LIBA))
 endif
 
