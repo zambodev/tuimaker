@@ -1,159 +1,56 @@
-#include "../include/window.hpp"
+#include "box.hpp"
 
 
-Window::Box::Box(int x1, int y1, int x2, int y2, std::string title)
-{
-#ifdef DEBUG
-	std::cerr << "box(): creating box object\n";
-#endif
+Box::Box(int x, int y, int width, int height) {
+    std::cout << "Creating Box!\n";
+    this->x = x;
+    this->y = y;
+    this->width = width;
+    this->height = height;
+    this->buffer = (wchar_t *)calloc(width * height, sizeof(wchar_t));
 
-	this->x1 = x1;
-	this->y1 = y1;
-	this->x2 = x2;
-	this->y2 = y2;
-
-	copy = (wchar_t *)malloc((x2 - x1 + 1) * (y2 - y1 + 1) * sizeof(wchar_t));
-	int idx = 0;
-
-	for(int i = y1; i <= y2; ++i)
-		for(int j = x1; j <= x2; ++j)
-			copy[idx++] = buffer[cols * i + j];
-
-	if(title != "") this->title = title;
+    this->draw();
 }
 
-Window::Box::~Box()
-{
-	delete copy;
-
-	clear();
+Box::~Box() {
+    delete this->buffer;
 }
 
-void Window::Box::draw(void)
-{
-#ifdef DEBUG
-	std::cerr << "draw(): drwaing box into the buffer\n";
-#endif
-
-	// Top left corner
-	if(buffer[cols * y1 + x1] == hbar) 
-		buffer[cols * y1 + x1] = tint;
-	else if(buffer[cols * y1 + x1] == vbar) 
-		buffer[cols * y1 + x1] = lint;
-	else
-		buffer[cols * y1 + x1] = tlcrn;
-
-	// Top right corner
-	if(buffer[cols * y1 + x1 + (x2 - x1)] == hbar) 
-		buffer[cols * y1 + x1 + (x2 - x1)] = tint;
-	else if(buffer[cols * y1 + x1 + (x2 - x1)] == vbar) 
-		buffer[cols * y1 + x1 + (x2 - x1)] = rint;
-	else
-		buffer[cols * y1 + x1 + (x2 - x1)] = trcrn;
-
-	// Bottom left corner
-	if(buffer[cols * y2 + x1] == hbar) 
-		buffer[cols * y2 + x1] = bint;
-	else if(buffer[cols * y2 + x1] == vbar) 
-		buffer[cols * y2 + x1] = lint;
-	else
-		buffer[cols * y2 + x1] = blcrn;
-
-	// Bottom right corner
-	if(buffer[cols * y2 + x1 + (x2 - x1)] == hbar) 
-		buffer[cols * y2 + x1 + (x2 - x1)] = bint;
-	else if(buffer[cols * y2 + x1 + (x2 - x1)] == vbar) 
-		buffer[cols * y2 + x1 + (x2 - x1)] = rint;
-	else
-		buffer[cols * y2 + x1 + (x2 - x1)] = brcrn;
-
-	// Fill top and bottom lines
-	for(int i = x1 + 1; i < x2; ++i)
-	{
-		buffer[cols * y1 + i] = hbar;
-		buffer[cols * y2 + i] = hbar;	
-	}
-
-	// Left and right lines
-	for(int i = y1 + 1; i < y2; ++i)
-	{
-		buffer[cols * i + x1] = vbar;
-		buffer[cols * i + x1 + (x2 - x1)] = vbar;
-	}
-
-#ifdef DEBUG
-	std::cerr << "draw(): writing box' title into the buffer\n";
-#endif
-
-	// Print title
-	for(int i = 0; i < title.length(); ++i)
-		buffer[cols * (y1 + 1) + x1 + (x2 - x1) / 2 - title.length() / 2 + i] = title[i];
+void Box::setIsSelected(bool isSelected) {
+    this->isSelected = isSelected;
 }
 
-void Window::Box::move(int x1, int y1, int x2, int y2)
-{
-	clear();
-
-#ifdef DEBUG
-	std::cerr << "move(): changing box coordinates\n";
-#endif
-
-	if(x2 == -1 && y2 == -1)
-	{
-		this->x2 += x1 - this->x1;
-		this->y2 += y1 - this->y1;
-	}
-	else
-	{
-		this->x2 = x2;
-		this->y2 = y2;
-	}
-
-	this->x1 = x1;
-	this->y1 = y1;
+bool Box::getIsSelected(void) {
+    return this->isSelected;
 }
 
-void Window::Box::write(std::vector<std::string> text)
-{
-#ifdef DEBUG
-	std::cerr << "write(): writing box' text into the buffer\n";
-#endif
-
-	int i = y1 + 2;
-	if(!this->title.empty()) ++i;
-
-	for(std::string str : text)
-	{
-		for(int j = x1 + 2, idx = 0; j < x2 && idx < str.size(); ++j, ++idx)
-			buffer[cols * i + j] = str[idx];
-
-		++i;
-	}
+void Box::setIsSelectable(bool isSelectable) {
+    this->isSelectable = isSelectable;
 }
 
-void Window::Box::clear_text(void)
-{
-#ifdef DEBUG
-	std::cerr << "clear_text(): removing box' text from the buffer\n";
-#endif
-
-	int i = y1 + 1;
-	if(!this->title.empty()) ++i;
-
-	for(i; i < y2; ++i)
-		for(int j = x1 + 1; j < x2; ++j)
-			buffer[cols * i + j] = L' ';
+bool Box::getIsSelectable(void) {
+    return this->isSelectable;
 }
 
-void Window::Box::clear(void)
-{
-#ifdef DEBUG
-	std::cerr << "clear(): removing box from the buffer\n";
-#endif
+void Box::setIsWritable(bool isWritable) {
+    this->isWritable = isWritable;
+}
 
-	int idx = 0;
+bool Box::getIsWritable(void) {
+    return this->isWritable;
+}
 
-	for(int i = y1; i <= y2; ++i)
-		for(int j = x1; j <= x2; ++j)
-			buffer[cols * i + j] = copy[idx++];
+void Box::draw(void) {
+    setlocale(LC_ALL, "");
+    for(int i = 0; i < this->width; ++i) {
+        this->buffer[i] = hbar;
+        this->buffer[this->width * (this->height - 1) + i] = hbar;
+    }
+
+    std::wcout << L"\u251b";
+
+    std::wcout << L"\x1b[s\x1b[0;0H";
+    for(int i = 0; i < this->width * this->height; ++i) {
+		std::wcout << this->buffer[i];
+    }
 }
