@@ -1,53 +1,60 @@
 #include "box.hpp"
 
 
-Box::Box(int x, int y, int width, int height) {
+Box::Box(const int &x, const int &y, const int &width, const int &height)
+    : m_X(x), m_Y(y), m_Width(width), m_Height(height),
+      m_Buffer(new wchar_t[width * height])
+{
     std::wcout << L"Creating Box!\n";
-    this->x = x;
-    this->y = y;
-    this->width = width;
-    this->height = height;
-    this->buffer = new wchar_t[width * height];
 
-    for(int i = 0; i < width * height; ++i)
-        this->buffer[i] = u'\u0020';
+    for (int i = 0; i < width * height; ++i)
+        this->m_Buffer[i] = SPACE;
 
     this->draw();
 }
 
-Box::~Box() {
-    delete this->buffer;
+Box::~Box()
+{
+    delete this->m_Buffer;
 }
 
-void Box::setIsSelected(bool isSelected) {
-    this->isSelected = isSelected;
+void Box::setSelected(bool isSelected)
+{
+    this->m_selected = isSelected;
 }
 
-bool Box::getIsSelected(void) {
-    return this->isSelected;
+bool Box::isSelected(void)
+{
+    return this->m_selected;
 }
 
-void Box::setIsSelectable(bool isSelectable) {
-    this->isSelectable = isSelectable;
+void Box::setSelectable(bool isSelectable)
+{
+    this->m_selectable = isSelectable;
 }
 
-bool Box::getIsSelectable(void) {
-    return this->isSelectable;
+bool Box::isSelectable(void)
+{
+    return this->m_selectable;
 }
 
-void Box::setIsWritable(bool isWritable) {
-    this->isWritable = isWritable;
+void Box::setWritable(bool isWritable)
+{
+    this->m_writable = isWritable;
 }
 
-bool Box::getIsWritable(void) {
-    return this->isWritable;
+bool Box::isWritable(void)
+{
+    return this->m_writable;
 }
 
-void Box::draw(void) {
-    for(int i = 0; i < this->width; ++i) {
-        this->buffer[i] = hbar;
-        this->buffer[this->width * (this->height - 1) + i] = hbar;
+void Box::draw(void)
+{
+    for (int i = 0; i < this->m_Width; ++i)
+    {
+        this->m_Buffer[i] = HBAR;
+        this->m_Buffer[this->m_Width * (this->m_Height - 1) + i] = HBAR;
     }
 
-    std::wcout << L"\x1b[s\x1b[0;0H" << this->buffer << L"\x1b[s\x1b[10;0H";
+    std::wcout << L"\x1b[s\x1b[0;0H" << this->m_Buffer << L"\x1b[s\x1b[10;0H";
 }
