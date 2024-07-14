@@ -2,7 +2,7 @@
 
 
 Window::Window(int x, int y, int width, int height) : Box(x, y, width, height) {
-    std::cout << "Creating Window!\n";
+    std::wcout << L"Creating Window!\n";
 }
 
 Window::~Window() {
