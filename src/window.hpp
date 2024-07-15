@@ -9,14 +9,17 @@
 class Window : protected Box
 {
     private:
-        Window* m_fatherWindow;
-        std::list<Window> m_childrenWindows;
+        std::list<Window*> m_nearbyWindows;
 
     public:
         Window(const int&& x, const int&& y, const int&& width, const int&& height);
         Window(const int&& x, const int&& y, const int&& width, const int&& height,
-               const unsigned char&& cornerBitmask, Window& fatherWindow);
+               const unsigned short&& cornerBitmask, Window& fatherWindow);
         ~Window();
+
+        void addChild(Window* window);
+        unsigned short checkCornerCollision(const int&& x, const int&& y, const int&& width, const int&& height);
+        void show(void);
 };
 
 #endif

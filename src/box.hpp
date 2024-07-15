@@ -2,12 +2,13 @@
 #define BOX_HPP
 
 #include <iostream>
+#include <array>
 
 
 class Box
 {
     private:
-        unsigned char m_CornerBitmask;
+        unsigned short m_CornerBitmask;
 
         int m_X;
         int m_Y;
@@ -24,10 +25,10 @@ class Box
         {
             U_BAR_HORIZONTAL        = u'\u2501',
             U_BAR_VERTICAL          = u'\u2503',
-            U_CORNER_TOP_LEFT       = u'\u250f',
-            U_CORNER_TOP_RIGHT      = u'\u2513',
-            U_CORNER_BOTTOM_LEFT    = u'\u2517',
-            U_CORNER_BOTTOM_RIGHT   = u'\u251b',
+            U_CRN_TOP_LEFT          = u'\u250f',
+            U_CRN_TOP_RIGHT         = u'\u2513',
+            U_CRN_BOTTOM_LEFT       = u'\u2517',
+            U_CRN_BOTTOM_RIGHT      = u'\u251b',
             U_CROSS                 = u'\u254b',
             U_T_LEFT                = u'\u2523',
             U_T_RIGHT               = u'\u252b',
@@ -36,20 +37,34 @@ class Box
             U_SPACE                 = u'\u0020'
         };
 
+    private:
+        wchar_t getTCorner(unsigned short&& val);
+
     protected:
-        enum : unsigned char
+        enum : unsigned short
         {
-            B_CORNER_TOP_LEFT       = 0xC0,
-            B_CORNER_TOP_RIGHT      = 0x30,
-            B_CORNER_BOTTOM_LEFT    = 0x0C,
-            B_CORNER_BOTTOM_RIGHT   = 0x03
+            B_CRN_TOP_LEFT          = 0x000FU,
+            B_CRN_TOP_RIGHT         = 0x00F0U,
+            B_CRN_BOTTOM_LEFT       = 0x0F00U,
+            B_CRN_BOTTOM_RIGHT      = 0xF000U,
+        };
+
+        enum : unsigned short
+        {
+            V_CRN_T_TOP             = 0x1,
+            V_CRN_T_BOTTOM          = 0x2,
+            V_CRN_T_LEFT            = 0x3,
+            V_CRN_T_RIGHT           = 0x4,
+            V_CROSS                 = 0x5
         };
 
     public:
         Box(const int&& x, const int&& y, const int&& width, const int&& height,
-            const unsigned char&& cornerBitmask);
+            const unsigned short&& cornerBitmask);
         ~Box();
 
+        std::array<int, 4> getSize(void);
+        void setBitmask(const unsigned short && bitmask);
         void setSelected(bool isSelected);
         bool isSelected(void);
         void setSelectable(bool isSelectable);
