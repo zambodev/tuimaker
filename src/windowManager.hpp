@@ -8,12 +8,16 @@
 class WindowManager
 {
     private:
+        wchar_t* m_Buffer;
         std::vector<std::vector<Window*>*> m_visibilityLayerList;
 
     public:
-        void addWindow(Window& window);
-        void removeWindow(Window& window);
+        WindowManager(int val);
+        ~WindowManager();
 
+        void addWindow(Window& window);
+        void removeWindow(int id);
+        void render(void);
 };
 
 #endif

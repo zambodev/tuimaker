@@ -77,6 +77,7 @@ class Window
         bool isWritable(void);
 
         void draw(void);
+        void show(wchar_t* buffer);
 };
 
 #endif

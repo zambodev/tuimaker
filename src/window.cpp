@@ -120,17 +120,21 @@ void Window::draw(void)
     this->m_Buffer[this->m_Width - 1] = U_CRN_TOP_RIGHT;
     this->m_Buffer[(this->m_Height - 1) * this->m_Width] = U_CRN_BOTTOM_LEFT;
     this->m_Buffer[(this->m_Height - 1) * this->m_Width + (this->m_Width - 1)] = U_CRN_BOTTOM_RIGHT;
+}
 
-    std::wcout << L"\x1b[s\x1b[" << this->m_Y << ";" << this->m_X << "H";
-    
+void Window::show(wchar_t* buffer)
+{
+    auto size = UTILS::getTerminalSize();
+
     for(int i = 0; i < this->m_Height; ++i)
     {
         for(int j = 0; j < this->m_Width; ++j)
-            wprintf(L"%lc", this->m_Buffer[i * this->m_Width + j]);
-
-        if(i < (this->m_Height - 1))
-            std::wcout << L"\x1b[" << this->m_Y + i + 1 << ";" << this->m_X << "H";
+        {
+            //if(buffer[(this->m_Y + i) * (this->m_X + (this->m_Width - 1)) + j] == u'\u0020')
+            buffer[(this->m_Y + i) * std::get<0>(size) + (this->m_X + j)] =
+                this->m_Buffer[i * this->m_Width + j];
+            //else
+                //break;
+        }
     }
-
-    std::wcout << L"\x1b[30;0H";
 }

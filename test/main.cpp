@@ -12,15 +12,13 @@ int main(void)
     Window window(0, 10, std::move(std::get<0>(size)),
     std::move(std::get<1>(size) - 10), 0x00, NULL);
 
-    Window child(20, 10, 40, 20, 0x00, &window);
-    Window child1(20, 10, 40, 20, 0x00, &child);
-    Window child2(20, 10, 40, 20, 0x00, &child1);
-    Window child3(20, 10, 40, 20, 0x00, &child2);
+    WindowManager wm(2);
+
+    Window child(10, 10, 20, 20, 0x00, &window);
     
-    WindowManager wm;
+    wm.addWindow(child);
 
-    wm.addWindow(child3);
+    child.draw();
 
-    //window.draw();
-    //child.draw();
+    wm.render();
 }
