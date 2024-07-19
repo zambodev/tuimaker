@@ -45,7 +45,6 @@ namespace UTILS
         if(window->getFather() != NULL)
             return getWindowDepth(window->getFather()) + 1;
         else 
-            return 0;
-
+            return 1;
     }
 }

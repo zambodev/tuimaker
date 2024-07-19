@@ -5,6 +5,22 @@
 #include <array>
 
 
+enum : wchar_t
+{
+    U_BAR_HORIZONTAL        = u'\u2501',
+    U_BAR_VERTICAL          = u'\u2503',
+    U_CRN_TOP_LEFT          = u'\u250f',
+    U_CRN_TOP_RIGHT         = u'\u2513',
+    U_CRN_BOTTOM_LEFT       = u'\u2517',
+    U_CRN_BOTTOM_RIGHT      = u'\u251b',
+    U_CROSS                 = u'\u254b',
+    U_T_LEFT                = u'\u2523',
+    U_T_RIGHT               = u'\u252b',
+    U_T_TOP                 = u'\u2533',
+    U_T_BOTTOM              = u'\u253B',
+    U_SPACE                 = u'\u0020'
+};
+
 class Window
 {
     private:
@@ -16,6 +32,7 @@ class Window
         int m_Height;
         int m_id;
 
+        bool m_Ready;
         bool m_Selectable;
         bool m_Selected;
         bool m_Writable;
@@ -23,23 +40,6 @@ class Window
         wchar_t* m_Buffer;
 
         Window* m_father;
-
-        enum : wchar_t
-        {
-            U_BAR_HORIZONTAL        = u'\u2501',
-            U_BAR_VERTICAL          = u'\u2503',
-            U_CRN_TOP_LEFT          = u'\u250f',
-            U_CRN_TOP_RIGHT         = u'\u2513',
-            U_CRN_BOTTOM_LEFT       = u'\u2517',
-            U_CRN_BOTTOM_RIGHT      = u'\u251b',
-            U_CROSS                 = u'\u254b',
-            U_T_LEFT                = u'\u2523',
-            U_T_RIGHT               = u'\u252b',
-            U_T_TOP                 = u'\u2533',
-            U_T_BOTTOM              = u'\u253B',
-            U_SPACE                 = u'\u0020'
-        };
-
     private:
         wchar_t getTCorner(unsigned short&& val);
 
@@ -75,9 +75,10 @@ class Window
         bool isSelectable(void);
         void setWritable(bool isWritable);
         bool isWritable(void);
+        bool isReady(void);
 
         void draw(void);
-        void show(wchar_t* buffer);
+        void show(wchar_t* buffer, int* layerMap);
 };
 
 #endif

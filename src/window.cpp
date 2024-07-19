@@ -35,7 +35,7 @@ Window::Window(const int&& x, const int&& y, const int&& width, const int&& heig
     : m_X(x), m_Y(y), m_Width(width), m_Height(height),
       m_Buffer(new wchar_t[width * height]), m_CornerBitmask(cornerBitmask),
       m_father(father), m_id(UTILS::getProgressiveId()),
-      m_Selectable(false), m_Selected(false), m_Writable(false)
+      m_Selectable(false), m_Selected(false), m_Writable(false), m_Ready(false)
 {
     for(int i = 0; i < this->m_Width * this->m_Height; ++i)
         this->m_Buffer[i] = U_SPACE;
@@ -97,6 +97,11 @@ bool Window::isWritable(void)
     return this->m_Writable;
 }
 
+bool Window::isReady(void)
+{
+    return this->m_Ready;
+}
+
 void Window::draw(void)
 {
     // Top and bottom sides
@@ -120,21 +125,17 @@ void Window::draw(void)
     this->m_Buffer[this->m_Width - 1] = U_CRN_TOP_RIGHT;
     this->m_Buffer[(this->m_Height - 1) * this->m_Width] = U_CRN_BOTTOM_LEFT;
     this->m_Buffer[(this->m_Height - 1) * this->m_Width + (this->m_Width - 1)] = U_CRN_BOTTOM_RIGHT;
+
+    this->m_Ready = true;
 }
 
-void Window::show(wchar_t* buffer)
+void Window::show(wchar_t* buffer, int* layerMap)
 {
     auto size = UTILS::getTerminalSize();
+    int depth = UTILS::getWindowDepth(this);
 
     for(int i = 0; i < this->m_Height; ++i)
-    {
         for(int j = 0; j < this->m_Width; ++j)
-        {
-            //if(buffer[(this->m_Y + i) * (this->m_X + (this->m_Width - 1)) + j] == u'\u0020')
-            buffer[(this->m_Y + i) * std::get<0>(size) + (this->m_X + j)] =
-                this->m_Buffer[i * this->m_Width + j];
-            //else
-                //break;
-        }
-    }
+            if(layerMap[(this->m_Y + i) * std::get<0>(size) + (this->m_X + j)] == depth)
+                buffer[(this->m_Y + i) * std::get<0>(size) + (this->m_X + j)] = this->m_Buffer[i * this->m_Width + j];
 }
