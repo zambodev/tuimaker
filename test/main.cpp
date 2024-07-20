@@ -8,9 +8,8 @@
 
 int main(void)
 {
-    auto size = UTILS::getTerminalSize();
-    Window window(0, 10, std::move(std::get<0>(size)),
-    std::move(std::get<1>(size) - 10), 0x00, NULL);
+    Window window(0, 10, UTILS::getTerminalWidth(),
+    UTILS::getTerminalHeight() - 10, 0x00, NULL);
 
     WindowManager wm;
 

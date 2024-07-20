@@ -2,14 +2,15 @@
 #define UTILS_HPP
 
 #include <tuple>
+#include <vector>
 #include "window.hpp"
 
 
 namespace UTILS
 {
-    std::tuple<int, int> getTerminalSize(void);
+    int getTerminalWidth(void);
+    int getTerminalHeight(void);
     int getProgressiveId(void);
-    int getWindowDepth(Window* window);
 }
 
 #endif

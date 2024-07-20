@@ -21,27 +21,25 @@ enum : wchar_t
     U_SPACE                 = u'\u0020'
 };
 
+struct WindowSize_t
+{
+    int x;
+    int y;
+    int width;
+    int height;
+};
+
 class Window
 {
     private:
-        unsigned short m_CornerBitmask;
-
-        int m_X;
-        int m_Y;
-        int m_Width;
-        int m_Height;
-        int m_id;
-
+        int m_Id;
         bool m_Ready;
         bool m_Selectable;
         bool m_Selected;
         bool m_Writable;
-        
         wchar_t* m_Buffer;
-
-        Window* m_father;
-    private:
-        wchar_t getTCorner(unsigned short&& val);
+        WindowSize_t m_Size;
+        Window* m_Father;
 
     protected:
         enum : unsigned short
@@ -66,9 +64,10 @@ class Window
             const unsigned short&& cornerBitmask, Window* father);
         ~Window();
 
-        std::array<int, 4> getSize(void);
+        bool operator==(Window& window);
+
+        WindowSize_t& getSize(void);
         Window* getFather(void);
-        void setBitmask(const unsigned short && bitmask);
         void setSelected(bool isSelected);
         bool isSelected(void);
         void setSelectable(bool isSelectable);
@@ -76,9 +75,10 @@ class Window
         void setWritable(bool isWritable);
         bool isWritable(void);
         bool isReady(void);
+        int getId(void);
+        wchar_t* getBuffer(void);
 
         void draw(void);
-        void show(wchar_t* buffer, int* layerMap);
 };
 
 #endif
