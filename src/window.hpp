@@ -33,7 +33,6 @@ class Window
 {
     private:
         int m_Id;
-        bool m_Ready;
         bool m_Selectable;
         bool m_Selected;
         bool m_Writable;
@@ -74,7 +73,6 @@ class Window
         bool isSelectable(void);
         void setWritable(bool isWritable);
         bool isWritable(void);
-        bool isReady(void);
         int getId(void);
         wchar_t* getBuffer(void);
 

@@ -7,7 +7,7 @@ Window::Window(const int&& x, const int&& y, const int&& width, const int&& heig
     : m_Size({x, y, width, height}),
       m_Buffer(new wchar_t[width * height]), m_Father(father),
       m_Id(UTILS::getProgressiveId()), m_Selectable(false),
-      m_Selected(false), m_Writable(false), m_Ready(false)
+      m_Selected(false), m_Writable(false)
 {
     for(int i = 0; i < this->m_Size.width * this->m_Size.height; ++i)
         this->m_Buffer[i] = U_SPACE;
@@ -71,11 +71,6 @@ bool Window::isWritable(void)
     return this->m_Writable;
 }
 
-bool Window::isReady(void)
-{
-    return this->m_Ready;
-}
-
 int Window::getId(void)
 {
     return this->m_Id;
@@ -105,7 +100,5 @@ void Window::draw(void)
     this->m_Buffer[this->m_Size.width - 1] = U_CRN_TOP_RIGHT;
     this->m_Buffer[(this->m_Size.height - 1) * this->m_Size.width] = U_CRN_BOTTOM_LEFT;
     this->m_Buffer[(this->m_Size.height - 1) * this->m_Size.width + (this->m_Size.width - 1)] = U_CRN_BOTTOM_RIGHT;
-
-    this->m_Ready = true;
 }
 

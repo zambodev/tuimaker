@@ -59,22 +59,21 @@ void WindowManager::removeWindow(int id)
 
 void WindowManager::render(void)
 {
-    std::vector<Window*>::reverse_iterator windowItr;
+    int depth;
 
-    for(windowItr = this->m_visibilityLayerList.rbegin(); windowItr != this->m_visibilityLayerList.rend(); ++windowItr)
+    for(int i = 0; i < this->m_Height; ++i)
     {
-        if((*windowItr)->isReady())
+        for(int j = 0; j < this->m_Width; ++j)
         {
-            auto size = (*windowItr)->getSize();
-            int depth = this->getIndexOf(*(*windowItr));
-            wchar_t* windowBuffer = (*windowItr)->getBuffer();
-            
-            for(int i = 0; i < size.height; ++i)
-                for(int j = 0; j < size.width; ++j)
-                    if(this->m_BufferLayerMap[(size.y + i) * this->m_Width + (size.x + j)] == depth + 1)
-                        this->m_Buffer[(size.y + i) * this->m_Width + (size.x + j)] = windowBuffer[i * size.width + j];
+            if((depth = this->m_BufferLayerMap[i * this->m_Width + j]) == 0)
+                continue;
+
+            Window* window = this->m_visibilityLayerList.at(depth - 1);
+            WindowSize_t& size = window->getSize();
+
+            this->m_Buffer[i * this->m_Width + j] = window->getBuffer()[(i - size.y) * size.width + (j - size.x)];
         }
     }
 
-    std::wcout << L"\x1b[s\x1b[0;0H" << this->m_Buffer << L"\x1b[00;0H";
+    std::wcout << L"\x1b[s\x1b[0;0H" << this->m_Buffer << L"\x1b[u";
 }
