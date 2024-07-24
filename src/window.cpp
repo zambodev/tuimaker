@@ -14,6 +14,8 @@ Window::Window(const int&& x, const int&& y, const int&& width, const int&& heig
         this->m_Buffer[i] = U_SPACE;
 
     WindowManager::getInstance()->addWindow(this);
+
+    this->draw();
 }
 
 Window::~Window()
