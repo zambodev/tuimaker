@@ -1,44 +1,21 @@
 #include <iostream>
+#include <chrono>
 #include <thread>
-#include <array>
-#include <tui.hpp>
+#include <tuple>
+
+#include "../src/windowManager.hpp"
+#include "../src/window.hpp"
+#include "../src/utils.hpp"
 
 
-int main()
+int main(void)
 {
-	Tui &tui = Tui::get_instance("Test");
-	
-	bool show = false;
-	bool running = true;
+    Window window(0, 10, UTILS::getTerminalWidth(),
+                  UTILS::getTerminalHeight() - 10, 0x00, NULL);
 
-	tui.box_create("notification", tui.get_size()[0] - 30, tui.get_size()[1] - 20, tui.get_size()[0], tui.get_size()[1], "Notifications");
+    Window child(10, 10, 120, 20, 0x00, &window);
+    
+    WindowManager::getInstance()->render();
 
-	std::function<void()> notify = [&tui, &show](){
-		if(!show)
-		{
-			tui.box_draw("notification");
-			tui.box_write("notification", {"Nothing to see"});
-			show = true;
-		}
-		else
-		{
-			tui.box_clear("notification");
-			show = false;
-		}
-
-		tui.refresh();
-	};
-	std::function<void()> exit = [&tui, &running](){
-		running = false;
-	};
-
-	tui.input_cords(2, 3);
-	tui.input_mode("command");
-	tui.selec_create("Test", 2, tui.get_size()[1] - 1, true, {"Notification", "Exit"}, {notify, exit});
-	tui.selec_draw("Test");
-	tui.refresh();
-
-	std::string val;
-
-	while(running);
+    std::wcout << L"\x1b[0;0H" << std::endl; 
 }

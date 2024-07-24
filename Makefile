@@ -50,7 +50,7 @@ all: clean sysinfo $(CFL) $(LIBA)
 
 # Build c files into object files
 $(BUILD)/%.o: $(SRC)/%.cpp
-	@echo -n "Compiling $^: "
+	@ echo -n "Compiling $^: "
 	@ $(CC) -c $(CFLAGS) $^
 	@ mv *.o $(BUILD)
 	@echo  "  $(GREEN)Done$(RESET)"
@@ -88,6 +88,8 @@ endif
 # Print architecture info
 sysinfo:
 	@echo "Building for $(OS)"
+	@ echo -n "Compiler: $(CC)\n"
+	@ echo -n "Executable: $(EXE)\n"
 
 # Clear folders
 clean:

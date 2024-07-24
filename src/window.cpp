@@ -1,159 +1,104 @@
-#include "../include/window.hpp"
+#include "window.hpp"
+#include "windowManager.hpp"
+#include "utils.hpp"
 
 
-Window::Window(std::string title)
+Window::Window(const int&& x, const int&& y, const int&& width, const int&& height,
+               const unsigned short&& cornerBitmask, Window* father)
+    : m_Size({x, y, width, height}),
+      m_Buffer(new wchar_t[width * height]), m_Father(father),
+      m_Id(UTILS::getProgressiveId()), m_Selectable(false),
+      m_Selected(false), m_Writable(false)
 {
-#ifdef DEBUG
-	std::cerr << "Window(): Creating window object\n";
-#endif
+    for(int i = 0; i < this->m_Size.width * this->m_Size.height; ++i)
+        this->m_Buffer[i] = U_SPACE;
 
-#ifdef __linux__
-	setlocale(LC_ALL, "");
+    WindowManager::getInstance()->addWindow(this);
 
-	struct winsize w;
-	ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-	cols = w.ws_col;
-	rows = w.ws_row;
-#elif _WIN32
-	_setmode(_fileno(stdout), _O_U16TEXT);
-
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
-
-	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-	cols = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-	rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-#endif
-
-	buffer = (wchar_t *)malloc(cols * rows * sizeof(wchar_t));
-
-	// Fill with blank
-	for(int i = 0; i < cols * rows; ++i)
-		buffer[i] = L' ';
-
-#ifdef DEBUG
-	std::cerr << "Window(): inserting new box\n";
-#endif
-	boxes.insert({"main", new Box(0, 0, cols-1, rows-1, title)});
-#ifdef DEBUG
-	std::cerr << "Widnow(): drawing 'main' box\n";
-#endif
-	boxes.at("main")->draw();
+    this->draw();
 }
 
 Window::~Window()
 {
-	/* Destroy boxes */
-	std::map<std::string, Box *>::iterator itr = boxes.begin();
-	if (itr != boxes.end())
-	{
-		delete itr->second;
-		boxes.erase(itr);
-	}
-
-	/* Destory selecs */
-	std::map<std::string, Selectable *>::iterator itr2 = selecs.begin();
-	if (itr2 != selecs.end())
-	{
-		delete itr2->second;
-		selecs.erase(itr2);
-	}
-
-	refresh();
+    delete this->m_Buffer;
 }
 
-void Window::refresh(void)
+bool Window::operator==(Window& window)
 {
-#ifdef DEBUG
-	std::cerr << "refresh()\n";
-#endif
-
-	wprintf(L"\x1b[s\x1b[0;0H");
-
-	for(int i = 0; i < cols * rows; ++i)
-		wprintf(L"%lc", buffer[i]);
-
-	wprintf(L"\x1b[u");
-	fflush(stdout);
+    if(this->m_Id == window.getId())
+        return true;
+    else
+        return false;
 }
 
-std::array<int, 2> Window::get_size()
+WindowSize_t& Window::getSize(void)
 {
-#ifdef DEBUG
-	std::cerr << "get_size()\n";
-#endif
-
-	return std::array<int, 2>{cols - 1, rows - 1};
+    return m_Size;
 }
 
-void Window::write(int x, int y, char c)
+Window* Window::getFather(void)
 {
-#ifdef DEBUG
-	std::cerr << "write(): writing into the buffer\n";
-#endif
-
-	buffer[cols * (y - 1) + (x - 1)] = c;
+    return this->m_Father;
 }
 
-void Window::box_create(std::string id, int x1, int y1, int x2, int y2, std::string title)
+void Window::setSelected(bool isSelected)
 {
-#ifdef DEBUG
-	std::cerr << "box_create(): emplacing new box\n";
-#endif
-
-	boxes.try_emplace(id, new Box(x1, y1, x2, y2, title));
+    this->m_Selected = isSelected;
 }
 
-void Window::box_delete(std::string id)
+bool Window::isSelected(void)
 {
-#ifdef DEBUG
-	std::cerr << "box_delete(): deleting new box\n";
-#endif
-
-	boxes[id]->~Box();
-	boxes.erase(id);
+    return this->m_Selected;
 }
 
-
-Window::Box * Window::get_box(std::string id)
+void Window::setSelectable(bool isSelectable)
 {
-#ifdef DEBUG
-	std::cerr << "get_box()\n";
-#endif
-
-	return boxes.at(id);
+    this->m_Selectable = isSelectable;
 }
 
-void Window::selec_create(std::string id, int x, int y, bool is_row, std::vector<std::string> options, std::vector<std::function<void(void)>> funcs)
+bool Window::isSelectable(void)
 {
-#ifdef DEBUG
-	std::cerr << "selec_craete(): emplacing new selectable\n";
-#endif
-
-	selecs.try_emplace(id, new Selectable(x, y, is_row, options, funcs));
+    return this->m_Selectable;
 }
 
-void Window::selec_delete(std::string id)
+void Window::setWritable(bool isWritable)
 {
-#ifdef DEBUG
-	std::cerr << "selec_delete()\n";
-#endif
-
-	selecs.at(id)->clear();
-	selecs.erase(id);
+    this->m_Writable = isWritable;
 }
 
-Window::Selectable * Window::get_selec(std::string id)
+bool Window::isWritable(void)
 {
-#ifdef DEBUG
-	std::cerr << "get_selec()\n";
-#endif
-
-	try
-	{
-		return selecs.at(id);
-	}
-	catch(std::out_of_range)
-	{
-		return nullptr;
-	}
+    return this->m_Writable;
 }
+
+int Window::getId(void)
+{
+    return this->m_Id;
+}
+
+wchar_t* Window::getBuffer(void)
+{
+    return this->m_Buffer;
+}
+
+void Window::draw(void)
+{
+    // Top and bottom sides
+    for(int i = 1; i < this->m_Size.width - 1; ++i)
+    {
+        this->m_Buffer[i] = U_BAR_HORIZONTAL;
+        this->m_Buffer[this->m_Size.width * (this->m_Size.height - 1) + i] = U_BAR_HORIZONTAL;
+    }
+    // Left and right sides
+    for(int i = 1; i < this->m_Size.height - 1; ++i)
+    {
+        this->m_Buffer[i * this->m_Size.width] = U_BAR_VERTICAL;
+        this->m_Buffer[i * this->m_Size.width + (this->m_Size.width - 1)] = U_BAR_VERTICAL;
+    }
+    // Corners
+    this->m_Buffer[0] = U_CRN_TOP_LEFT;
+    this->m_Buffer[this->m_Size.width - 1] = U_CRN_TOP_RIGHT;
+    this->m_Buffer[(this->m_Size.height - 1) * this->m_Size.width] = U_CRN_BOTTOM_LEFT;
+    this->m_Buffer[(this->m_Size.height - 1) * this->m_Size.width + (this->m_Size.width - 1)] = U_CRN_BOTTOM_RIGHT;
+}
+
