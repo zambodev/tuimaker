@@ -28,7 +28,7 @@ int WindowManager::getIndexOf(Window& window)
     int idx = 0;
     std::vector<Window*>::iterator itr;
 
-    for(itr = this->m_visibilityLayerList.begin(); itr != this->m_visibilityLayerList.end(); ++itr)
+    for(itr = this->m_VisibilityLayerList.begin(); itr != this->m_VisibilityLayerList.end(); ++itr)
     {
         if(*(*itr) == window)
             return idx;
@@ -39,17 +39,15 @@ int WindowManager::getIndexOf(Window& window)
     return 0;
 }
 
-void WindowManager::addWindow(Window& window)
+void WindowManager::addWindow(Window*window)
 {
-    Window *tmp = &window;
+    this->m_VisibilityLayerList.emplace_back(window);
+    auto size = window->getSize();
 
-    this->m_visibilityLayerList.emplace_back(tmp);
-
-    auto size = window.getSize();
     for(int i = 0; i < size.height; ++i)
         for(int j = 0; j < size.width; ++j)
             this->m_BufferLayerMap[(size.y + i) * this->m_Width + (size.x + j)]
-                = this->m_visibilityLayerList.size();
+                = this->m_VisibilityLayerList.size();
 }
 
 void WindowManager::removeWindow(int id)
@@ -68,7 +66,7 @@ void WindowManager::render(void)
             if((depth = this->m_BufferLayerMap[i * this->m_Width + j]) == 0)
                 continue;
 
-            Window* window = this->m_visibilityLayerList.at(depth - 1);
+            Window* window = this->m_VisibilityLayerList.at(depth - 1);
             WindowSize_t& size = window->getSize();
 
             this->m_Buffer[i * this->m_Width + j] = window->getBuffer()[(i - size.y) * size.width + (j - size.x)];

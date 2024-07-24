@@ -1,4 +1,5 @@
 #include "window.hpp"
+#include "windowManager.hpp"
 #include "utils.hpp"
 
 
@@ -12,10 +13,7 @@ Window::Window(const int&& x, const int&& y, const int&& width, const int&& heig
     for(int i = 0; i < this->m_Size.width * this->m_Size.height; ++i)
         this->m_Buffer[i] = U_SPACE;
 
-    if(father == NULL)
-        std::wcout << L"Created Window!\n";
-    else
-        std::wcout << L"Created child Window!\n";
+    WindowManager::getInstance()->addWindow(this);
 }
 
 Window::~Window()
