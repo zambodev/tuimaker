@@ -1,7 +1,13 @@
 .vscode
-build/
+Build/
 bin/
 lib/
 release/
+CMakeFiles/
 
+CMakeCache.txt
+Makefile
+
+*.so
+*.cmake
 *.log

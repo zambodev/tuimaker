@@ -10,12 +10,14 @@
 
 int main(void)
 {
-    Window window(0, 10, UTILS::getTerminalWidth(),
-                  UTILS::getTerminalHeight() - 10, 0x00, NULL);
+    Window window(0, 0, UTILS::getTerminalWidth(),
+                  UTILS::getTerminalHeight(), 0x00, NULL);
 
-    Window child(10, 10, 120, 20, 0x00, &window);
+    Window child(10, 10, UTILS::getTerminalWidth() / 2, UTILS::getTerminalHeight() / 2, 0x00, &window);
     
     WindowManager::getInstance()->render();
 
-    std::wcout << L"\x1b[0;0H" << std::endl; 
+    std::wcout << L"\x1b[0;0H" << std::flush;
+
+    while (1);
 }
