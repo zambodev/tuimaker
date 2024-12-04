@@ -2,7 +2,7 @@
 #define WINDOWMANAGER_HPP
 
 #include <vector>
-#include "window.hpp"
+#include "Window.hpp"
 
 
 class WindowManager

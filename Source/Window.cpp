@@ -1,13 +1,13 @@
-#include "window.hpp"
-#include "windowManager.hpp"
-#include "utils.hpp"
+#include "../Include/Window.hpp"
+#include "../Include/WindowManager.hpp"
+#include "../Include/Utils.hpp"
 
 
 Window::Window(const int&& x, const int&& y, const int&& width, const int&& height,
                const unsigned short&& cornerBitmask, Window* father)
     : m_Size({x, y, width, height}),
       m_Buffer(new wchar_t[width * height]), m_Father(father),
-      m_Id(UTILS::getProgressiveId()), m_Selectable(false),
+      m_Id(Utils::GetProgressiveId()), m_Selectable(false),
       m_Selected(false), m_Writable(false)
 {
     for(int i = 0; i < this->m_Size.width * this->m_Size.height; ++i)

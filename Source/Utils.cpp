@@ -10,12 +10,12 @@
 #include <io.h>
 #include <fcntl.h>
 #endif
-#include "utils.hpp"
+#include "../Include/Utils.hpp"
 
 
-namespace UTILS
+namespace Utils
 {
-    int getTerminalWidth(void)
+    int GetTerminalWidth(void)
     {
 #ifdef __linux__
         setlocale(LC_ALL, "");
@@ -33,7 +33,7 @@ namespace UTILS
 #endif
     }
 
-    int getTerminalHeight(void)
+    int GetTerminalHeight(void)
     {
 #ifdef __linux__
         setlocale(LC_ALL, "");
@@ -51,7 +51,7 @@ namespace UTILS
 #endif
     }
 
-    int getProgressiveId(void)
+    int GetProgressiveId(void)
     {
         static int id = 0;
 

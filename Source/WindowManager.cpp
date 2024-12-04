@@ -1,12 +1,12 @@
 #include <vector>
 #include <tuple>
 #include <cstring>
-#include "windowManager.hpp"
-#include "utils.hpp"
+#include "../Include/WindowManager.hpp"
+#include "../Include/Utils.hpp"
 
 
 WindowManager::WindowManager()
-    : m_Width(UTILS::getTerminalWidth()), m_Height(UTILS::getTerminalHeight())
+    : m_Width(Utils::GetTerminalWidth()), m_Height(Utils::GetTerminalHeight())
 {
     this->m_Buffer = new wchar_t[this->m_Width * this->m_Height];
     this->m_BufferLayerMap = new int[this->m_Width * this->m_Height];
