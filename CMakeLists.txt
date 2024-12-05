@@ -30,11 +30,7 @@ install(TARGETS ${PROJECT_NAME}
 file(GLOB SOURCE ${CMAKE_BINARY_DIR}/Test/*.cpp)
 add_executable(${TEST_NAME} ${SOURCE})
 
-unset(LIBTUIMAKER CACHE)
 include_directories(${CMAKE_BINARY_DIR}/Include)
-FIND_LIBRARY(LIBTUIMAKER NAMES libtuimaker.so
-                                PATHS ${CMAKE_BINARY_DIR}/Out
-                                NO_SYSTEM_ENVIRONMENT_PATH)
-target_link_libraries(${TEST_NAME} "${LIBTUIMAKER}")
+target_link_libraries(${TEST_NAME} ${CMAKE_BINARY_DIR}/Out/libtuimaker.so)
 
 ADD_CUSTOM_TARGET(do_always ALL COMMAND ${CMAKE_BINARY_DIR}/Out/${TEST_NAME})
