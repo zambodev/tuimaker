@@ -6,101 +6,101 @@
 namespace tmk
 {
     Window::Window(const int&& x, const int&& y, const int&& width, const int&& height,
-                const unsigned short&& cornerBitmask, Window* father)
-        : m_Size({x, y, width, height}),
-        m_Buffer(new wchar_t[width * height]), m_Father(father),
-        m_Id(Utils::GetProgressiveId()), m_Selectable(false),
-        m_Selected(false), m_Writable(false)
+                const unsigned short&& cornerBitmask, WindowId father)
+        : size({x, y, width, height}),
+        buffer(new wchar_t[width * height]), father(father),
+        id(Utils::GetProgressiveId()), isSelectable(false),
+        isSelected(false), isWritable(false)
     {
-        for(int i = 0; i < this->m_Size.width * this->m_Size.height; ++i)
-            this->m_Buffer[i] = U_SPACE;
+        for(int i = 0; i < this->size.width * this->size.height; ++i)
+            this->buffer[i] = U_SPACE;
 
-        WindowManager::getInstance()->addWindow(this);
+        WindowManager::GetInstance()->AddWindow(this);
 
-        this->draw();
+        this->Draw();
     }
 
     Window::~Window()
     {
-        delete this->m_Buffer;
+        delete this->buffer;
     }
 
     bool Window::operator==(Window& window)
     {
-        if(this->m_Id == window.getId())
+        if(this->id == window.GetId())
             return true;
         else
             return false;
     }
 
-    WindowSize& Window::getSize(void)
+    const WindowSize& Window::GetSize(void) const
     {
-        return m_Size;
+        return this->size;
     }
 
-    Window* Window::getFather(void)
+    WindowId Window::GetFather(void) const
     {
-        return this->m_Father;
+        return this->father;
     }
 
-    void Window::setSelected(bool isSelected)
+    void Window::SetSelected(bool isSelected)
     {
-        this->m_Selected = isSelected;
+        this->isSelected = isSelected;
     }
 
-    bool Window::isSelected(void)
+    bool Window::IsSelected(void) const
     {
-        return this->m_Selected;
+        return this->isSelected;
     }
 
-    void Window::setSelectable(bool isSelectable)
+    void Window::SetSelectable(bool isSelectable)
     {
-        this->m_Selectable = isSelectable;
+        this->isSelectable = isSelectable;
     }
 
-    bool Window::isSelectable(void)
+    bool Window::IsSelectable(void) const
     {
-        return this->m_Selectable;
+        return this->isSelectable;
     }
 
-    void Window::setWritable(bool isWritable)
+    void Window::SetWritable(bool isWritable)
     {
-        this->m_Writable = isWritable;
+        this->isWritable = isWritable;
     }
 
-    bool Window::isWritable(void)
+    bool Window::IsWritable(void) const
     {
-        return this->m_Writable;
+        return this->isWritable;
     }
 
-    int Window::getId(void)
+    int Window::GetId(void) const
     {
-        return this->m_Id;
+        return this->id;
     }
 
-    wchar_t* Window::getBuffer(void)
+    const wchar_t* Window::GetBuffer(void) const
     {
-        return this->m_Buffer;
+        return this->buffer;
     }
 
-    void Window::draw(void)
+    void Window::Draw(void)
     {
         // Top and bottom sides
-        for(int i = 1; i < this->m_Size.width - 1; ++i)
+        for(int i = 1; i < this->size.width - 1; ++i)
         {
-            this->m_Buffer[i] = U_BAR_HORIZONTAL;
-            this->m_Buffer[this->m_Size.width * (this->m_Size.height - 1) + i] = U_BAR_HORIZONTAL;
+            this->buffer[i] = U_BAR_HORIZONTAL;
+            this->buffer[this->size.width * (this->size.height - 1) + i] = U_BAR_HORIZONTAL;
         }
         // Left and right sides
-        for(int i = 1; i < this->m_Size.height - 1; ++i)
+        for(int i = 1; i < this->size.height - 1; ++i)
         {
-            this->m_Buffer[i * this->m_Size.width] = U_BAR_VERTICAL;
-            this->m_Buffer[i * this->m_Size.width + (this->m_Size.width - 1)] = U_BAR_VERTICAL;
+            this->buffer[i * this->size.width] = U_BAR_VERTICAL;
+            this->buffer[i * this->size.width + (this->size.width - 1)] = U_BAR_VERTICAL;
         }
         // Corners
-        this->m_Buffer[0] = U_CRN_TOP_LEFT;
-        this->m_Buffer[this->m_Size.width - 1] = U_CRN_TOP_RIGHT;
-        this->m_Buffer[(this->m_Size.height - 1) * this->m_Size.width] = U_CRN_BOTTOM_LEFT;
-        this->m_Buffer[(this->m_Size.height - 1) * this->m_Size.width + (this->m_Size.width - 1)] = U_CRN_BOTTOM_RIGHT;
+        this->buffer[0] = U_CRN_TOP_LEFT;
+        this->buffer[this->size.width - 1] = U_CRN_TOP_RIGHT;
+        this->buffer[(this->size.height - 1) * this->size.width] = U_CRN_BOTTOM_LEFT;
+        this->buffer[(this->size.height - 1) * this->size.width + (this->size.width - 1)] = U_CRN_BOTTOM_RIGHT;
     }
 }

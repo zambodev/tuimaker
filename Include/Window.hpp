@@ -5,6 +5,8 @@
 
 namespace tmk
 {
+    typedef unsigned int WindowId;
+
     enum : wchar_t
     {
         U_BAR_HORIZONTAL        = u'\u2501',
@@ -32,13 +34,13 @@ namespace tmk
     class Window
     {
         private:
-            int m_Id;
-            bool m_Selectable;
-            bool m_Selected;
-            bool m_Writable;
-            wchar_t* m_Buffer;
-            WindowSize m_Size;
-            Window* m_Father;
+            int id;
+            bool isSelectable;
+            bool isSelected;
+            bool isWritable;
+            wchar_t* buffer;
+            WindowSize size;
+            WindowId father;
 
         protected:
             enum : unsigned short
@@ -59,23 +61,23 @@ namespace tmk
             };
 
         public:
+            Window() = delete;
             Window(const int&& x, const int&& y, const int&& width, const int&& height,
-                const unsigned short&& cornerBitmask, Window* father);
+                const unsigned short&& cornerBitmask, WindowId father);
             ~Window();
-
+            // Operators
             bool operator==(Window& window);
-
-            WindowSize& getSize(void);
-            Window* getFather(void);
-            void setSelected(bool isSelected);
-            bool isSelected(void);
-            void setSelectable(bool isSelectable);
-            bool isSelectable(void);
-            void setWritable(bool isWritable);
-            bool isWritable(void);
-            int getId(void);
-            wchar_t* getBuffer(void);
-
-            void draw(void);
+            // Functions
+            const WindowSize& GetSize(void) const;
+            WindowId GetFather(void) const;
+            void SetSelected(bool isSelected);
+            bool IsSelected(void) const;
+            void SetSelectable(bool isSelectable);
+            bool IsSelectable(void) const;
+            void SetWritable(bool isWritable);
+            bool IsWritable(void) const;
+            int GetId(void) const;
+            const wchar_t* GetBuffer(void) const;
+            void Draw(void);
     };
 }

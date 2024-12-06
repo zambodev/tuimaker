@@ -8,29 +8,30 @@
 namespace tmk
 {
     WindowManager::WindowManager()
-        : m_Width(Utils::GetTerminalWidth()), m_Height(Utils::GetTerminalHeight())
+        : width(Utils::GetTerminalWidth()), height(Utils::GetTerminalHeight())
     {
-        this->m_Buffer = new wchar_t[this->m_Width * this->m_Height];
-        this->m_BufferLayerMap = new int[this->m_Width * this->m_Height];
+        this->buffer = new wchar_t[this->width * this->height];
+        this->visibilityMask = new unsigned char[this->width * this->height];
         
-        for(int i = 0; i < this->m_Width * this->m_Height; ++i)
+        for(unsigned int i = 0; i < this->width * this->height; ++i)
         {
-            this->m_Buffer[i] = U_SPACE;
-            this->m_BufferLayerMap[i] = 0;
+            this->buffer[i] = U_SPACE;
+            this->visibilityMask[i] = 0;
         }
+
     }
 
     WindowManager::~WindowManager()
     {
-        delete this->m_Buffer;
+        delete this->buffer;
     }
 
-    int WindowManager::getIndexOf(Window& window)
+    int WindowManager::GetIndexOf(Window& window)
     {
         int idx = 0;
         std::vector<Window*>::iterator itr;
 
-        for(itr = this->m_VisibilityLayerList.begin(); itr != this->m_VisibilityLayerList.end(); ++itr)
+        for(itr = this->windows.begin(); itr != this->windows.end(); ++itr)
         {
             if(*(*itr) == window)
                 return idx;
@@ -41,40 +42,42 @@ namespace tmk
         return 0;
     }
 
-    void WindowManager::addWindow(Window*window)
+    WindowId WindowManager::AddWindow(Window* window)
     {
-        this->m_VisibilityLayerList.emplace_back(window);
-        auto size = window->getSize();
+        this->windows.emplace_back(window);
+        auto size = window->GetSize();
 
         for(int i = 0; i < size.height; ++i)
             for(int j = 0; j < size.width; ++j)
-                this->m_BufferLayerMap[(size.y + i) * this->m_Width + (size.x + j)]
-                    = this->m_VisibilityLayerList.size();
+                this->visibilityMask[(size.y + i) * this->width + (size.x + j)] = (unsigned char)this->windows.size();
+    
+        return window->GetId();
     }
 
-    void WindowManager::removeWindow(int id)
+    void WindowManager::RemoveWindow(int id)
     {
 
     }
 
-    void WindowManager::render(void)
+    void WindowManager::Render(void)
     {
         int depth;
 
-        for(int i = 0; i < this->m_Height; ++i)
+        for(int i = 0; i < this->height; ++i)
         {
-            for(int j = 0; j < this->m_Width; ++j)
+            for(int j = 0; j < this->width; ++j)
             {
-                if((depth = this->m_BufferLayerMap[i * this->m_Width + j]) == 0)
+                if((depth = this->visibilityMask[i * this->width + j]) == 0)
                     continue;
 
-                Window* window = this->m_VisibilityLayerList.at(depth - 1);
-                WindowSize& size = window->getSize();
+                Window* window = this->windows.at(depth - 1);
+                const WindowSize& size = window->GetSize();
 
-                this->m_Buffer[i * this->m_Width + j] = window->getBuffer()[(i - size.y) * size.width + (j - size.x)];
+                this->buffer[i * this->width + j] = window->GetBuffer()[(i - size.y) * size.width + (j - size.x)];
             }
         }
 
-        std::wcout << L"\x1b[s\x1b[0;0H" << this->m_Buffer << L"\x1b[u";
+        for(unsigned int i = 0; i < this->width * this->height; ++i)
+            std::wcout << this->buffer[i];
     }
 }

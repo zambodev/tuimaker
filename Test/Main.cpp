@@ -4,11 +4,15 @@
 #include <tuple>
 
 #include <Utils.hpp>
-#include <Window.hpp>
+#include <WindowManager.hpp>
 
 int main(void)
 {
-    std::cout <<  tmk::Utils::GetTerminalHeight();
-    return 0;
+    tmk::WindowManager* wm = tmk::WindowManager::GetInstance();
 
+    unsigned int w1Id = wm->AddWindow(new tmk::Window(0, 0, tmk::Utils::GetTerminalWidth(), tmk::Utils::GetTerminalHeight(), 0, 0));
+
+    unsigned int w2Id = wm->AddWindow(new tmk::Window(0, 0, 60, 10, 0, w1Id));
+
+    wm->Render();
 }

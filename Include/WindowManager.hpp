@@ -8,26 +8,26 @@ namespace tmk
     class WindowManager
     {
         private:
-            int m_Width;
-            int m_Height;
-            wchar_t* m_Buffer;
-            int* m_BufferLayerMap;
-            std::vector<Window*> m_VisibilityLayerList;
+            int width;
+            int height;
+            wchar_t* buffer;
+            unsigned char* visibilityMask;
+            std::vector<Window*> windows;
             WindowManager();
             ~WindowManager();
 
         public:
             WindowManager(const WindowManager& obj) = delete;
 
-            static WindowManager* getInstance(void)
+            static WindowManager* GetInstance(void)
             {
                 static WindowManager* instance = new WindowManager();
                 return instance;
             }
 
-            int getIndexOf(Window& window);
-            void addWindow(Window* window);
-            void removeWindow(int id);
-            void render(void);
+            int GetIndexOf(Window& window);
+            WindowId AddWindow(Window* window);
+            void RemoveWindow(int id);
+            void Render(void);
     };
 }
