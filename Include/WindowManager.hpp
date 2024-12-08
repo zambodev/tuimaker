@@ -11,7 +11,7 @@ namespace tmk
             int width;
             int height;
             wchar_t* buffer;
-            unsigned char* visibilityMask;
+            WindowId* visibilityMask;
             std::vector<Window*> windows;
             WindowManager();
             ~WindowManager();
@@ -27,7 +27,10 @@ namespace tmk
 
             int GetIndexOf(Window& window);
             WindowId AddWindow(Window* window);
-            void RemoveWindow(int id);
+            void RemoveWindow(WindowId id);
             void Render(void);
+            Window* GetWindow(WindowId id);
+            void SetVisible(WindowId id);
+            void RefreshVisibilityMask(void);
     };
 }

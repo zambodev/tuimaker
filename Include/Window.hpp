@@ -5,7 +5,7 @@
 
 namespace tmk
 {
-    typedef unsigned int WindowId;
+    typedef int WindowId;
 
     enum : wchar_t
     {
@@ -77,6 +77,7 @@ namespace tmk
             void SetWritable(bool isWritable);
             bool IsWritable(void) const;
             int GetId(void) const;
+            wchar_t GetCharAt(int x, int y) const;
             const wchar_t* GetBuffer(void) const;
             void Draw(void);
     };

@@ -14,5 +14,7 @@ int main(void)
 
     unsigned int w2Id = wm->AddWindow(new tmk::Window(0, 0, 60, 10, 0, w1Id));
 
+    wm->RemoveWindow(w2Id);
+
     wm->Render();
 }

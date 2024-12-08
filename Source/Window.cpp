@@ -15,8 +15,6 @@ namespace tmk
         for(int i = 0; i < this->size.width * this->size.height; ++i)
             this->buffer[i] = U_SPACE;
 
-        WindowManager::GetInstance()->AddWindow(this);
-
         this->Draw();
     }
 
@@ -76,6 +74,11 @@ namespace tmk
     int Window::GetId(void) const
     {
         return this->id;
+    }
+
+    wchar_t Window::GetCharAt(int x, int y) const
+    {
+        return this->buffer[y * this->size.width + x];
     }
 
     const wchar_t* Window::GetBuffer(void) const
