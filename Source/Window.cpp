@@ -5,14 +5,15 @@
 
 namespace tmk
 {
-    Window::Window(const int&& x, const int&& y, const int&& width, const int&& height,
-                const unsigned short&& cornerBitmask, WindowId father)
-        : size({x, y, width, height}),
-        buffer(new wchar_t[width * height]), father(father),
-        id(Utils::GetProgressiveId()), isSelectable(false),
-        isSelected(false), isWritable(false)
+    Window::Window(const int &&x, const int &&y, const int &&width, const int &&height,
+                   const unsigned short &&cornerBitmask, WindowId father)
+    : size({x, y, width, height}),
+      buffer(new wchar_t[width * height]), father(father),
+      id(Utils::GetProgressiveId()), isSelectable(false),
+      isSelected(false), isWritable(false),
+      cursorX(1), cursorY(1)
     {
-        for(int i = 0; i < this->size.width * this->size.height; ++i)
+        for (int i = 0; i < this->size.width * this->size.height; ++i)
             this->buffer[i] = U_SPACE;
 
         this->Draw();
@@ -23,15 +24,15 @@ namespace tmk
         delete this->buffer;
     }
 
-    bool Window::operator==(Window& window)
+    bool Window::operator==(Window &window)
     {
-        if(this->id == window.GetId())
+        if (this->id == window.GetId())
             return true;
         else
             return false;
     }
 
-    const WindowSize& Window::GetSize(void) const
+    const WindowSize &Window::GetSize(void) const
     {
         return this->size;
     }
@@ -81,7 +82,7 @@ namespace tmk
         return this->buffer[y * this->size.width + x];
     }
 
-    const wchar_t* Window::GetBuffer(void) const
+    const wchar_t *Window::GetBuffer(void) const
     {
         return this->buffer;
     }
@@ -89,13 +90,13 @@ namespace tmk
     void Window::Draw(void)
     {
         // Top and bottom sides
-        for(int i = 1; i < this->size.width - 1; ++i)
+        for (int i = 1; i < this->size.width - 1; ++i)
         {
             this->buffer[i] = U_BAR_HORIZONTAL;
             this->buffer[this->size.width * (this->size.height - 1) + i] = U_BAR_HORIZONTAL;
         }
         // Left and right sides
-        for(int i = 1; i < this->size.height - 1; ++i)
+        for (int i = 1; i < this->size.height - 1; ++i)
         {
             this->buffer[i * this->size.width] = U_BAR_VERTICAL;
             this->buffer[i * this->size.width + (this->size.width - 1)] = U_BAR_VERTICAL;
@@ -105,5 +106,30 @@ namespace tmk
         this->buffer[this->size.width - 1] = U_CRN_TOP_RIGHT;
         this->buffer[(this->size.height - 1) * this->size.width] = U_CRN_BOTTOM_LEFT;
         this->buffer[(this->size.height - 1) * this->size.width + (this->size.width - 1)] = U_CRN_BOTTOM_RIGHT;
+    }
+
+    BorderType Window::IsOnBorder(int x, int y) const
+    {
+        const int winX = this->size.x;
+        const int winY = this->size.y;
+
+        if(x == winX && y == winY)
+            return BORDER_TYPE_CORNER_TOP_LEFT;
+        else if(x == winX + this->size.width - 1 && y == winY)
+            return BORDER_TYPE_CORNER_TOP_RIGHT;
+        else if(x == winX && y == winY + this->size.height - 1)
+            return BORDER_TYPE_CORNER_BOTTOM_LEFT;
+        else if(x == winX + this->size.width - 1 && y == winY + this->size.height - 1)
+            return BORDER_TYPE_CORNER_BOTTOM_RIGHT;
+        else if(x == winX && (y > winY || y < winY + this->size.height - 1))
+            return BORDER_TYPE_LEFT;
+        else if(x == winX + this->size.width - 1 && (y > winY || y < winY + this->size.height - 1))
+            return BORDER_TYPE_RIGHT;
+        else if(y == winY && (x > winX || x < winX + this->size.width - 1))
+            return BORDER_TYPE_TOP;
+        else if(y == winY + this->size.height - 1 && (x > winX || x < winX + this->size.width - 1))
+            return BORDER_TYPE_BOTTOM;
+        else
+            return BORDER_TYPE_NONE;
     }
 }
