@@ -107,29 +107,4 @@ namespace tmk
         this->buffer[(this->size.height - 1) * this->size.width] = U_CRN_BOTTOM_LEFT;
         this->buffer[(this->size.height - 1) * this->size.width + (this->size.width - 1)] = U_CRN_BOTTOM_RIGHT;
     }
-
-    BorderType Window::IsOnBorder(int x, int y) const
-    {
-        const int winX = this->size.x;
-        const int winY = this->size.y;
-
-        if(x == winX && y == winY)
-            return BORDER_TYPE_CORNER_TOP_LEFT;
-        else if(x == winX + this->size.width - 1 && y == winY)
-            return BORDER_TYPE_CORNER_TOP_RIGHT;
-        else if(x == winX && y == winY + this->size.height - 1)
-            return BORDER_TYPE_CORNER_BOTTOM_LEFT;
-        else if(x == winX + this->size.width - 1 && y == winY + this->size.height - 1)
-            return BORDER_TYPE_CORNER_BOTTOM_RIGHT;
-        else if(x == winX && (y > winY || y < winY + this->size.height - 1))
-            return BORDER_TYPE_LEFT;
-        else if(x == winX + this->size.width - 1 && (y > winY || y < winY + this->size.height - 1))
-            return BORDER_TYPE_RIGHT;
-        else if(y == winY && (x > winX || x < winX + this->size.width - 1))
-            return BORDER_TYPE_TOP;
-        else if(y == winY + this->size.height - 1 && (x > winX || x < winX + this->size.width - 1))
-            return BORDER_TYPE_BOTTOM;
-        else
-            return BORDER_TYPE_NONE;
-    }
 }

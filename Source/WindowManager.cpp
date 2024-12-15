@@ -72,107 +72,116 @@ namespace tmk
                     continue;
     
                 const WindowSize size = window->GetSize();
+                const Window* win;
+                WindowSize winSize;
+                wchar_t left = 0;
+                wchar_t right = 0;
+                wchar_t up = 0;
+                wchar_t down = 0;
 
-                const BorderType winBorderType = window->IsOnBorder(j, i);
-
-                if(winBorderType != BORDER_TYPE_NONE)
+                switch(window->GetCharAt(j - size.x, i - size.y))
                 {
-                    BorderType borders[4] = {BORDER_TYPE_NONE};
-
-                    // Get near cells information like if it is a border and which border type
-                    if(i > 0 && (winBorderType == BORDER_TYPE_CORNER_TOP_LEFT || winBorderType == BORDER_TYPE_CORNER_TOP_RIGHT))
+                    case U_CRN_TOP_LEFT:
                     {
-                        const Window* win = this->GetWindow(this->visibilityMask[(i - 1) * this->width + j]);
-                        if(win != nullptr && win != window)
-                            borders[0] = win->IsOnBorder(j, i - 1);
-                    }
-                    if(i < this->height - 1 && (winBorderType == BORDER_TYPE_CORNER_BOTTOM_LEFT || winBorderType == BORDER_TYPE_CORNER_BOTTOM_RIGHT))
-                    {
-                        const Window* win = this->GetWindow(this->visibilityMask[(i + 1) * this->width + j]);
-                        if(win != nullptr && win != window)
-                            borders[1] = win->IsOnBorder(j, i + 1);
-                    }
-                    if(j > 0 && (winBorderType == BORDER_TYPE_CORNER_TOP_LEFT || winBorderType == BORDER_TYPE_CORNER_BOTTOM_LEFT))
-                    {
-                        const Window* win = this->GetWindow(this->visibilityMask[i * this->width + (j - 1)]);
-                        if(win != nullptr && win != window)
-                            borders[2] = win->IsOnBorder(j - 1, i);
-                    }
-                    if(j < this->width - 1 && (winBorderType == BORDER_TYPE_CORNER_TOP_RIGHT || winBorderType == BORDER_TYPE_CORNER_BOTTOM_RIGHT))
-                    {
-                        const Window* win = this->GetWindow(this->visibilityMask[i * this->width + (j + 1)]);
-                        if(win != nullptr && win != window)
-                            borders[3] = win->IsOnBorder(j + 1, i);
-                    }
-
-                    // Corners
-                    if(winBorderType <= BORDER_TYPE_BOTTOM)
-                    {
-                        this->buffer[i * this->width + j] = window->GetCharAt(j - size.x, i - size.y);
-                    }
-                    if(winBorderType > BORDER_TYPE_BOTTOM)
-                    {
-                        switch(winBorderType)
+                        if(i > 0 && (win = this->GetWindow(this->visibilityMask[(i - 1) * this->width + j])) != nullptr)
                         {
-                            case BORDER_TYPE_CORNER_TOP_LEFT:
-                            {
-                                if(borders[0] != BORDER_TYPE_NONE && borders[2] != BORDER_TYPE_NONE)
-                                    this->buffer[i * this->width + j] = U_CROSS;
-                                else if(borders[0] != BORDER_TYPE_NONE)
-                                    this->buffer[i * this->width + j] = U_T_RIGHT;
-                                else if(borders[2] != BORDER_TYPE_NONE)
-                                    this->buffer[i * this->width + j] = U_T_TOP;
-                                else
-                                    this->buffer[i * this->width + j] = window->GetCharAt(j - size.x, i - size.y);
-                            }
-                            break;
-                            case BORDER_TYPE_CORNER_TOP_RIGHT:
-                            {
-                                if(borders[0] != BORDER_TYPE_NONE && borders[3] != BORDER_TYPE_NONE)
-                                    this->buffer[i * this->width + j] = U_CROSS;
-                                else if(borders[0] != BORDER_TYPE_NONE)
-                                    this->buffer[i * this->width + j] = U_T_LEFT;
-                                else if(borders[3] != BORDER_TYPE_NONE)
-                                    this->buffer[i * this->width + j] = U_T_TOP;
-                                else
-                                    this->buffer[i * this->width + j] = window->GetCharAt(j - size.x, i - size.y);
-                            }
-                            break;
-                            case BORDER_TYPE_CORNER_BOTTOM_LEFT:
-                            {
-                                if(borders[1] != BORDER_TYPE_NONE && borders[2] != BORDER_TYPE_NONE)
-                                    this->buffer[i * this->width + j] = U_CROSS;
-                                else if(borders[1] != BORDER_TYPE_NONE)
-                                    this->buffer[i * this->width + j] = U_T_LEFT;
-                                else if(borders[2] != BORDER_TYPE_NONE)
-                                    this->buffer[i * this->width + j] = U_T_BOTTOM;
-                                else
-                                    this->buffer[i * this->width + j] = window->GetCharAt(j - size.x, i - size.y);
-                            }
-                            break;
-                            case BORDER_TYPE_CORNER_BOTTOM_RIGHT:
-                            {
-                                if(borders[1] != BORDER_TYPE_NONE && borders[3] != BORDER_TYPE_NONE)
-                                    this->buffer[i * this->width + j] = U_CROSS;
-                                else if(borders[1] != BORDER_TYPE_NONE)
-                                    this->buffer[i * this->width + j] = U_T_LEFT;
-                                else if(borders[3] != BORDER_TYPE_NONE)
-                                    this->buffer[i * this->width + j] = U_T_BOTTOM;
-                                else
-                                    this->buffer[i * this->width + j] = window->GetCharAt(j - size.x, i - size.y);
-                            }
-                            break;
+                            winSize = win->GetSize();
+                            up = win->GetCharAt(j - winSize.x, i - winSize.y - 1);
                         }
+
+                        if(j > 0 && (win = this->GetWindow(this->visibilityMask[i * this->width + (j - 1)])) != nullptr)
+                        {
+                            winSize = win->GetSize();
+                            left = win->GetCharAt(j - winSize.x - 1, i - winSize.y);
+                        }
+
+                        if(up == U_BAR_VERTICAL && left == U_BAR_HORIZONTAL)
+                            this->buffer[i * this->width + j] = U_CROSS;
+                        else if(up == U_BAR_VERTICAL)
+                            this->buffer[i * this->width + j] = U_T_LEFT;
+                        else if(left == U_BAR_HORIZONTAL)
+                            this->buffer[i * this->width + j] = U_T_TOP;
+                        else
+                            this->buffer[i * this->width + j] = window->GetCharAt(j - size.x, i - size.y);
                     }
-                    // Neither corner nor border
-                    else
+                    break;
+                    case U_CRN_TOP_RIGHT:
+                    {
+                        if(i > 0 && (win = this->GetWindow(this->visibilityMask[(i - 1) * this->width + j])) != nullptr)
+                        {
+                            winSize = win->GetSize();
+                            up = win->GetCharAt(j - winSize.x, i - winSize.y - 1);
+                        }
+
+                        if(j < this->width && (win = this->GetWindow(this->visibilityMask[i * this->width + (j + 1)])) != nullptr)
+                        {
+                            winSize = win->GetSize();
+                            left = win->GetCharAt(j - winSize.x + 1, i - winSize.y);
+                        }
+
+                        if(up == U_BAR_VERTICAL && left == U_BAR_HORIZONTAL)
+                            this->buffer[i * this->width + j] = U_CROSS;
+                        else if(up == U_BAR_VERTICAL)
+                            this->buffer[i * this->width + j] = U_T_RIGHT;
+                        else if(left == U_BAR_HORIZONTAL)
+                            this->buffer[i * this->width + j] = U_T_TOP;
+                        else
+                            this->buffer[i * this->width + j] = window->GetCharAt(j - size.x, i - size.y);
+                    }
+                    break;
+                    case U_CRN_BOTTOM_LEFT:
+                    {
+                        if(i < this->width && (win = this->GetWindow(this->visibilityMask[(i + 1) * this->width + j])) != nullptr)
+                        {
+                            winSize = win->GetSize();
+                            up = win->GetCharAt(j - winSize.x, i - winSize.y + 1);
+                        }
+
+                        if(j > 0 && (win = this->GetWindow(this->visibilityMask[i * this->width + (j - 1)])) != nullptr)
+                        {
+                            winSize = win->GetSize();
+                            left = win->GetCharAt(j - winSize.x - 1, i - winSize.y);
+                        }
+
+                        if(up == U_BAR_VERTICAL && left == U_BAR_HORIZONTAL)
+                            this->buffer[i * this->width + j] = U_CROSS;
+                        else if(up == U_BAR_VERTICAL)
+                            this->buffer[i * this->width + j] = U_T_LEFT;
+                        else if(left == U_BAR_HORIZONTAL)
+                            this->buffer[i * this->width + j] = U_T_BOTTOM;
+                        else
+                            this->buffer[i * this->width + j] = window->GetCharAt(j - size.x, i - size.y);
+                    }
+                    break;
+                    case U_CRN_BOTTOM_RIGHT:
+                    {
+                        if(i < this->width && (win = this->GetWindow(this->visibilityMask[(i + 1) * this->width + j])) != nullptr)
+                        {
+                            winSize = win->GetSize();
+                            up = win->GetCharAt(j - winSize.x, i - winSize.y + 1);
+                        }
+
+                        if(j < this->width && (win = this->GetWindow(this->visibilityMask[i * this->width + (j + 1)])) != nullptr)
+                        {
+                            winSize = win->GetSize();
+                            left = win->GetCharAt(j - winSize.x + 1, i - winSize.y);
+                        }
+
+                        if(up == U_BAR_VERTICAL && left == U_BAR_HORIZONTAL)
+                            this->buffer[i * this->width + j] = U_CROSS;
+                        else if(up == U_BAR_VERTICAL)
+                            this->buffer[i * this->width + j] = U_T_RIGHT;
+                        else if(left == U_BAR_HORIZONTAL)
+                            this->buffer[i * this->width + j] = U_T_BOTTOM;
+                        else
+                            this->buffer[i * this->width + j] = window->GetCharAt(j - size.x, i - size.y);
+                    }
+                    break;
+                    default:
                     {
                         this->buffer[i * this->width + j] = window->GetCharAt(j - size.x, i - size.y);
                     }
-                }
-                else
-                {
-                    this->buffer[i * this->width + j] = window->GetCharAt(j - size.x, i - size.y);
+                    break;
                 }
             }
         }

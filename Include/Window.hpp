@@ -23,22 +23,6 @@ namespace tmk
         U_SPACE                 = u'\u0020'
     };
 
-    typedef enum
-    {
-        // Sides
-        BORDER_TYPE_NONE,
-        BORDER_TYPE_LEFT,
-        BORDER_TYPE_RIGHT,
-        BORDER_TYPE_TOP,
-        BORDER_TYPE_BOTTOM,
-        // Corners
-        BORDER_TYPE_CORNER_TOP_LEFT,
-        BORDER_TYPE_CORNER_TOP_RIGHT,
-        BORDER_TYPE_CORNER_BOTTOM_LEFT,
-        BORDER_TYPE_CORNER_BOTTOM_RIGHT
-    }
-    BorderType;
-
     struct WindowSize
     {
         int x;
@@ -98,6 +82,5 @@ namespace tmk
             wchar_t GetCharAt(int x, int y) const;
             const wchar_t* GetBuffer(void) const;
             void Draw(void);
-            BorderType IsOnBorder(int x, int y) const;
     };
 }

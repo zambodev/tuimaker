@@ -14,5 +14,7 @@ int main(void)
 
     unsigned int w2Id = wm->AddWindow(new tmk::Window(10, 0, 60, tmk::Utils::GetTerminalHeight(), 0, w1Id));
 
+    unsigned int w3Id = wm->AddWindow(new tmk::Window(69, 10, tmk::Utils::GetTerminalWidth() - 69, 10, 0, w1Id));
+
     wm->Render();
 }
