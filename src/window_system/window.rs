@@ -37,46 +37,32 @@ pub struct Window {
     y: usize,
     width: usize,
     height: usize,
+    is_root: bool,
     buffer: Vec<char>,
     id: WindowId,
     children: Vec<WindowRef>
 }
 
 impl<'a> Window {
-    pub fn new(x: usize, y: usize, width: usize, height: usize) -> WindowRef {
+    pub fn new(x: usize, y: usize, width: usize, height: usize, is_root: bool) -> WindowRef {
         Arc::new(Mutex::new(Window {
             x,
             y,
             width,
             height,
+            is_root,
             buffer: vec![' '; (width * height).into()],
             id: NEXT_ID.fetch_add(1, Ordering::Relaxed),
             children: Vec::new()
         }))
     }
 
-    pub fn add_child(& mut self, win: WindowRef) {
-        self.children.push(win);
+    pub fn get_cords(& self) -> (usize, usize) {
+        (self.x, self.y)
     }
 
-    pub fn draw(& mut self) {
-        // Upper and lower horizontal lines
-        for x in 1..(self.width - 1) {
-            self.buffer[x] = hex_to_char!(WindowBorder::BarHorizontal);
-            self.buffer[(self.height - 1) * self.width + x] = hex_to_char!(WindowBorder::BarHorizontal);
-        }
-
-        // Left and right vertical lines
-        for y in 1..(self.height - 1) {
-            self.buffer[y * self.width] = hex_to_char!(WindowBorder::BarVertical);
-            self.buffer[y * self.width + (self.width - 1)] = hex_to_char!(WindowBorder::BarVertical);
-        }
-
-        // Corners
-        self.buffer[0] = hex_to_char!(WindowBorder::CrnTopLeft);
-        self.buffer[self.width - 1] = hex_to_char!(WindowBorder::CrnTopRight);
-        self.buffer[(self.height - 1) * self.width] = hex_to_char!(WindowBorder::CrnBottomLeft);
-        self.buffer[(self.height - 1) * self.width + (self.width - 1)] = hex_to_char!(WindowBorder::CrnBottomRight);
+    pub fn get_size(& self) -> (usize, usize) {
+        (self.width, self.height)
     }
 
     pub fn set_width(& mut self, width: usize) {
@@ -91,7 +77,39 @@ impl<'a> Window {
         self.id
     }
 
+    pub fn is_root(&self) -> bool {
+        self.is_root
+    }
+
     pub fn get_buffer(&'a self) -> &'a Vec<char> {
         &self.buffer
+    }
+
+    pub fn add_child(& mut self, win: WindowRef) {
+        self.children.push(win);
+    }
+
+    pub fn get_children(& self) -> std::slice::Iter<'_, Arc<Mutex<Window>>> {
+        self.children.iter()
+    }
+
+    pub fn draw(& mut self) {
+        // Upper and lower horizontal lines
+        for x in 1 .. (self.width - 1) {
+            self.buffer[x] = hex_to_char!(WindowBorder::BarHorizontal);
+            self.buffer[(self.height - 1) * self.width + x] = hex_to_char!(WindowBorder::BarHorizontal);
+        }
+
+        // Left and right vertical lines
+        for y in 1 .. (self.height - 1) {
+            self.buffer[y * self.width] = hex_to_char!(WindowBorder::BarVertical);
+            self.buffer[y * self.width + (self.width - 1)] = hex_to_char!(WindowBorder::BarVertical);
+        }
+
+        // Corners
+        self.buffer[0] = hex_to_char!(WindowBorder::CrnTopLeft);
+        self.buffer[self.width - 1] = hex_to_char!(WindowBorder::CrnTopRight);
+        self.buffer[(self.height - 1) * self.width] = hex_to_char!(WindowBorder::CrnBottomLeft);
+        self.buffer[(self.height - 1) * self.width + (self.width - 1)] = hex_to_char!(WindowBorder::CrnBottomRight);
     }
 }
