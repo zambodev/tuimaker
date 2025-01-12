@@ -1,6 +1,7 @@
 #include <vector>
 #include <tuple>
 #include <cstring>
+#include <cassert>
 #include "../Include/WindowManager.hpp"
 #include "../Include/Utils.hpp"
 
@@ -10,221 +11,82 @@ namespace tmk
     WindowManager::WindowManager()
     : width(Utils::GetTerminalWidth()), height(Utils::GetTerminalHeight())
     {
-        this->buffer = new wchar_t[this->width * this->height];
-        this->visibilityMask = new WindowId[this->width * this->height];
+        buffer = std::make_shared<wchar_t[]>(this->width * this->height);
 
-        for (unsigned int i = 0; i < this->width * this->height; ++i)
-        {
+        for(unsigned int i = 0; i < this->width * this->height; ++i)
             this->buffer[i] = U_SPACE;
-            this->visibilityMask[i] = -1;
-        }
     }
 
     WindowManager::~WindowManager()
     {
-        delete this->buffer;
     }
 
-    int WindowManager::GetIndexOf(Window &window)
+    void WindowManager::RenderChildren(std::shared_ptr<WindowNode> wnode)
     {
-        int idx = 0;
-        std::vector<Window *>::iterator itr;
+        wnode->window->Draw();
+        
+        const WindowSize& wsize = wnode->window->GetSize();
+        auto wbuffer = wnode->window->GetBuffer();
 
-        for (itr = this->windows.begin(); itr != this->windows.end(); ++itr)
+        for(int h = 0; h < wsize.height; ++h)
         {
-            if (*(*itr) == window)
-                return idx;
-
-            ++idx;
+            for(int w = 0; w < wsize.width; ++w)
+            {
+                this->buffer[(wsize.y + h) * this->width + (wsize.x + w)] =
+                    wbuffer[h * wsize.width + w];
+            }
         }
 
-        return 0;
+        for(auto node : wnode->children)
+            this->RenderChildren(node);
     }
 
-    WindowId WindowManager::AddWindow(Window *window)
+    std::shared_ptr<WindowManager::WindowNode> WindowManager::FindNode(std::shared_ptr<WindowNode> upperNode, WindowId id)
     {
-        this->windows.emplace_back(window);
-        auto size = window->GetSize();
+        if(upperNode == nullptr)
+            return nullptr;
 
-        this->SetVisible(window->GetId());
+        if(upperNode->window->GetId() == id)
+            return upperNode;
 
-        return window->GetId();
+        for(auto node : upperNode->children)
+            if(this->FindNode(node, id) != nullptr)
+                return node;
+    
+        return nullptr;
     }
 
-    void WindowManager::RemoveWindow(WindowId id)
+    std::shared_ptr<Window> WindowManager::AddWindow(WindowSize wsize, std::shared_ptr<Window> father)
     {
-        for (auto itr = this->windows.begin(); itr < this->windows.end(); ++itr)
-            if ((*itr)->GetId() == id)
-                this->windows.erase(itr);
+        auto window = std::make_shared<Window>(wsize);
+        
+        if(root == nullptr)
+        {
+            this->root = std::make_shared<WindowNode>(window, father);
+        }
+        else
+        {
+            auto node = FindNode(this->root, father->GetId());
+            node->children.push_back(std::make_shared<WindowNode>(window, father));
+        }
+        this->SetVisible(window);
 
-        this->RefreshVisibilityMask();
+        return window;
+    }
+
+    void WindowManager::RemoveWindow(std::shared_ptr<Window> window)
+    {
+        
     }
 
     void WindowManager::Render(void)
     {
-        for (int i = 0; i < this->height; ++i)
-        {
-            for (int j = 0; j < this->width; ++j)
-            {
-                const Window* window = this->GetWindow(this->visibilityMask[i * this->width + j]);
-    
-                if (window == nullptr)
-                    continue;
-    
-                const WindowSize size = window->GetSize();
-                const Window* win;
-                WindowSize winSize;
-                wchar_t left = 0;
-                wchar_t right = 0;
-                wchar_t up = 0;
-                wchar_t down = 0;
+        this->RenderChildren(this->root);
 
-                switch(window->GetCharAt(j - size.x, i - size.y))
-                {
-                    case U_CRN_TOP_LEFT:
-                    {
-                        if(i > 0 && (win = this->GetWindow(this->visibilityMask[(i - 1) * this->width + j])) != nullptr)
-                        {
-                            winSize = win->GetSize();
-                            up = win->GetCharAt(j - winSize.x, i - winSize.y - 1);
-                        }
-
-                        if(j > 0 && (win = this->GetWindow(this->visibilityMask[i * this->width + (j - 1)])) != nullptr)
-                        {
-                            winSize = win->GetSize();
-                            left = win->GetCharAt(j - winSize.x - 1, i - winSize.y);
-                        }
-
-                        if(up == U_BAR_VERTICAL && left == U_BAR_HORIZONTAL)
-                            this->buffer[i * this->width + j] = U_CROSS;
-                        else if(up == U_BAR_VERTICAL)
-                            this->buffer[i * this->width + j] = U_T_LEFT;
-                        else if(left == U_BAR_HORIZONTAL)
-                            this->buffer[i * this->width + j] = U_T_TOP;
-                        else
-                            this->buffer[i * this->width + j] = window->GetCharAt(j - size.x, i - size.y);
-                    }
-                    break;
-                    case U_CRN_TOP_RIGHT:
-                    {
-                        if(i > 0 && (win = this->GetWindow(this->visibilityMask[(i - 1) * this->width + j])) != nullptr)
-                        {
-                            winSize = win->GetSize();
-                            up = win->GetCharAt(j - winSize.x, i - winSize.y - 1);
-                        }
-
-                        if(j < this->width && (win = this->GetWindow(this->visibilityMask[i * this->width + (j + 1)])) != nullptr)
-                        {
-                            winSize = win->GetSize();
-                            left = win->GetCharAt(j - winSize.x + 1, i - winSize.y);
-                        }
-
-                        if(up == U_BAR_VERTICAL && left == U_BAR_HORIZONTAL)
-                            this->buffer[i * this->width + j] = U_CROSS;
-                        else if(up == U_BAR_VERTICAL)
-                            this->buffer[i * this->width + j] = U_T_RIGHT;
-                        else if(left == U_BAR_HORIZONTAL)
-                            this->buffer[i * this->width + j] = U_T_TOP;
-                        else
-                            this->buffer[i * this->width + j] = window->GetCharAt(j - size.x, i - size.y);
-                    }
-                    break;
-                    case U_CRN_BOTTOM_LEFT:
-                    {
-                        if(i < this->width && (win = this->GetWindow(this->visibilityMask[(i + 1) * this->width + j])) != nullptr)
-                        {
-                            winSize = win->GetSize();
-                            up = win->GetCharAt(j - winSize.x, i - winSize.y + 1);
-                        }
-
-                        if(j > 0 && (win = this->GetWindow(this->visibilityMask[i * this->width + (j - 1)])) != nullptr)
-                        {
-                            winSize = win->GetSize();
-                            left = win->GetCharAt(j - winSize.x - 1, i - winSize.y);
-                        }
-
-                        if(up == U_BAR_VERTICAL && left == U_BAR_HORIZONTAL)
-                            this->buffer[i * this->width + j] = U_CROSS;
-                        else if(up == U_BAR_VERTICAL)
-                            this->buffer[i * this->width + j] = U_T_LEFT;
-                        else if(left == U_BAR_HORIZONTAL)
-                            this->buffer[i * this->width + j] = U_T_BOTTOM;
-                        else
-                            this->buffer[i * this->width + j] = window->GetCharAt(j - size.x, i - size.y);
-                    }
-                    break;
-                    case U_CRN_BOTTOM_RIGHT:
-                    {
-                        if(i < this->width && (win = this->GetWindow(this->visibilityMask[(i + 1) * this->width + j])) != nullptr)
-                        {
-                            winSize = win->GetSize();
-                            up = win->GetCharAt(j - winSize.x, i - winSize.y + 1);
-                        }
-
-                        if(j < this->width && (win = this->GetWindow(this->visibilityMask[i * this->width + (j + 1)])) != nullptr)
-                        {
-                            winSize = win->GetSize();
-                            left = win->GetCharAt(j - winSize.x + 1, i - winSize.y);
-                        }
-
-                        if(up == U_BAR_VERTICAL && left == U_BAR_HORIZONTAL)
-                            this->buffer[i * this->width + j] = U_CROSS;
-                        else if(up == U_BAR_VERTICAL)
-                            this->buffer[i * this->width + j] = U_T_RIGHT;
-                        else if(left == U_BAR_HORIZONTAL)
-                            this->buffer[i * this->width + j] = U_T_BOTTOM;
-                        else
-                            this->buffer[i * this->width + j] = window->GetCharAt(j - size.x, i - size.y);
-                    }
-                    break;
-                    default:
-                    {
-                        this->buffer[i * this->width + j] = window->GetCharAt(j - size.x, i - size.y);
-                    }
-                    break;
-                }
-            }
-        }
-
-        std::wcout << this->buffer;
+        std::wcout << "\x1b[1J\x1b[0;0H" << this->buffer;
     }
 
-    Window *WindowManager::GetWindow(WindowId id)
+    void WindowManager::SetVisible(std::shared_ptr<Window> window)
     {
-        for (auto window : this->windows)
-            if (window->GetId() == id)
-                return window;
-
-        return nullptr;
-    }
-
-    void WindowManager::SetVisible(WindowId id)
-    {
-        Window *window = this->GetWindow(id);
-
-        if (window == nullptr)
-            return;
-
-        const WindowSize size = window->GetSize();
-
-        for (int i = 0; i < size.height; ++i)
-            for (int j = 0; j < size.width; ++j)
-                this->visibilityMask[(size.y + i) * this->width + (size.x + j)] = window->GetId();
-    }
-
-    void WindowManager::RefreshVisibilityMask(void)
-    {
-        memset(this->visibilityMask, -1, this->width * this->height * sizeof(WindowId));
-
-        for (auto itr = this->windows.rbegin(); itr < this->windows.rend(); ++itr)
-        {
-            const WindowSize size = (*itr)->GetSize();
-            const WindowId id = (*itr)->GetId();
-
-            for (int i = 0; i < size.height; ++i)
-                for (int j = 0; j < size.width; ++j)
-                    if (this->visibilityMask[(size.y + i) * (size.x + size.width) + (size.x + j)] == -1)
-                        this->visibilityMask[(size.y + i) * (size.x + size.width) + (size.x + j)] = id;
-        }
     }
 }
