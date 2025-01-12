@@ -36,9 +36,6 @@ namespace tmk
     class Window
     {
         private:
-            bool                        isSelectable;
-            bool                        isSelected;
-            bool                        isWritable;
             int                         cursorX;
             int                         cursorY;
             WindowSize                  size;
@@ -53,16 +50,10 @@ namespace tmk
             bool operator==(Window& window);
             // Functions
             const WindowSize& GetSize(void) const;
-            WindowId GetFather(void) const;
-            void SetSelected(bool isSelected);
-            bool IsSelected(void) const;
-            void SetSelectable(bool isSelectable);
-            bool IsSelectable(void) const;
-            void SetWritable(bool isWritable);
-            bool IsWritable(void) const;
             int GetId(void) const;
             wchar_t GetCharAt(int x, int y) const;
             std::shared_ptr<wchar_t[]> GetBuffer(void);
             void Draw(void);
+            void Write(int x, int y, const std::string&& str, int lineLength = 0);
     };
 }

@@ -8,8 +8,7 @@ namespace tmk
     Window::Window(WindowSize wsize)
     : size(wsize),
       buffer(std::make_shared<wchar_t[]>(wsize.width * wsize.height)),
-      id(Utils::GetProgressiveId()), isSelectable(false),
-      isSelected(false), isWritable(false),
+      id(Utils::GetProgressiveId()),
       cursorX(1), cursorY(1)
     {
         for(int i = 0; i < wsize.width * wsize.height; ++i)
@@ -33,36 +32,6 @@ namespace tmk
     const WindowSize &Window::GetSize(void) const
     {
         return this->size;
-    }
-
-    void Window::SetSelected(bool isSelected)
-    {
-        this->isSelected = isSelected;
-    }
-
-    bool Window::IsSelected(void) const
-    {
-        return this->isSelected;
-    }
-
-    void Window::SetSelectable(bool isSelectable)
-    {
-        this->isSelectable = isSelectable;
-    }
-
-    bool Window::IsSelectable(void) const
-    {
-        return this->isSelectable;
-    }
-
-    void Window::SetWritable(bool isWritable)
-    {
-        this->isWritable = isWritable;
-    }
-
-    bool Window::IsWritable(void) const
-    {
-        return this->isWritable;
     }
 
     int Window::GetId(void) const
@@ -99,5 +68,76 @@ namespace tmk
         this->buffer[this->size.width - 1] = U_CRN_TOP_RIGHT;
         this->buffer[(this->size.height - 1) * this->size.width] = U_CRN_BOTTOM_LEFT;
         this->buffer[(this->size.height - 1) * this->size.width + (this->size.width - 1)] = U_CRN_BOTTOM_RIGHT;
+    }
+
+    void Window::Write(int x, int y, const std::string&& str, int lineLength)
+    {
+        int lineFill = 0;
+
+        if(lineLength > 0 && lineLength > this->size.width - x - 1)
+            lineLength = this->size.width - x - 1;
+
+        for(int i = 0; i < str.length(); ++i)
+        {
+            // Check for end of window
+            if(this->buffer[y * this->size.width + x + i] != U_SPACE || (lineLength > 0 && lineFill > 0 && lineFill == lineLength))
+            {
+                //std::wcout << x << " | " << i << " | " << i % lineLength << "\n" << std::flush;
+
+                int oldX = x;
+                int oldY = y;
+
+                x = (lineLength > 0) ? x -= lineLength : 1 - i;
+                y += 1;
+
+                if(str[i] != ' ')
+                {
+                    int idx = i;
+                    int xCopy = oldX + i + 1;
+
+                    for(; idx >= 0; --idx)
+                    {
+                        const char& c = str[idx];
+                        
+                        if(c == ' ')
+                            break;
+                        else if(xCopy == 0)
+                            break;
+
+                        --xCopy;
+                    }
+
+                    if(xCopy > 0 && oldX <= xCopy)
+                    {
+                        int len = i - idx - 1;
+
+                        for(int j = 0; j < len; ++j)
+                        {
+                            this->buffer[oldY * this->size.width + oldX + i - len + j] = U_BAR_VERTICAL;
+                            this->buffer[y * this->size.width + x + i + j] = str[i - len + j];
+                        }
+
+                        x += len;
+                        lineFill = len;
+                    }
+                }
+            }
+            
+            if(lineFill == lineLength)
+                lineFill = 0;
+
+            if(lineFill == 0)
+            {
+                while(str[i] == ' ')
+                {
+                    ++i;
+                    --x;
+                }
+            }
+
+            this->buffer[y * this->size.width + x + i] = str[i];
+            ++lineFill;
+        }
+
     }
 }
