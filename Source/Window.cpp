@@ -1,3 +1,4 @@
+#include <cassert>
 #include "../Include/Window.hpp"
 #include "../Include/WindowManager.hpp"
 #include "../Include/Utils.hpp"
@@ -74,8 +75,8 @@ namespace tmk
     {
         int lineFill = 0;
 
-        if(lineLength > 0 && lineLength > this->size.width - x - 1)
-            lineLength = this->size.width - x - 1;
+        if(lineLength > 0)
+            assert(lineLength <= this->size.width - x - 1);
 
         for(int i = 0; i < str.length(); ++i)
         {
@@ -89,6 +90,9 @@ namespace tmk
 
                 x = (lineLength > 0) ? x -= lineLength : 1 - i;
                 y += 1;
+
+                if(y > this->size.height - 1)
+                    return;
 
                 if(str[i] != ' ')
                 {
@@ -113,7 +117,7 @@ namespace tmk
 
                         for(int j = 0; j < len; ++j)
                         {
-                            this->buffer[oldY * this->size.width + oldX + i - len + j] = U_BAR_VERTICAL;
+                            this->buffer[oldY * this->size.width + oldX + i - len + j] = U_SPACE;
                             this->buffer[y * this->size.width + x + i + j] = str[i - len + j];
                         }
 
