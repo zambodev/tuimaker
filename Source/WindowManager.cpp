@@ -1,6 +1,7 @@
 #include <vector>
 #include <tuple>
 #include <cstring>
+#include <cassert>
 #include "../Include/WindowManager.hpp"
 #include "../Include/Utils.hpp"
 
@@ -8,73 +9,84 @@
 namespace tmk
 {
     WindowManager::WindowManager()
-        : m_Width(Utils::GetTerminalWidth()), m_Height(Utils::GetTerminalHeight())
+    : width(Utils::GetTerminalWidth()), height(Utils::GetTerminalHeight())
     {
-        this->m_Buffer = new wchar_t[this->m_Width * this->m_Height];
-        this->m_BufferLayerMap = new int[this->m_Width * this->m_Height];
-        
-        for(int i = 0; i < this->m_Width * this->m_Height; ++i)
-        {
-            this->m_Buffer[i] = U_SPACE;
-            this->m_BufferLayerMap[i] = 0;
-        }
+        buffer = std::make_shared<wchar_t[]>(this->width * this->height);
+
+        for(unsigned int i = 0; i < this->width * this->height; ++i)
+            this->buffer[i] = U_SPACE;
     }
 
     WindowManager::~WindowManager()
     {
-        delete this->m_Buffer;
     }
 
-    int WindowManager::getIndexOf(Window& window)
+    void WindowManager::RenderChildren(std::shared_ptr<WindowNode> wnode)
     {
-        int idx = 0;
-        std::vector<Window*>::iterator itr;
+        wnode->window->Draw();
+        
+        const WindowSize& wsize = wnode->window->GetSize();
+        auto wbuffer = wnode->window->GetBuffer();
 
-        for(itr = this->m_VisibilityLayerList.begin(); itr != this->m_VisibilityLayerList.end(); ++itr)
+        for(int h = 0; h < wsize.height; ++h)
         {
-            if(*(*itr) == window)
-                return idx;
-
-            ++idx;
-        }
-
-        return 0;
-    }
-
-    void WindowManager::addWindow(Window*window)
-    {
-        this->m_VisibilityLayerList.emplace_back(window);
-        auto size = window->getSize();
-
-        for(int i = 0; i < size.height; ++i)
-            for(int j = 0; j < size.width; ++j)
-                this->m_BufferLayerMap[(size.y + i) * this->m_Width + (size.x + j)]
-                    = this->m_VisibilityLayerList.size();
-    }
-
-    void WindowManager::removeWindow(int id)
-    {
-
-    }
-
-    void WindowManager::render(void)
-    {
-        int depth;
-
-        for(int i = 0; i < this->m_Height; ++i)
-        {
-            for(int j = 0; j < this->m_Width; ++j)
+            for(int w = 0; w < wsize.width; ++w)
             {
-                if((depth = this->m_BufferLayerMap[i * this->m_Width + j]) == 0)
-                    continue;
-
-                Window* window = this->m_VisibilityLayerList.at(depth - 1);
-                WindowSize& size = window->getSize();
-
-                this->m_Buffer[i * this->m_Width + j] = window->getBuffer()[(i - size.y) * size.width + (j - size.x)];
+                this->buffer[(wsize.y + h) * this->width + (wsize.x + w)] =
+                    wbuffer[h * wsize.width + w];
             }
         }
 
-        std::wcout << L"\x1b[s\x1b[0;0H" << this->m_Buffer << L"\x1b[u";
+        for(auto node : wnode->children)
+            this->RenderChildren(node);
+    }
+
+    std::shared_ptr<WindowManager::WindowNode> WindowManager::FindNode(std::shared_ptr<WindowNode> upperNode, WindowId id)
+    {
+        if(upperNode == nullptr)
+            return nullptr;
+
+        if(upperNode->window->GetId() == id)
+            return upperNode;
+
+        for(auto node : upperNode->children)
+            if(this->FindNode(node, id) != nullptr)
+                return node;
+    
+        return nullptr;
+    }
+
+    std::shared_ptr<Window> WindowManager::AddWindow(WindowSize wsize, std::shared_ptr<Window> father)
+    {
+        auto window = std::make_shared<Window>(wsize);
+        
+        if(root == nullptr)
+        {
+            this->root = std::make_shared<WindowNode>(window, father);
+        }
+        else
+        {
+            auto node = FindNode(this->root, father->GetId());
+            node->children.push_back(std::make_shared<WindowNode>(window, father));
+        }
+        this->SetVisible(window);
+
+        return window;
+    }
+
+    void WindowManager::RemoveWindow(std::shared_ptr<Window> window)
+    {
+        
+    }
+
+    void WindowManager::Render(void)
+    {
+        this->RenderChildren(this->root);
+
+        std::wcout << "\x1b[1J\x1b[0;0H" << this->buffer;
+    }
+
+    void WindowManager::SetVisible(std::shared_ptr<Window> window)
+    {
     }
 }

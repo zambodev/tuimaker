@@ -2,9 +2,13 @@
 
 #include <iostream>
 #include <array>
+#include <vector>
+#include <memory>
 
 namespace tmk
 {
+    typedef int WindowId;
+
     enum : wchar_t
     {
         U_BAR_HORIZONTAL        = u'\u2501',
@@ -32,50 +36,24 @@ namespace tmk
     class Window
     {
         private:
-            int m_Id;
-            bool m_Selectable;
-            bool m_Selected;
-            bool m_Writable;
-            wchar_t* m_Buffer;
-            WindowSize m_Size;
-            Window* m_Father;
-
-        protected:
-            enum : unsigned short
-            {
-                B_CRN_TOP_LEFT          = 0x000FU,
-                B_CRN_TOP_RIGHT         = 0x00F0U,
-                B_CRN_BOTTOM_LEFT       = 0x0F00U,
-                B_CRN_BOTTOM_RIGHT      = 0xF000U,
-            };
-
-            enum : unsigned short
-            {
-                V_CRN_T_TOP             = 0x1,
-                V_CRN_T_BOTTOM          = 0x2,
-                V_CRN_T_LEFT            = 0x3,
-                V_CRN_T_RIGHT           = 0x4,
-                V_CROSS                 = 0x5
-            };
+            int                         cursorX;
+            int                         cursorY;
+            WindowSize                  size;
+            WindowId                    id;
+            std::shared_ptr<wchar_t[]>  buffer;
 
         public:
-            Window(const int&& x, const int&& y, const int&& width, const int&& height,
-                const unsigned short&& cornerBitmask, Window* father);
+            Window() = delete;
+            Window(WindowSize size);
             ~Window();
-
+            // Operators
             bool operator==(Window& window);
-
-            WindowSize& getSize(void);
-            Window* getFather(void);
-            void setSelected(bool isSelected);
-            bool isSelected(void);
-            void setSelectable(bool isSelectable);
-            bool isSelectable(void);
-            void setWritable(bool isWritable);
-            bool isWritable(void);
-            int getId(void);
-            wchar_t* getBuffer(void);
-
-            void draw(void);
+            // Functions
+            const WindowSize& GetSize(void) const;
+            int GetId(void) const;
+            wchar_t GetCharAt(int x, int y) const;
+            std::shared_ptr<wchar_t[]> GetBuffer(void);
+            void Draw(void);
+            void Write(int x, int y, const std::string&& str, int lineLength = 0);
     };
 }
