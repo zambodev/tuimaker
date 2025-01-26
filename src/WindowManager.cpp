@@ -2,8 +2,8 @@
 #include <tuple>
 #include <cstring>
 #include <cassert>
-#include "../Include/WindowManager.hpp"
-#include "../Include/Utils.hpp"
+#include "WindowManager.hpp"
+#include "Utils.hpp"
 
 
 namespace tmk

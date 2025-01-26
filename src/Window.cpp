@@ -1,7 +1,7 @@
 #include <cassert>
-#include "../Include/Window.hpp"
-#include "../Include/WindowManager.hpp"
-#include "../Include/Utils.hpp"
+#include "Window.hpp"
+#include "WindowManager.hpp"
+#include "Utils.hpp"
 
 
 namespace tmk
