@@ -5,6 +5,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <clocale>
+#include <termios.h>
 #elif _WIN32
 #include <windows.h>
 #include <io.h>
@@ -58,6 +59,22 @@ namespace tmk
             static int id = 0;
 
             return id++;
+        }
+
+        void EnableBuffInput(void)
+        {
+            struct termios t;
+            tcgetattr(STDIN_FILENO, &t);
+            t.c_lflag &= (~ICANON & ~ECHO);
+            tcsetattr(STDIN_FILENO, TCSANOW, &t);
+        }
+
+        void DisableBuffInput(void)
+        {
+            struct termios t;
+            tcgetattr(STDIN_FILENO, &t);
+            t.c_lflag |= (ICANON & ECHO);
+            tcsetattr(STDIN_FILENO, TCSANOW, &t);
         }
     }
 }

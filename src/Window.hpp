@@ -54,6 +54,8 @@ namespace tmk
             wchar_t GetCharAt(int x, int y) const;
             std::shared_ptr<wchar_t[]> GetBuffer(void);
             void Draw(void);
-            void Write(int x, int y, const std::string&& str, int lineLength = 0);
+            void SetCursorPos(int x, int y);
+            void Write(const std::string&& str);
+            void WriteChar(const char c);
     };
 }

@@ -17,7 +17,8 @@ namespace tmk
                 std::vector<std::shared_ptr<WindowNode>>    children;
 
                 WindowNode(std::shared_ptr<Window> wptr, std::shared_ptr<Window> fptr)
-                    : window(wptr), father(fptr) {}
+                : window(wptr), father(fptr)
+                {}
             };
  
             WindowManager(const WindowManager& obj) = delete;

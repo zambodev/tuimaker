@@ -83,7 +83,12 @@ namespace tmk
     {
         this->RenderChildren(this->root);
 
-        std::wcout << "\x1b[1J\x1b[0;0H" << this->buffer;
+        std::wcout << "\x1b[1J\x1b[0;0H";
+        
+        for(int i = 0; i < this->width * this->height; ++i)
+            std::wcout << this->buffer[i];
+
+        std::wcout << std::flush;
     }
 
     void WindowManager::SetVisible(std::shared_ptr<Window> window)

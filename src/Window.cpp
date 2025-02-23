@@ -1,4 +1,5 @@
 #include <cassert>
+#include <cmath>
 #include "Window.hpp"
 #include "WindowManager.hpp"
 #include "Utils.hpp"
@@ -71,77 +72,47 @@ namespace tmk
         this->buffer[(this->size.height - 1) * this->size.width + (this->size.width - 1)] = U_CRN_BOTTOM_RIGHT;
     }
 
-    void Window::Write(int x, int y, const std::string&& str, int lineLength)
+    void Window::SetCursorPos(int x, int y)
     {
-        int lineFill = 0;
+        this->cursorX = x;
+        this->cursorY = y;
+    }
 
-        if(lineLength > 0)
-            assert(lineLength <= this->size.width - x - 1);
-
+    void Window::Write(const std::string&& str)
+    {
         for(int i = 0; i < str.length(); ++i)
+            this->WriteChar(str[i]);    
+    }
+
+    void Window::WriteChar(const char c)
+    {
+        static int wordBeginIdx = 0;
+
+        if(c == ' ')
+            wordBeginIdx = 1;
+
+        if(this->cursorX == this->size.width - 1)
         {
-            // Check for end of window
-            if(this->buffer[y * this->size.width + x + i] != U_SPACE || (lineLength > 0 && lineFill > 0 && lineFill == lineLength))
+            int oldWordBeginIdx = wordBeginIdx;
+            int cursorTmp = 1;
+
+            for(; wordBeginIdx < 0; ++wordBeginIdx)
             {
-                //std::wcout << x << " | " << i << " | " << i % lineLength << "\n" << std::flush;
+                this->buffer[(this->cursorY + 1) * this->size.width + cursorTmp] =
+                    this->buffer[(this->cursorY) * this->size.width + this->cursorX + wordBeginIdx];
+                this->buffer[(this->cursorY) * this->size.width + this->cursorX + wordBeginIdx] = ' ';
 
-                int oldX = x;
-                int oldY = y;
-
-                x = (lineLength > 0) ? x -= lineLength : 1 - i;
-                y += 1;
-
-                if(y > this->size.height - 1)
-                    return;
-
-                if(str[i] != ' ')
-                {
-                    int idx = i;
-                    int xCopy = oldX + i + 1;
-
-                    for(; idx >= 0; --idx)
-                    {
-                        const char& c = str[idx];
-                        
-                        if(c == ' ')
-                            break;
-                        else if(xCopy == 0)
-                            break;
-
-                        --xCopy;
-                    }
-
-                    if(xCopy > 0 && oldX <= xCopy)
-                    {
-                        int len = i - idx - 1;
-
-                        for(int j = 0; j < len; ++j)
-                        {
-                            this->buffer[oldY * this->size.width + oldX + i - len + j] = U_SPACE;
-                            this->buffer[y * this->size.width + x + i + j] = str[i - len + j];
-                        }
-
-                        x += len;
-                        lineFill = len;
-                    }
-                }
-            }
-            
-            if(lineFill == lineLength)
-                lineFill = 0;
-
-            if(lineFill == 0)
-            {
-                while(str[i] == ' ')
-                {
-                    ++i;
-                    --x;
-                }
+                ++cursorTmp;
             }
 
-            this->buffer[y * this->size.width + x + i] = str[i];
-            ++lineFill;
+            this->cursorX = cursorTmp;
+            ++this->cursorY;
         }
 
+        this->buffer[(this->cursorY) * this->size.width + this->cursorX] = c;
+
+        --wordBeginIdx;
+        ++this->cursorX;
     }
 }
+

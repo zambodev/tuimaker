@@ -10,5 +10,7 @@ namespace tmk
         int GetTerminalWidth(void);
         int GetTerminalHeight(void);
         int GetProgressiveId(void);
+        void EnableBuffInput(void);
+        void DisableBuffInput(void);
     }
 }
