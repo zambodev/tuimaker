@@ -35,13 +35,6 @@ namespace tmk
 
     class Window
     {
-        private:
-            int                         cursorX;
-            int                         cursorY;
-            WindowSize                  size;
-            WindowId                    id;
-            std::shared_ptr<wchar_t[]>  buffer;
-
         public:
             Window() = delete;
             Window(WindowSize size);
@@ -49,13 +42,20 @@ namespace tmk
             // Operators
             bool operator==(Window& window);
             // Functions
-            const WindowSize& GetSize(void) const;
-            int GetId(void) const;
-            wchar_t GetCharAt(int x, int y) const;
-            std::shared_ptr<wchar_t[]> GetBuffer(void);
-            void Draw(void);
-            void SetCursorPos(int x, int y);
-            void Write(const std::string&& str);
-            void WriteChar(const char c);
+            const WindowSize& get_size(void) const;
+            int get_id(void) const;
+            wchar_t get_char_at(int x, int y) const;
+            std::shared_ptr<wchar_t[]> get_buffer(void);
+            void draw(void);
+            void set_cursor_pos(int x, int y);
+            void write(const std::string&& str);
+            void write_char(const char c);
+    
+        private:
+            int                         cur_x_;
+            int                         cur_y_;
+            WindowSize                  size_;
+            WindowId                    id_;
+            std::shared_ptr<wchar_t[]>  buffer_;
     };
 }

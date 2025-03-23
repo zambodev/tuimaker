@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <memory>
-#include "Window.hpp"
+#include "Window.h"
 
 
 namespace tmk
@@ -22,17 +22,17 @@ namespace tmk
             };
  
             WindowManager(const WindowManager& obj) = delete;
-            static WindowManager* GetInstance(void)
+            static WindowManager* get_instance(void)
             {
                 static WindowManager* instance = new WindowManager();
                 return instance;
             }
 
-            std::shared_ptr<Window> AddWindow(WindowSize wsize, std::shared_ptr<Window> father);
-            void RemoveWindow(std::shared_ptr<Window> window);
-            void Render(void);
-            std::shared_ptr<Window> GetWindow(WindowId id);
-            void SetVisible(std::shared_ptr<Window> window);
+            std::shared_ptr<Window> add_window(WindowSize wsize, std::shared_ptr<Window> father);
+            void delete_window(std::shared_ptr<Window> window);
+            void render(void);
+            std::shared_ptr<Window> get_window(WindowId id);
+            void set_visible(std::shared_ptr<Window> window);
         
         private:
             int                         width;
@@ -42,7 +42,7 @@ namespace tmk
 
             WindowManager();
             ~WindowManager();
-            void RenderChildren(std::shared_ptr<WindowNode> wnode);
-            std::shared_ptr<WindowNode> FindNode(std::shared_ptr<WindowNode> upperNode, WindowId id);
+            void render_children(std::shared_ptr<WindowNode> wnode);
+            std::shared_ptr<WindowNode> find_node(std::shared_ptr<WindowNode> upperNode, WindowId id);
     };
 }

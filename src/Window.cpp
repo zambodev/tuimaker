@@ -1,22 +1,22 @@
 #include <cassert>
 #include <cmath>
-#include "Window.hpp"
-#include "WindowManager.hpp"
-#include "Utils.hpp"
+#include "../headers/Window.h"
+#include "../headers/WindowManager.h"
+#include "../headers/Utils.h"
 
 
 namespace tmk
 {
     Window::Window(WindowSize wsize)
-    : size(wsize),
-      buffer(std::make_shared<wchar_t[]>(wsize.width * wsize.height)),
-      id(Utils::GetProgressiveId()),
-      cursorX(1), cursorY(1)
+    : size_(wsize),
+      buffer_(std::make_shared<wchar_t[]>(wsize.width * wsize.height)),
+      id_(Utils::get_progressive_id()),
+      cur_x_(1), cur_y_(1)
     {
         for(int i = 0; i < wsize.width * wsize.height; ++i)
-            this->buffer[i] = U_SPACE;
+            this->buffer_[i] = U_SPACE;
 
-        this->Draw();
+        this->draw();
     }
 
     Window::~Window()
@@ -25,94 +25,94 @@ namespace tmk
 
     bool Window::operator==(Window &window)
     {
-        if(this->id == window.GetId())
+        if(this->id_ == window.get_id())
             return true;
         else
             return false;
     }
 
-    const WindowSize &Window::GetSize(void) const
+    const WindowSize &Window::get_size(void) const
     {
-        return this->size;
+        return this->size_;
     }
 
-    int Window::GetId(void) const
+    int Window::get_id(void) const
     {
-        return this->id;
+        return this->id_;
     }
 
-    wchar_t Window::GetCharAt(int x, int y) const
+    wchar_t Window::get_char_at(int x, int y) const
     {
-        return this->buffer[y * this->size.width + x];
+        return this->buffer_[y * this->size_.width + x];
     }
 
-    std::shared_ptr<wchar_t[]> Window::GetBuffer(void)
+    std::shared_ptr<wchar_t[]> Window::get_buffer(void)
     {
-        return this->buffer;
+        return this->buffer_;
     }
 
-    void Window::Draw(void)
+    void Window::draw(void)
     {
         // Top and bottom sides
-        for(int i = 1; i < this->size.width - 1; ++i)
+        for(int i = 1; i < this->size_.width - 1; ++i)
         {
-            this->buffer[i] = U_BAR_HORIZONTAL;
-            this->buffer[this->size.width * (this->size.height - 1) + i] = U_BAR_HORIZONTAL;
+            this->buffer_[i] = U_BAR_HORIZONTAL;
+            this->buffer_[this->size_.width * (this->size_.height - 1) + i] = U_BAR_HORIZONTAL;
         }
         // Left and right sides
-        for(int i = 1; i < this->size.height - 1; ++i)
+        for(int i = 1; i < this->size_.height - 1; ++i)
         {
-            this->buffer[i * this->size.width] = U_BAR_VERTICAL;
-            this->buffer[i * this->size.width + (this->size.width - 1)] = U_BAR_VERTICAL;
+            this->buffer_[i * this->size_.width] = U_BAR_VERTICAL;
+            this->buffer_[i * this->size_.width + (this->size_.width - 1)] = U_BAR_VERTICAL;
         }
         // Corners
-        this->buffer[0] = U_CRN_TOP_LEFT;
-        this->buffer[this->size.width - 1] = U_CRN_TOP_RIGHT;
-        this->buffer[(this->size.height - 1) * this->size.width] = U_CRN_BOTTOM_LEFT;
-        this->buffer[(this->size.height - 1) * this->size.width + (this->size.width - 1)] = U_CRN_BOTTOM_RIGHT;
+        this->buffer_[0] = U_CRN_TOP_LEFT;
+        this->buffer_[this->size_.width - 1] = U_CRN_TOP_RIGHT;
+        this->buffer_[(this->size_.height - 1) * this->size_.width] = U_CRN_BOTTOM_LEFT;
+        this->buffer_[(this->size_.height - 1) * this->size_.width + (this->size_.width - 1)] = U_CRN_BOTTOM_RIGHT;
     }
 
-    void Window::SetCursorPos(int x, int y)
+    void Window::set_cursor_pos(int x, int y)
     {
-        this->cursorX = x;
-        this->cursorY = y;
+        this->cur_x_ = x;
+        this->cur_y_ = y;
     }
 
-    void Window::Write(const std::string&& str)
+    void Window::write(const std::string&& str)
     {
         for(int i = 0; i < str.length(); ++i)
-            this->WriteChar(str[i]);    
+            this->write_char(str[i]);    
     }
 
-    void Window::WriteChar(const char c)
+    void Window::write_char(const char c)
     {
         static int wordBeginIdx = 0;
 
         if(c == ' ')
             wordBeginIdx = 1;
 
-        if(this->cursorX == this->size.width - 1)
+        if(this->cur_x_ == this->size_.width - 1)
         {
             int oldWordBeginIdx = wordBeginIdx;
             int cursorTmp = 1;
 
             for(; wordBeginIdx < 0; ++wordBeginIdx)
             {
-                this->buffer[(this->cursorY + 1) * this->size.width + cursorTmp] =
-                    this->buffer[(this->cursorY) * this->size.width + this->cursorX + wordBeginIdx];
-                this->buffer[(this->cursorY) * this->size.width + this->cursorX + wordBeginIdx] = ' ';
+                this->buffer_[(this->cur_y_ + 1) * this->size_.width + cursorTmp] =
+                    this->buffer_[(this->cur_y_) * this->size_.width + this->cur_x_ + wordBeginIdx];
+                this->buffer_[(this->cur_y_) * this->size_.width + this->cur_x_ + wordBeginIdx] = ' ';
 
                 ++cursorTmp;
             }
 
-            this->cursorX = cursorTmp;
-            ++this->cursorY;
+            this->cur_x_ = cursorTmp;
+            ++this->cur_y_;
         }
 
-        this->buffer[(this->cursorY) * this->size.width + this->cursorX] = c;
+        this->buffer_[(this->cur_y_) * this->size_.width + this->cur_x_] = c;
 
         --wordBeginIdx;
-        ++this->cursorX;
+        ++this->cur_x_;
     }
 }
 

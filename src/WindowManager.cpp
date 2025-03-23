@@ -2,16 +2,17 @@
 #include <tuple>
 #include <cstring>
 #include <cassert>
-#include "WindowManager.hpp"
-#include "Utils.hpp"
+#include <memory>
+#include "../headers/WindowManager.h"
+#include "../headers/Utils.h"
 
 
 namespace tmk
 {
     WindowManager::WindowManager()
-    : width(Utils::GetTerminalWidth()), height(Utils::GetTerminalHeight())
+    : width(Utils::get_term_width()), height(Utils::get_term_height())
     {
-        buffer = std::make_shared<wchar_t[]>(this->width * this->height);
+        this->buffer = std::make_shared<wchar_t[]>(this->width * this->height);
 
         for(unsigned int i = 0; i < this->width * this->height; ++i)
             this->buffer[i] = U_SPACE;
@@ -21,12 +22,12 @@ namespace tmk
     {
     }
 
-    void WindowManager::RenderChildren(std::shared_ptr<WindowNode> wnode)
+    void WindowManager::render_children(std::shared_ptr<WindowNode> wnode)
     {
-        wnode->window->Draw();
+        wnode->window->draw();
         
-        const WindowSize& wsize = wnode->window->GetSize();
-        auto wbuffer = wnode->window->GetBuffer();
+        const WindowSize& wsize = wnode->window->get_size();
+        auto wbuffer = wnode->window->get_buffer();
 
         for(int h = 0; h < wsize.height; ++h)
         {
@@ -38,25 +39,25 @@ namespace tmk
         }
 
         for(auto node : wnode->children)
-            this->RenderChildren(node);
+            this->render_children(node);
     }
 
-    std::shared_ptr<WindowManager::WindowNode> WindowManager::FindNode(std::shared_ptr<WindowNode> upperNode, WindowId id)
+    std::shared_ptr<WindowManager::WindowNode> WindowManager::find_node(std::shared_ptr<WindowNode> upperNode, WindowId id)
     {
         if(upperNode == nullptr)
             return nullptr;
 
-        if(upperNode->window->GetId() == id)
+        if(upperNode->window->get_id() == id)
             return upperNode;
 
         for(auto node : upperNode->children)
-            if(this->FindNode(node, id) != nullptr)
+            if(this->find_node(node, id) != nullptr)
                 return node;
     
         return nullptr;
     }
 
-    std::shared_ptr<Window> WindowManager::AddWindow(WindowSize wsize, std::shared_ptr<Window> father)
+    std::shared_ptr<Window> WindowManager::add_window(WindowSize wsize, std::shared_ptr<Window> father)
     {
         auto window = std::make_shared<Window>(wsize);
         
@@ -66,22 +67,22 @@ namespace tmk
         }
         else
         {
-            auto node = FindNode(this->root, father->GetId());
+            auto node = find_node(this->root, father->get_id());
             node->children.push_back(std::make_shared<WindowNode>(window, father));
         }
-        this->SetVisible(window);
+        this->set_visible(window);
 
         return window;
     }
 
-    void WindowManager::RemoveWindow(std::shared_ptr<Window> window)
+    void WindowManager::delete_window(std::shared_ptr<Window> window)
     {
         
     }
 
-    void WindowManager::Render(void)
+    void WindowManager::render(void)
     {
-        this->RenderChildren(this->root);
+        this->render_children(this->root);
 
         std::wcout << "\x1b[1J\x1b[0;0H";
         
@@ -91,7 +92,7 @@ namespace tmk
         std::wcout << std::flush;
     }
 
-    void WindowManager::SetVisible(std::shared_ptr<Window> window)
+    void WindowManager::set_visible(std::shared_ptr<Window> window)
     {
     }
 }

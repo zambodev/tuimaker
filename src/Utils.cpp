@@ -11,14 +11,14 @@
 #include <io.h>
 #include <fcntl.h>
 #endif
-#include "Utils.hpp"
+#include "../headers/Utils.h"
 
 
 namespace tmk
 {
     namespace Utils
     {
-        int GetTerminalWidth(void)
+        int get_term_width(void)
         {
     #ifdef __linux__
             setlocale(LC_ALL, "");
@@ -36,7 +36,7 @@ namespace tmk
     #endif
         }
 
-        int GetTerminalHeight(void)
+        int get_term_height(void)
         {
     #ifdef __linux__
             setlocale(LC_ALL, "");
@@ -54,14 +54,14 @@ namespace tmk
     #endif
         }
 
-        int GetProgressiveId(void)
+        int get_progressive_id(void)
         {
             static int id = 0;
 
             return id++;
         }
 
-        void EnableBuffInput(void)
+        void enable_buff_input(void)
         {
             struct termios t;
             tcgetattr(STDIN_FILENO, &t);
@@ -69,7 +69,7 @@ namespace tmk
             tcsetattr(STDIN_FILENO, TCSANOW, &t);
         }
 
-        void DisableBuffInput(void)
+        void disable_buff_input(void)
         {
             struct termios t;
             tcgetattr(STDIN_FILENO, &t);

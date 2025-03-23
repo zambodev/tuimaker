@@ -6,6 +6,7 @@ CC =
 CFLAGS = -std=c++20 -Werror
 
 #Folders
+INCLUDES = headers
 SRC = src
 OUT = out
 BUILD = $(OUT)/build
@@ -19,9 +20,9 @@ CFL := $(OUT) $(BUILD) $(LIB) $(RELEASE) $(INCLUDE) $(TEST)	# Create Folders Lis
 LIBA = $(LIB)/libtuimaker
 LIBNAME = tuimaker
 TESTFILE = $(filter %.cpp, $(MAKECMDGOALS))
-SRCS := $(wildcard $(SRC)/*.cpp)
+SRCS := $(wildcard $(SRC)/*)
 OBJS := $(addprefix $(BUILD)/, $(notdir $(SRCS:.cpp=.o)))
-CHI := $(wildcard $(SRC)/*.hpp)
+CHI := $(wildcard $(INCLUDES)/*)
 HEADERS := $(notdir $(CHI))
 
 # Executables
@@ -42,7 +43,7 @@ endif
 GREEN = \033[0;32m
 RESET = \033[0m
 
-all: clean sysinfo $(CFL) $(CHI) $(LIBA)
+all: $(CFL) $(LIBA)
 
 # Build cpp files into object files
 $(BUILD)/%.o: $(SRC)/%.cpp
@@ -50,8 +51,11 @@ $(BUILD)/%.o: $(SRC)/%.cpp
 	@ $(CC) -c -fPIC $(CFLAGS) $^ -o $@
 	@ echo  "  $(GREEN)Done$(RESET)"
 
-# Create static library archive
+# Create shared library archive
 $(LIBA): $(OBJS)
+	@ echo -n "Copying $(CHI) into $(INCLUDE): "
+	@ cp $(CHI) $(INCLUDE)/
+	@ echo  "  $(GREEN)Done$(RESET)"
 	@ echo -n "Creating archive: "
 	@ $(CC) -shared -o $(LIBA) $^
 	@ echo  "  $(GREEN)Done$(RESET)"
@@ -78,20 +82,6 @@ ifeq ("$(wildcard $@)", "")
 	@ mkdir $@
 	@ echo  "  $(GREEN)Done$(RESET)"
 endif
-
-# Copy headers to include folder
-.PHONY: $(CHI)
-$(CHI):
-	@ echo -n "Copying $@ into $(INCLUDE): "
-	@ cp $@ $(INCLUDE)/
-	@ echo  "  $(GREEN)Done$(RESET)"
-
-# Print architecture info
-.PHONY: sysinfo
-sysinfo:
-	@ echo "Building for $(OS)"
-	@ echo -n "Compiler: $(CC)\n"
-	@ echo -n "Executable: $(EXE)\n"
 
 # Clear folders
 .PHONY: clean
