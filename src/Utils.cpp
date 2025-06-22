@@ -56,7 +56,7 @@ namespace tmk
 
         int get_progressive_id(void)
         {
-            static int id = 0;
+            static int id = 1;
 
             return id++;
         }
