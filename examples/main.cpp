@@ -5,6 +5,7 @@
 
 #include <Utils.h>
 #include <WindowManager.hpp>
+#include <TextBox.hpp>
 
 int main(void)
 {
@@ -17,4 +18,5 @@ int main(void)
     w2->write("Ciao come va io tutto bene. Ottimo buona a sapersi dai, spero vada tutto bene. Benissimissimo spero di poter mangiare il cibo.");
 
     wm->render(rootWindow->get_id());
+
 }

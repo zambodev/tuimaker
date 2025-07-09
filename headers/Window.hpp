@@ -54,7 +54,7 @@ namespace tmk
             draw();
         }
 
-        virtual ~Window()
+        ~Window()
         {
         }
 
@@ -66,7 +66,7 @@ namespace tmk
                 return false;
         }
 
-        const WindowSize &get_size(void) const
+        const WindowSize & get_size(void) const
         {
             return size_;
         }
@@ -81,7 +81,7 @@ namespace tmk
             return buffer_;
         }
 
-        void draw(void)
+        virtual void draw(void)
         {
             // Top and bottom sides
             for (int i = 1; i < this->size_.width - 1; ++i)
@@ -120,9 +120,6 @@ namespace tmk
             return children;
         }
 
-        virtual void write(const std::string &&str) {}
-        virtual void write_char(const char c) {}
-
     protected:
         int cur_x_;
         int cur_y_;
@@ -130,57 +127,6 @@ namespace tmk
         WindowSize size_;
         WindowId id_;
         std::vector<WindowId> children_;
-    };
-
-    class TextBox : public Window
-    {
     public:
-        TextBox(WindowSize wsize)
-            : Window(wsize)
-        {
-        };
-
-        ~TextBox()
-        {
-        };
-
-        void write(const std::string &&str)
-        {
-            for (int i = 0; i < str.length(); ++i)
-                write_char(str[i]);
-        }
-
-        void write_char(const char c)
-        {
-            static int wordBeginIdx = 0;
-
-            if (c == ' ')
-                wordBeginIdx = 1;
-
-            if (cur_x_ == size_.width - 1)
-            {
-                int oldWordBeginIdx = wordBeginIdx;
-                int cursorTmp = 1;
-
-                for (; wordBeginIdx < 0; ++wordBeginIdx)
-                {
-                    buffer_[(cur_y_ + 1) * size_.width + cursorTmp] =
-                        buffer_[(cur_y_)*size_.width + cur_x_ + wordBeginIdx];
-                    buffer_[(cur_y_)*size_.width + cur_x_ + wordBeginIdx] = ' ';
-
-                    ++cursorTmp;
-                }
-
-                cur_x_ = cursorTmp;
-                ++cur_y_;
-            }
-
-            buffer_[(cur_y_)*size_.width + cur_x_] = c;
-
-            --wordBeginIdx;
-            ++cur_x_;
-        }
-
-    private:
     };
 }
