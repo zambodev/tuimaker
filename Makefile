@@ -85,51 +85,6 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 .PHONY : rebuild_cache/fast
 
-# Special rule for the target list_install_components
-list_install_components:
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Available install components are: \"Unspecified\""
-.PHONY : list_install_components
-
-# Special rule for the target list_install_components
-list_install_components/fast: list_install_components
-.PHONY : list_install_components/fast
-
-# Special rule for the target install
-install: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
-	/usr/bin/cmake -P cmake_install.cmake
-.PHONY : install
-
-# Special rule for the target install
-install/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Install the project..."
-	/usr/bin/cmake -P cmake_install.cmake
-.PHONY : install/fast
-
-# Special rule for the target install/local
-install/local: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
-	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
-.PHONY : install/local
-
-# Special rule for the target install/local
-install/local/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing only the local directory..."
-	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
-.PHONY : install/local/fast
-
-# Special rule for the target install/strip
-install/strip: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
-	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
-.PHONY : install/strip
-
-# Special rule for the target install/strip
-install/strip/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Installing the project stripped..."
-	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
-.PHONY : install/strip/fast
-
 # The main all target
 all: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/thomas/Workspace/tuimaker/CMakeFiles /home/thomas/Workspace/tuimaker//CMakeFiles/progress.marks
@@ -162,91 +117,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named tuimaker
+# Target rules for targets named tests_main
 
 # Build rule for target.
-tuimaker: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tuimaker
-.PHONY : tuimaker
+tests_main: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tests_main
+.PHONY : tests_main
 
 # fast build rule for target.
-tuimaker/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/tuimaker.dir/build.make CMakeFiles/tuimaker.dir/build
-.PHONY : tuimaker/fast
-
-#=============================================================================
-# Target rules for targets named tuimakerTest
-
-# Build rule for target.
-tuimakerTest: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 tuimakerTest
-.PHONY : tuimakerTest
-
-# fast build rule for target.
-tuimakerTest/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/tuimakerTest.dir/build.make CMakeFiles/tuimakerTest.dir/build
-.PHONY : tuimakerTest/fast
-
-#=============================================================================
-# Target rules for targets named do_always
-
-# Build rule for target.
-do_always: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 do_always
-.PHONY : do_always
-
-# fast build rule for target.
-do_always/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/do_always.dir/build.make CMakeFiles/do_always.dir/build
-.PHONY : do_always/fast
-
-examples/main.o: examples/main.cpp.o
-.PHONY : examples/main.o
-
-# target to build an object file
-examples/main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/tuimakerTest.dir/build.make CMakeFiles/tuimakerTest.dir/examples/main.cpp.o
-.PHONY : examples/main.cpp.o
-
-examples/main.i: examples/main.cpp.i
-.PHONY : examples/main.i
-
-# target to preprocess a source file
-examples/main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/tuimakerTest.dir/build.make CMakeFiles/tuimakerTest.dir/examples/main.cpp.i
-.PHONY : examples/main.cpp.i
-
-examples/main.s: examples/main.cpp.s
-.PHONY : examples/main.s
-
-# target to generate assembly for a file
-examples/main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/tuimakerTest.dir/build.make CMakeFiles/tuimakerTest.dir/examples/main.cpp.s
-.PHONY : examples/main.cpp.s
-
-src/Utils.o: src/Utils.cpp.o
-.PHONY : src/Utils.o
-
-# target to build an object file
-src/Utils.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/tuimaker.dir/build.make CMakeFiles/tuimaker.dir/src/Utils.cpp.o
-.PHONY : src/Utils.cpp.o
-
-src/Utils.i: src/Utils.cpp.i
-.PHONY : src/Utils.i
-
-# target to preprocess a source file
-src/Utils.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/tuimaker.dir/build.make CMakeFiles/tuimaker.dir/src/Utils.cpp.i
-.PHONY : src/Utils.cpp.i
-
-src/Utils.s: src/Utils.cpp.s
-.PHONY : src/Utils.s
-
-# target to generate assembly for a file
-src/Utils.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/tuimaker.dir/build.make CMakeFiles/tuimaker.dir/src/Utils.cpp.s
-.PHONY : src/Utils.cpp.s
+tests_main/fast:
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/tests_main.dir/build.make tests/CMakeFiles/tests_main.dir/build
+.PHONY : tests_main/fast
 
 # Help Target
 help:
@@ -255,20 +136,8 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
-	@echo "... install"
-	@echo "... install/local"
-	@echo "... install/strip"
-	@echo "... list_install_components"
 	@echo "... rebuild_cache"
-	@echo "... do_always"
-	@echo "... tuimaker"
-	@echo "... tuimakerTest"
-	@echo "... examples/main.o"
-	@echo "... examples/main.i"
-	@echo "... examples/main.s"
-	@echo "... src/Utils.o"
-	@echo "... src/Utils.i"
-	@echo "... src/Utils.s"
+	@echo "... tests_main"
 .PHONY : help
 
 

@@ -4,9 +4,10 @@
 #include <memory>
 #include <map>
 #include <cstring>
-#include "Window.hpp"
-#include "Utils.h"
-#include "WindowPtr.hpp"
+#include <print>
+#include <tuimaker/Window.hpp>
+#include <tuimaker/Utils.hpp>
+#include <tuimaker/WindowPtr.hpp>
 
 namespace tmk
 {
@@ -72,11 +73,11 @@ namespace tmk
         {
             this->render_buffer(id);
 
-            // Need to do this because std::wcout << buffer_ generates weird chars at the end
-            for(size_t i = 0; i < width_ * height_; ++i)
-            {
+            std::wcout << "\x1b[0;0H";
+            for (size_t i = 0; i < width_ * height_; ++i)
                 std::wcout << buffer_[i];
-            }
+
+            std::fflush(stdout);
         }
 
         void set_visible(std::shared_ptr<Window> window)

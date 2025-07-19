@@ -4,7 +4,7 @@
 #include <array>
 #include <vector>
 #include <memory>
-#include "Utils.h"
+#include <tuimaker/Utils.hpp>
 
 namespace tmk
 {
@@ -43,18 +43,36 @@ namespace tmk
     {
     public:
         Window(WindowSize wsize)
-            : size_(wsize),
-              buffer_(std::make_shared<wchar_t[]>(wsize.width * wsize.height)),
+            : buffer_(std::make_shared<wchar_t[]>(size_.width * size_.height)),
+              size_(wsize),
               id_(Utils::get_progressive_id()),
               cur_x_(1), cur_y_(1)
         {
-            for (int i = 0; i < wsize.width * wsize.height; ++i)
-                buffer_[i] = U_SPACE;
+            // Top and bottom sides
+            for (size_t i = 1; i < size_.width - 1; ++i)
+            {
+                buffer_[i] = U_BAR_HORIZONTAL;
+                buffer_[size_.width * (size_.height - 1) + i] = U_BAR_HORIZONTAL;
+            }
+            // Left and right sides
+            for (size_t i = 1; i < size_.height - 1; ++i)
+            {
+                buffer_[i * size_.width] = U_BAR_VERTICAL;
+                buffer_[i * size_.width + (size_.width - 1)] = U_BAR_VERTICAL;
+            }
+            // Corners
+            buffer_[0] = U_CRN_TOP_LEFT;
+            buffer_[size_.width - 1] = U_CRN_TOP_RIGHT;
+            buffer_[(size_.height - 1) * size_.width] = U_CRN_BOTTOM_LEFT;
+            buffer_[(size_.height - 1) * size_.width + (size_.width - 1)] = U_CRN_BOTTOM_RIGHT;
 
-            draw();
+            // Clear the rest
+            for (size_t i = 1; i < size_.height - 1; ++i)
+                for (size_t j = 1; j < size_.width - 1; ++j)
+                    buffer_[i * size_.width + j] = U_SPACE;
         }
 
-        ~Window()
+        virtual ~Window()
         {
         }
 
@@ -66,7 +84,7 @@ namespace tmk
                 return false;
         }
 
-        const WindowSize & get_size(void) const
+        const WindowSize &get_size(void) const
         {
             return size_;
         }
@@ -76,33 +94,13 @@ namespace tmk
             return id_;
         }
 
-        std::shared_ptr<wchar_t[]> get_buffer(void)
+        std::shared_ptr<const wchar_t[]> get_buffer(void)
         {
             return buffer_;
         }
 
-        virtual void draw(void)
-        {
-            // Top and bottom sides
-            for (int i = 1; i < this->size_.width - 1; ++i)
-            {
-                buffer_[i] = U_BAR_HORIZONTAL;
-                buffer_[size_.width * (size_.height - 1) + i] = U_BAR_HORIZONTAL;
-            }
-            // Left and right sides
-            for (int i = 1; i < size_.height - 1; ++i)
-            {
-                buffer_[i * size_.width] = U_BAR_VERTICAL;
-                buffer_[i * size_.width + (size_.width - 1)] = U_BAR_VERTICAL;
-            }
-            // Corners
-            buffer_[0] = U_CRN_TOP_LEFT;
-            buffer_[size_.width - 1] = U_CRN_TOP_RIGHT;
-            buffer_[(size_.height - 1) * size_.width] = U_CRN_BOTTOM_LEFT;
-            buffer_[(size_.height - 1) * size_.width + (size_.width - 1)] = U_CRN_BOTTOM_RIGHT;
-        }
-
-        void set_cursor_pos(int x, int y)
+        void
+        set_cursor_pos(int x, int y)
         {
             cur_x_ = x;
             cur_y_ = y;
@@ -123,10 +121,9 @@ namespace tmk
     protected:
         int cur_x_;
         int cur_y_;
-        std::shared_ptr<wchar_t[]> buffer_;
         WindowSize size_;
         WindowId id_;
         std::vector<WindowId> children_;
-    public:
+        std::shared_ptr<wchar_t[]> buffer_ = nullptr;
     };
 }
