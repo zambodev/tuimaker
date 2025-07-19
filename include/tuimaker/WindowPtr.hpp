@@ -8,7 +8,7 @@ namespace tmk
     class WindowPtr
     {
     public:
-        typedef std::atomic<size_t> InstanceCounter;
+        typedef std::atomic<uint64_t> InstanceCounter;
 
         template <class... Args>
         WindowPtr(Args... args)

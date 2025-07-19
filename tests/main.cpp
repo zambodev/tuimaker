@@ -16,7 +16,7 @@ int main(void)
     auto w2 = wm->create_window<tmk::TextBox>({10, 5, 60, 20}, rootWindow->get_id());
     auto w3 = wm->create_window<tmk::LoadingBar>({10, 25, 32, 5}, rootWindow->get_id());
 
-    for (size_t i = 0; i <= 100; ++i)
+    for (uint64_t i = 0; i <= 100; ++i)
     {
         w2->write(std::format("ciao {}\n", i));
         w3->set(i);

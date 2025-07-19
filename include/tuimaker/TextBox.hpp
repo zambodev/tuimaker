@@ -43,9 +43,9 @@ namespace tmk
 
             if (cur_y_ >= size_.height - 1)
             {
-                for (size_t y = 1; y < size_.height - 2; ++y)
+                for (uint64_t y = 1; y < size_.height - 2; ++y)
                 {
-                    for (size_t x = 1; x < size_.width - 1; ++x)
+                    for (uint64_t x = 1; x < size_.width - 1; ++x)
                     {
                         buffer_[y * size_.width + x] = buffer_[(y + 1) * size_.width + x];
                     }

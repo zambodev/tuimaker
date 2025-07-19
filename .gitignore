@@ -6,3 +6,4 @@ out/
 *.cmake
 CMakeCache.txt
 Makefile
+tests/tests_main

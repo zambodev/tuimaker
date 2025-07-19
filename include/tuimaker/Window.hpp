@@ -33,10 +33,10 @@ namespace tmk
 
     struct WindowSize
     {
-        size_t x;
-        size_t y;
-        size_t width;
-        size_t height;
+        uint64_t x;
+        uint64_t y;
+        uint64_t width;
+        uint64_t height;
     };
 
     class Window
@@ -49,13 +49,13 @@ namespace tmk
               cur_x_(1), cur_y_(1)
         {
             // Top and bottom sides
-            for (size_t i = 1; i < size_.width - 1; ++i)
+            for (uint64_t i = 1; i < size_.width - 1; ++i)
             {
                 buffer_[i] = U_BAR_HORIZONTAL;
                 buffer_[size_.width * (size_.height - 1) + i] = U_BAR_HORIZONTAL;
             }
             // Left and right sides
-            for (size_t i = 1; i < size_.height - 1; ++i)
+            for (uint64_t i = 1; i < size_.height - 1; ++i)
             {
                 buffer_[i * size_.width] = U_BAR_VERTICAL;
                 buffer_[i * size_.width + (size_.width - 1)] = U_BAR_VERTICAL;
@@ -67,8 +67,8 @@ namespace tmk
             buffer_[(size_.height - 1) * size_.width + (size_.width - 1)] = U_CRN_BOTTOM_RIGHT;
 
             // Clear the rest
-            for (size_t i = 1; i < size_.height - 1; ++i)
-                for (size_t j = 1; j < size_.width - 1; ++j)
+            for (uint64_t i = 1; i < size_.height - 1; ++i)
+                for (uint64_t j = 1; j < size_.width - 1; ++j)
                     buffer_[i * size_.width + j] = U_SPACE;
         }
 

@@ -17,20 +17,20 @@ namespace tmk
         ~LoadingBar() {
         };
 
-        void set(size_t percentage)
+        void set(uint64_t percentage)
         {
             constexpr uint8_t MAX_DECIMAL = 9;
             constexpr uint8_t MAX_LB_RANGE = 7;
             constexpr uint8_t MIN_LB_RANGE = 1;
 
             double full_blocks = (((size_.width - 2) / 100.0) * percentage) + 1;
-            double dec = (full_blocks - (size_t)(full_blocks)) * 10;
-            size_t inc_block = std::round(1 + ((dec - 1) * (MAX_LB_RANGE - 1) / (MAX_DECIMAL - 1)));
+            double dec = (full_blocks - (uint64_t)(full_blocks)) * 10;
+            uint64_t inc_block = std::round(1 + ((dec - 1) * (MAX_LB_RANGE - 1) / (MAX_DECIMAL - 1)));
             perc_ = percentage;
 
-            for (size_t x = 1; x < (size_t)(full_blocks); ++x)
+            for (uint64_t x = 1; x < (uint64_t)(full_blocks); ++x)
             {
-                for (size_t y = 1; y < size_.height - 1; ++y)
+                for (uint64_t y = 1; y < size_.height - 1; ++y)
                 {
                     buffer_[y * size_.width + x] = LB_L_100;
                 }
@@ -38,7 +38,7 @@ namespace tmk
 
             if (inc_block > 0)
             {
-                for (size_t y = 1; y < size_.height - 1; ++y)
+                for (uint64_t y = 1; y < size_.height - 1; ++y)
                 {
                     switch (inc_block)
                     {
@@ -85,6 +85,6 @@ namespace tmk
             LB_L_100 = u'\u2588',
         };
 
-        size_t perc_;
+        uint64_t perc_;
     };
 }

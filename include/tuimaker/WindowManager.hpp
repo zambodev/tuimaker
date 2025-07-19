@@ -74,7 +74,7 @@ namespace tmk
             this->render_buffer(id);
 
             std::wcout << "\x1b[0;0H";
-            for (size_t i = 0; i < width_ * height_; ++i)
+            for (uint64_t i = 0; i < width_ * height_; ++i)
                 std::wcout << buffer_[i];
 
             std::fflush(stdout);
