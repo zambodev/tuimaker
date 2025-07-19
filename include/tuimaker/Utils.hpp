@@ -24,6 +24,7 @@ namespace tmk
             setlocale(LC_ALL, "");
 
             struct winsize w;
+
             ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
             return w.ws_col;
 #elif _WIN32
@@ -42,6 +43,7 @@ namespace tmk
             setlocale(LC_ALL, "");
 
             struct winsize w;
+
             ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
             return w.ws_row;
 #elif _WIN32
@@ -64,6 +66,7 @@ namespace tmk
         void enable_buff_input(void)
         {
             struct termios t;
+
             tcgetattr(STDIN_FILENO, &t);
             t.c_lflag &= (~ICANON & ~ECHO);
             tcsetattr(STDIN_FILENO, TCSANOW, &t);
@@ -72,6 +75,7 @@ namespace tmk
         void disable_buff_input(void)
         {
             struct termios t;
+
             tcgetattr(STDIN_FILENO, &t);
             t.c_lflag |= (ICANON & ECHO);
             tcsetattr(STDIN_FILENO, TCSANOW, &t);
