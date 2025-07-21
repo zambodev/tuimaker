@@ -99,8 +99,7 @@ namespace tmk
             return buffer_;
         }
 
-        void
-        set_cursor_pos(int x, int y)
+        void set_cursor_pos(int x, int y)
         {
             cur_x_ = x;
             cur_y_ = y;

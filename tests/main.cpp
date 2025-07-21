@@ -1,4 +1,5 @@
 #include <iostream>
+#include <format>
 #include <chrono>
 #include <thread>
 #include <tuple>
@@ -17,16 +18,20 @@ int main(void)
     auto root = wm->create_window<tmk::Window>({0, 0, tmk::Utils::get_term_width(), tmk::Utils::get_term_height()}, 0);
     auto w2 = wm->create_window<tmk::TextBox>({10, 5, 60, 20}, root->get_id());
     auto w3 = wm->create_window<tmk::LoadingBar>({10, 25, 32, 5}, root->get_id());
-    auto w4 = wm->create_window<tmk::InputBox>({70, 5, 32, 10}, root->get_id());
+    auto w4 = wm->create_window<tmk::InputBox>({70, 5, 32, 5}, root->get_id());
 
-    // for (uint64_t i = 0; i <= 100; ++i)
+    // for (uint64_t i = 0; i < 10; ++i)
     // {
-    //     w3->set(i);
+    //     std::string s = "";
+    //     for (uint64_t x = 0; x < i + 1; ++x)
+    //     {
+    //         s += std::to_string(i);
+    //     }
+    //     s += "\n";
+    //     w4->write(s);
     //     wm->render(root->get_id());
     //     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     // }
-
-    uint64_t i = 0;
 
     while (true)
     {
