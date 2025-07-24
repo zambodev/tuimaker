@@ -118,8 +118,8 @@ namespace tmk
         }
 
     protected:
-        int cur_x_;
-        int cur_y_;
+        uint64_t cur_x_;
+        uint64_t cur_y_;
         WindowSize size_;
         WindowId id_;
         std::vector<WindowId> children_;

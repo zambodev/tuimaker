@@ -39,7 +39,6 @@ namespace tmk
                 }
                 else if (cur_x_ == 1 && cur_y_ > 1)
                 {
-                    --cur_y_;
                     cur_x_ = (is_line_empty(cur_y_) ? 1 : get_last_char_idx(cur_y_));
                     text_buffer_.pop_back();
 
@@ -56,7 +55,7 @@ namespace tmk
                             {
                                 buffer_[y * size_.width + x + 1] = (*it)[x];
                             }
-                            for (uint64_t x = (*it).length() + 1; x < size_.width - 1; ++x)
+                            for (uint64_t x = (*it).length() + 1; x < size_.width - 2; ++x)
                             {
                                 buffer_[y * size_.width + x] = U_SPACE;
                             }
@@ -69,6 +68,8 @@ namespace tmk
                         --cur_y_;
                     }
 
+                    word_len = get_last_word_len(cur_y_);
+
                     cur_x_ = (is_line_empty(cur_y_) ? 1 : get_last_char_idx(cur_y_));
                     it_ = text_buffer_.end() - 1;
 
@@ -79,7 +80,7 @@ namespace tmk
                 --word_len;
 
                 buffer_[(cur_y_ * size_.width) + cur_x_] = U_SPACE;
-                if ((*it_).empty())
+                if (!(*it_).empty())
                     (*it_).pop_back();
 
                 return;
@@ -105,26 +106,32 @@ namespace tmk
                 return;
                 break;
             }
+
             if (cur_x_ == size_.width - 1)
             {
-                int cursor_tmp = 1;
+                uint64_t cursor_tmp = 1;
 
                 text_buffer_.push_back("");
                 it_ = text_buffer_.end() - 1;
 
                 if ((cur_y_ + 1) >= size_.height - 1)
-                    scroll_up();
+                    scroll_up(false);
                 else
                     ++cur_y_;
 
-                if ((word_len + 1) < (size_.width - 2))
+                if (word_len < (size_.width - 2))
                 {
-                    --word_len;
-                    for (; word_len > 0; --word_len)
+                    uint64_t word_len_copy = (word_len - 1);
+
+                    for (; word_len_copy > 0; --word_len_copy)
                     {
                         buffer_[cur_y_ * size_.width + cursor_tmp] =
-                            buffer_[((cur_y_ - 1) * size_.width) + cur_x_ - word_len];
-                        buffer_[((cur_y_ - 1) * size_.width) + cur_x_ - word_len] = U_SPACE;
+                            buffer_[((cur_y_ - 1) * size_.width) + (size_.width - word_len_copy) - 1];
+                        buffer_[((cur_y_ - 1) * size_.width) + (size_.width - word_len_copy) - 1] = U_SPACE;
+
+                        char tmp = (it_ - 1)->back();
+                        it_->push_back(tmp);
+                        (it_ - 1)->pop_back();
 
                         ++cursor_tmp;
                     }
@@ -134,13 +141,14 @@ namespace tmk
                 else
                 {
                     cur_x_ = 1;
+                    word_len = 1;
                 }
             }
             else if (cur_y_ >= size_.height - 1)
                 scroll_up();
 
             buffer_[(cur_y_ * size_.width) + cur_x_] = c;
-            (*it_) += c;
+            it_->push_back(c);
 
             ++word_len;
             ++cur_x_;
@@ -182,6 +190,23 @@ namespace tmk
                     return x + 1;
 
             return 1;
+        }
+
+        uint64_t get_last_word_len(uint64_t line)
+        {
+            uint64_t len = 1;
+
+            uint64_t last_char_idx = get_last_char_idx(line);
+
+            for (uint64_t x = last_char_idx - 1; x > 0; --x)
+            {
+                if (buffer_[line * size_.width + x] == U_SPACE)
+                    break;
+
+                ++len;
+            }
+
+            return len;
         }
 
         std::vector<std::string> text_buffer_;
