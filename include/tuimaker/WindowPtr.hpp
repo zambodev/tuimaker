@@ -10,10 +10,16 @@ namespace tmk
     public:
         typedef std::atomic<uint64_t> InstanceCounter;
 
+        WindowPtr()
+        {
+            instance_ = nullptr;
+            counter_ = nullptr;
+        }
+
         template <class... Args>
         WindowPtr(Args... args)
         {
-            instance_ = dynamic_cast<Window *>(new T(args...));
+            instance_ = new T(args...);
             counter_ = new InstanceCounter(0);
             ++(*counter_);
         }
@@ -21,7 +27,7 @@ namespace tmk
         template <class U>
         WindowPtr(WindowPtr<U> &ptr)
         {
-            if (!std::is_base_of<T, U>::value)
+            if (!std::is_base_of<T, U>::value && !std::is_same<U, T>::value)
             {
                 throw std::runtime_error("Not a derived type!");
             }
@@ -44,14 +50,28 @@ namespace tmk
             }
         }
 
-        T *operator->()
+        WindowPtr<T> &operator=(const WindowPtr<T> &obj)
         {
-            return dynamic_cast<T *>(instance_);
+            instance_ = obj.instance_;
+            counter_ = obj.counter_;
+
+            return *this;
         }
 
-        T *get(void) const
+        T *operator->()
         {
-            return dynamic_cast<T *>(instance_);
+            return instance_;
+        }
+
+        template <class U = T>
+        U *get(void)
+        {
+            if (!std::is_base_of<T, U>::value && !std::is_same<U, T>::value)
+            {
+                throw std::runtime_error("Not a parent type!");
+            }
+
+            return dynamic_cast<U *>(instance_);
         }
 
         InstanceCounter *get_counter(void) const
@@ -60,7 +80,7 @@ namespace tmk
         }
 
     private:
-        Window *instance_;
-        InstanceCounter *counter_;
+        T *instance_ = nullptr;
+        InstanceCounter *counter_ = nullptr;
     };
 }

@@ -18,7 +18,7 @@ namespace tmk
 {
     namespace Utils
     {
-        int get_term_width(void)
+        uint64_t get_term_width(void)
         {
 #ifdef __linux__
             setlocale(LC_ALL, "");
@@ -37,7 +37,7 @@ namespace tmk
 #endif
         }
 
-        int get_term_height(void)
+        uint64_t get_term_height(void)
         {
 #ifdef __linux__
             setlocale(LC_ALL, "");
@@ -56,9 +56,9 @@ namespace tmk
 #endif
         }
 
-        int get_progressive_id(void)
+        uint64_t get_progressive_id(void)
         {
-            static int id = 1;
+            static uint64_t id = 1;
 
             return id++;
         }

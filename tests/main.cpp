@@ -33,10 +33,12 @@ int main(void)
     //     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     // }
 
+    wm->select_window(w4->get_id());
+
     while (true)
     {
-        w4->read();
         // w2->write(std::format("ciao {}\n", ++i));
+        wm->input();
         wm->render(root->get_id());
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
     }

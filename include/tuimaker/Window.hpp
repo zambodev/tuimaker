@@ -42,6 +42,7 @@ namespace tmk
     class Window
     {
     public:
+        Window() = delete;
         Window(WindowSize wsize)
             : buffer_(std::make_shared<wchar_t[]>(size_.width * size_.height)),
               size_(wsize),
@@ -117,7 +118,13 @@ namespace tmk
             return children;
         }
 
+        void select(bool state)
+        {
+            is_selected_ = state;
+        }
+
     protected:
+        bool is_selected_ = false;
         uint64_t cur_x_;
         uint64_t cur_y_;
         WindowSize size_;

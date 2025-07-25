@@ -6,6 +6,7 @@
 #include <cstring>
 #include <print>
 #include <tuimaker/Window.hpp>
+#include <tuimaker/InputBox.hpp>
 #include <tuimaker/Utils.hpp>
 #include <tuimaker/WindowPtr.hpp>
 
@@ -84,12 +85,35 @@ namespace tmk
         {
         }
 
-    private:
-        int width_;
-        int height_;
-        std::map<WindowId, WindowPtr<Window>> window_map_;
-        std::shared_ptr<wchar_t[]> buffer_;
+        void select_window(WindowId id)
+        {
+            selected_win_ = window_map_.find(id)->second;
+            selected_win_->select(true);
+        }
 
+        void input(void)
+        {
+            if (!selected_win_.get())
+                return;
+
+            fd_set sigfd;
+            struct timeval tv;
+
+            FD_ZERO(&sigfd);
+            FD_SET(0, &sigfd);
+
+            tv.tv_sec = 0;
+            tv.tv_usec = 10000; // 10ms
+
+            if (!select(1, &sigfd, NULL, NULL, &tv))
+                return;
+
+            char c = getchar();
+
+            selected_win_.get<InputBox>()->write_char(c);
+        }
+
+    private:
         WindowManager()
             : width_(Utils::get_term_width()), height_(Utils::get_term_height())
         {
@@ -102,5 +126,17 @@ namespace tmk
         ~WindowManager()
         {
         }
+
+        template <class T1, class T2>
+        bool is_sub_of(void)
+        {
+            return std::is_base_of<T1, T2>::value;
+        }
+
+        int width_;
+        int height_;
+        WindowPtr<Window> selected_win_;
+        std::map<WindowId, WindowPtr<Window>> window_map_;
+        std::shared_ptr<wchar_t[]> buffer_;
     };
 }
