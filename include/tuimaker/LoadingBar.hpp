@@ -23,6 +23,9 @@ namespace tmk
             constexpr uint8_t MAX_LB_RANGE = 7;
             constexpr uint8_t MIN_LB_RANGE = 1;
 
+            if (percentage > 100)
+                return;
+
             double full_blocks = (((size_.width - 2) / 100.0) * percentage) + 1;
             double dec = (full_blocks - (uint64_t)(full_blocks)) * 10;
             uint64_t inc_block = std::round(1 + ((dec - 1) * (MAX_LB_RANGE - 1) / (MAX_DECIMAL - 1)));

@@ -35,8 +35,13 @@ int main(void)
 
     wm->select_window(w4->get_id());
 
+    uint64_t counter = 0;
+    uint64_t perc = 0;
+
     while (true)
     {
+        if (((++counter) % 10) == 0)
+            w3->set(++perc);
         // w2->write(std::format("ciao {}\n", ++i));
         wm->input();
         wm->render(root->get_id());
