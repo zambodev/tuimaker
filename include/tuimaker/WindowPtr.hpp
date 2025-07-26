@@ -54,6 +54,7 @@ namespace tmk
         {
             instance_ = obj.instance_;
             counter_ = obj.counter_;
+            ++(*counter_);
 
             return *this;
         }
