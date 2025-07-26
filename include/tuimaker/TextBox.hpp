@@ -119,7 +119,7 @@ namespace tmk
                 else
                     ++cur_y_;
 
-                if (word_len < (size_.width - 2))
+                if (word_len > 0 && word_len < (size_.width - 2))
                 {
                     uint64_t word_len_copy = (word_len - 1);
 

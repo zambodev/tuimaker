@@ -40,8 +40,8 @@ int main(void)
 
     while (true)
     {
-        if (((++counter) % 10) == 0)
-            w3->set(++perc);
+        // if (((++counter) % 10) == 0)
+        //     w3->set(++perc);
         // w2->write(std::format("ciao {}\n", ++i));
         wm->input();
         wm->render(root->get_id());
