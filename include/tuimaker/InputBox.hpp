@@ -2,7 +2,7 @@
 
 #include <chrono>
 #include <tuimaker/TextBox.hpp>
-#include <tuimaker/Utils.hpp>
+#include <tuimaker/TermUtils.hpp>
 
 namespace tmk
 {

@@ -57,7 +57,7 @@ namespace tmk
                             }
                             for (uint64_t x = (*it).length() + 1; x < size_.width - 2; ++x)
                             {
-                                buffer_[y * size_.width + x] = U_SPACE;
+                                buffer_[y * size_.width + x] = TChar::U_SPACE;
                             }
 
                             ++it;
@@ -79,7 +79,7 @@ namespace tmk
                 --cur_x_;
                 --word_len;
 
-                buffer_[(cur_y_ * size_.width) + cur_x_] = U_SPACE;
+                buffer_[(cur_y_ * size_.width) + cur_x_] = TChar::U_SPACE;
                 if (!(*it_).empty())
                     (*it_).pop_back();
 
@@ -87,7 +87,7 @@ namespace tmk
                 break;
             case ' ':
                 word_len = 0;
-                c = U_SPACE;
+                c = TChar::U_SPACE;
                 break;
             case '\n':
                 ++cur_y_;
@@ -127,7 +127,7 @@ namespace tmk
                     {
                         buffer_[cur_y_ * size_.width + cursor_tmp] =
                             buffer_[((cur_y_ - 1) * size_.width) + (size_.width - word_len_copy) - 1];
-                        buffer_[((cur_y_ - 1) * size_.width) + (size_.width - word_len_copy) - 1] = U_SPACE;
+                        buffer_[((cur_y_ - 1) * size_.width) + (size_.width - word_len_copy) - 1] = TChar::U_SPACE;
 
                         char tmp = (it_ - 1)->back();
                         it_->push_back(tmp);
@@ -164,7 +164,7 @@ namespace tmk
                     buffer_[y * size_.width + x] = buffer_[(y + 1) * size_.width + x];
 
                     if (y == (size_.height - 3))
-                        buffer_[(y + 1) * size_.width + x] = U_SPACE;
+                        buffer_[(y + 1) * size_.width + x] = TChar::U_SPACE;
                 }
             }
 
@@ -177,7 +177,7 @@ namespace tmk
         bool is_line_empty(uint64_t line)
         {
             for (uint64_t x = 1; x < size_.width - 1; ++x)
-                if (buffer_[line * size_.width + x] != U_SPACE)
+                if (buffer_[line * size_.width + x] != TChar::U_SPACE)
                     return false;
 
             return true;
@@ -186,7 +186,7 @@ namespace tmk
         uint64_t get_last_char_idx(uint64_t line)
         {
             for (uint64_t x = size_.width - 2; x >= 1; --x)
-                if (buffer_[line * size_.width + x] != U_SPACE)
+                if (buffer_[line * size_.width + x] != TChar::U_SPACE)
                     return x + 1;
 
             return 1;
@@ -200,7 +200,7 @@ namespace tmk
 
             for (uint64_t x = last_char_idx - 1; x > 0; --x)
             {
-                if (buffer_[line * size_.width + x] == U_SPACE)
+                if (buffer_[line * size_.width + x] == TChar::U_SPACE)
                     break;
 
                 ++len;

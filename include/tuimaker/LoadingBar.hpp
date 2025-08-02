@@ -77,7 +77,7 @@ namespace tmk
     private:
         enum : wchar_t
         {
-            LB_L_0 = U_SPACE,
+            LB_L_0 = TChar::U_SPACE,
             LB_L_12 = u'\u258f',
             LB_L_25 = u'\u258e',
             LB_L_37 = u'\u258d',

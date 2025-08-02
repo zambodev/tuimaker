@@ -1,13 +1,13 @@
 #pragma once
 
 #include <vector>
+#include <deque>
 #include <memory>
 #include <map>
 #include <cstring>
-#include <print>
 #include <tuimaker/Window.hpp>
 #include <tuimaker/InputBox.hpp>
-#include <tuimaker/Utils.hpp>
+#include <tuimaker/TermUtils.hpp>
 #include <tuimaker/WindowPtr.hpp>
 
 namespace tmk
@@ -24,7 +24,7 @@ namespace tmk
         }
 
         template <typename T>
-        WindowPtr<T> create_window(WindowSize wsize, WindowId father)
+        WindowPtr<T> create_window(WindowSize wsize)
         {
             if (!std::is_base_of<Window, T>::value)
             {
@@ -34,55 +34,50 @@ namespace tmk
             auto window = WindowPtr<T>(wsize);
             WindowId id = window->get_id();
             window_map_.emplace(id, window);
-
-            if (father > 0)
-            {
-                auto father_win = window_map_.find(father)->second;
-                father_win->add_child(id);
-            }
+            window_stack_.push_front(id);
 
             return window;
         }
 
         void delete_window(WindowPtr<Window> &window)
         {
+            //! Implement
         }
 
-        void render_buffer(WindowId id)
+        void render(void)
         {
-            auto window = window_map_.find(id)->second;
-            auto wsize = window->get_size();
-            auto wbuffer = window->get_buffer();
-            auto wchildren = window->get_children();
-
-            for (int h = 0; h < wsize.height; ++h)
+            // Fill the frame buffer
+            for (auto it = window_stack_.rbegin(); it != window_stack_.rend(); ++it)
             {
-                for (int w = 0; w < wsize.width; ++w)
-                {
-                    buffer_[(wsize.y + h) * width_ + (wsize.x + w)] =
-                        wbuffer[h * wsize.width + w];
-                }
+                this->render_buffer(*it);
             }
 
-            for (auto child : wchildren)
-            {
-                render_buffer(child);
-            }
-        }
-
-        void render(WindowId id)
-        {
-            this->render_buffer(id);
-
+            // Hide curor
             std::wcout << "\033[?25l\033[0;0H";
+            // Need to print char by char to avoid weird chars at the end
             for (uint64_t i = 0; i < width_ * height_; ++i)
                 std::wcout << buffer_[i];
-
+            // Flush the buffer for instant render
             std::fflush(stdout);
         }
 
-        void set_visible(std::shared_ptr<Window> window)
+        void set_on_top(WindowId id)
         {
+            selected_win_ = window_map_.find(id)->second;
+            auto it = std::find(window_stack_.begin(), window_stack_.end(), id);
+
+            if (it == window_stack_.end())
+            {
+                //! Error
+            }
+
+            window_stack_.push_front(*it);
+            window_stack_.erase(it);
+        }
+
+        void set_root(WindowId id)
+        {
+            root_win_ = window_map_.find(id)->second;
         }
 
         void select_window(WindowId id)
@@ -114,13 +109,29 @@ namespace tmk
         }
 
     private:
+        void render_buffer(WindowId id)
+        {
+            auto window = window_map_.find(id)->second;
+            auto wsize = window->get_size();
+            auto wbuffer = window->get_buffer();
+
+            for (int h = 0; h < wsize.height; ++h)
+            {
+                for (int w = 0; w < wsize.width; ++w)
+                {
+                    buffer_[(wsize.y + h) * width_ + (wsize.x + w)] =
+                        wbuffer[h * wsize.width + w];
+                }
+            }
+        }
+
         WindowManager()
-            : width_(Utils::get_term_width()), height_(Utils::get_term_height())
+            : width_(TermUtils::get_term_width()), height_(TermUtils::get_term_height())
         {
             this->buffer_ = std::make_shared<wchar_t[]>(this->width_ * this->height_);
 
             for (unsigned int i = 0; i < this->width_ * this->height_; ++i)
-                this->buffer_[i] = U_SPACE;
+                this->buffer_[i] = TChar::U_SPACE;
         }
 
         ~WindowManager()
@@ -135,8 +146,10 @@ namespace tmk
 
         int width_;
         int height_;
+        WindowPtr<Window> root_win_;
         WindowPtr<Window> selected_win_;
         std::map<WindowId, WindowPtr<Window>> window_map_;
+        std::deque<WindowId> window_stack_;
         std::shared_ptr<wchar_t[]> buffer_;
     };
 }

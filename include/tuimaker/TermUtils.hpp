@@ -16,7 +16,7 @@
 
 namespace tmk
 {
-    namespace Utils
+    namespace TermUtils
     {
         uint64_t get_term_width(void)
         {
