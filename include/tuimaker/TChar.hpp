@@ -28,6 +28,7 @@ namespace tmk
         static constexpr const wchar_t *TC_MAGENTA = L"\e[35m";
         static constexpr const wchar_t *TC_CYAN = L"\e[36m";
         static constexpr const wchar_t *TC_WHITE = L"\e[37m";
+        static constexpr const wchar_t *TC_DEFAULT = L"\e[39m";
         // Background color
         static constexpr const wchar_t *BGC_BLACK = L"\e[40m";
         static constexpr const wchar_t *BGC_RED = L"\e[41m";
@@ -37,6 +38,7 @@ namespace tmk
         static constexpr const wchar_t *BGC_MAGENTA = L"\e[45m";
         static constexpr const wchar_t *BGC_CYAN = L"\e[46m";
         static constexpr const wchar_t *BGC_WHITE = L"\e[47m";
+        static constexpr const wchar_t *BGC_DEFAULT = L"\e[49m";
 
         const wchar_t *text_color;
         const wchar_t *bg_color;
@@ -44,8 +46,8 @@ namespace tmk
 
         TChar()
         {
-            text_color = TC_WHITE;
-            bg_color = BGC_BLACK;
+            text_color = TC_DEFAULT;
+            bg_color = BGC_DEFAULT;
             character = U_SPACE;
         }
 
@@ -56,7 +58,7 @@ namespace tmk
         TChar &operator=(const TChar &obj)
         {
             text_color = obj.text_color;
-            bg_color = obj.text_color;
+            bg_color = obj.bg_color;
             character = obj.character;
 
             return *this;

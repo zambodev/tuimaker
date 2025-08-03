@@ -90,6 +90,13 @@ namespace tmk
             return buffer_[y * size_.width + x];
         }
 
+        void set_bg_color(const wchar_t *color)
+        {
+            for (uint64_t h = 1; h < size_.height - 1; ++h)
+                for (uint64_t w = 1; w < size_.width - 1; ++w)
+                    buffer_[h * size_.width + w].bg_color = color;
+        }
+
         void set_cursor_pos(int x, int y)
         {
             cur_x_ = x;

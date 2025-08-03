@@ -4,6 +4,7 @@
 #include <thread>
 #include <tuple>
 
+#include <tuimaker/TChar.hpp>
 #include <tuimaker/TermUtils.hpp>
 #include <tuimaker/WindowManager.hpp>
 #include <tuimaker/TextBox.hpp>
@@ -34,6 +35,7 @@ int main(void)
     //     std::this_thread::sleep_for(std::chrono::milliseconds(100));
     // }
 
+    w2->set_bg_color(tmk::TChar::BGC_YELLOW);
     wm->select_window(w4->get_id());
 
     wm->set_on_top(w2->get_id());
