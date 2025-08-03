@@ -34,7 +34,10 @@ namespace tmk
             auto window = WindowPtr<T>(wsize);
             WindowId id = window->get_id();
             window_map_.emplace(id, window);
-            window_stack_.push_front(id);
+
+            for (uint64_t h = 0; h < wsize.height; ++h)
+                for (uint64_t w = 0; w < wsize.width; ++w)
+                    id_show_layer_[(wsize.y + h) * width_ + (wsize.x + w)] = id;
 
             return window;
         }
@@ -47,9 +50,15 @@ namespace tmk
         void render(void)
         {
             // Fill the frame buffer
-            for (auto it = window_stack_.rbegin(); it != window_stack_.rend(); ++it)
+            //! Implement something better, this is temporary
+            for (uint64_t h = 0; h < height_; ++h)
             {
-                this->render_buffer(*it);
+                for (uint64_t w = 0; w < width_; ++w)
+                {
+                    auto window = window_map_.find(id_show_layer_[h * width_ + w])->second;
+                    auto wsize = window->get_size();
+                    buffer_[h * width_ + w] = window->get_char_at(w - wsize.x, h - wsize.y);
+                }
             }
 
             // Hide curor
@@ -64,15 +73,11 @@ namespace tmk
         void set_on_top(WindowId id)
         {
             selected_win_ = window_map_.find(id)->second;
-            auto it = std::find(window_stack_.begin(), window_stack_.end(), id);
+            auto wsize = selected_win_->get_size();
 
-            if (it == window_stack_.end())
-            {
-                //! Error
-            }
-
-            window_stack_.push_front(*it);
-            window_stack_.erase(it);
+            for (uint64_t h = 0; h < wsize.height; ++h)
+                for (uint64_t w = 0; w < wsize.width; ++w)
+                    id_show_layer_[(wsize.y + h) * width_ + (wsize.x + w)] = id;
         }
 
         void set_root(WindowId id)
@@ -116,22 +121,21 @@ namespace tmk
             auto wbuffer = window->get_buffer();
 
             for (int h = 0; h < wsize.height; ++h)
-            {
                 for (int w = 0; w < wsize.width; ++w)
-                {
-                    buffer_[(wsize.y + h) * width_ + (wsize.x + w)] =
-                        wbuffer[h * wsize.width + w];
-                }
-            }
+                    buffer_[(wsize.y + h) * width_ + (wsize.x + w)] = wbuffer[h * wsize.width + w];
         }
 
         WindowManager()
             : width_(TermUtils::get_term_width()), height_(TermUtils::get_term_height())
         {
-            this->buffer_ = std::make_shared<wchar_t[]>(this->width_ * this->height_);
+            buffer_ = std::make_shared<TChar[]>(width_ * height_);
+            id_show_layer_ = std::make_unique<WindowId[]>(width_ * height_);
 
-            for (unsigned int i = 0; i < this->width_ * this->height_; ++i)
-                this->buffer_[i] = TChar::U_SPACE;
+            for (unsigned int i = 0; i < width_ * height_; ++i)
+            {
+                buffer_[i].character = TChar::U_SPACE;
+                id_show_layer_[i] = 0;
+            }
         }
 
         ~WindowManager()
@@ -149,7 +153,7 @@ namespace tmk
         WindowPtr<Window> root_win_;
         WindowPtr<Window> selected_win_;
         std::map<WindowId, WindowPtr<Window>> window_map_;
-        std::deque<WindowId> window_stack_;
-        std::shared_ptr<wchar_t[]> buffer_;
+        std::unique_ptr<WindowId[]> id_show_layer_;
+        std::shared_ptr<TChar[]> buffer_;
     };
 }

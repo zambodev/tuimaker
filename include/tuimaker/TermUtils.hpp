@@ -58,9 +58,12 @@ namespace tmk
 
         uint64_t get_progressive_id(void)
         {
-            static uint64_t id = 1;
+            // Skip id 0
+            static uint64_t id = 0;
 
-            return id++;
+            ++id;
+
+            return id;
         }
 
         void enable_buff_input(void)

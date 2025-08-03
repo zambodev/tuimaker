@@ -35,7 +35,7 @@ namespace tmk
             {
                 for (uint64_t y = 1; y < size_.height - 1; ++y)
                 {
-                    buffer_[y * size_.width + x] = LB_L_100;
+                    buffer_[y * size_.width + x].character = LB_L_100;
                 }
             }
 
@@ -46,28 +46,28 @@ namespace tmk
                     switch (inc_block)
                     {
                     case 1:
-                        buffer_[y * size_.width + full_blocks] = LB_L_12;
+                        buffer_[y * size_.width + full_blocks].character = LB_L_12;
                         break;
                     case 2:
-                        buffer_[y * size_.width + full_blocks] = LB_L_25;
+                        buffer_[y * size_.width + full_blocks].character = LB_L_25;
                         break;
                     case 3:
-                        buffer_[y * size_.width + full_blocks] = LB_L_37;
+                        buffer_[y * size_.width + full_blocks].character = LB_L_37;
                         break;
                     case 4:
-                        buffer_[y * size_.width + full_blocks] = LB_L_50;
+                        buffer_[y * size_.width + full_blocks].character = LB_L_50;
                         break;
                     case 5:
-                        buffer_[y * size_.width + full_blocks] = LB_L_62;
+                        buffer_[y * size_.width + full_blocks].character = LB_L_62;
                         break;
                     case 6:
-                        buffer_[y * size_.width + full_blocks] = LB_L_75;
+                        buffer_[y * size_.width + full_blocks].character = LB_L_75;
                         break;
                     case 7:
-                        buffer_[y * size_.width + full_blocks] = LB_L_87;
+                        buffer_[y * size_.width + full_blocks].character = LB_L_87;
                         break;
                     default:
-                        buffer_[y * size_.width + full_blocks] = LB_L_0;
+                        buffer_[y * size_.width + full_blocks].character = LB_L_0;
                         break;
                     }
                 }
