@@ -13,8 +13,7 @@
 
 int main(void)
 {
-    tmk::TermUtils::enable_buff_input();
-    tmk::WindowManager *wm = tmk::WindowManager::get_instance();
+    auto wm = tmk::WindowManager::get_instance();
 
     auto root = wm->create_window<tmk::Window>({0, 0, tmk::TermUtils::get_term_width(), tmk::TermUtils::get_term_height()});
     wm->set_root(root->get_id());
@@ -44,7 +43,7 @@ int main(void)
     uint64_t counter = 0;
     uint64_t perc = 0;
 
-    while (true)
+    // while (true)
     {
         // if (((++counter) % 10) == 0)
         //     w3->set(++perc);
@@ -52,6 +51,4 @@ int main(void)
         wm->render();
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
     }
-
-    tmk::TermUtils::disable_buff_input();
 }

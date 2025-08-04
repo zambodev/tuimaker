@@ -5,6 +5,7 @@
 #include <memory>
 #include <map>
 #include <cstring>
+#include <termios.h>
 #include <tuimaker/Window.hpp>
 #include <tuimaker/InputBox.hpp>
 #include <tuimaker/TermUtils.hpp>
@@ -17,9 +18,18 @@ namespace tmk
     public:
         WindowManager(const WindowManager &obj) = delete;
 
-        static WindowManager *get_instance(void)
+        ~WindowManager()
         {
-            static WindowManager *instance = new WindowManager();
+            // Buffered input on
+            tcsetattr(STDIN_FILENO, TCSANOW, &old_term_);
+
+            // Show cursor
+            std::wcout << L"\e[?25h";
+        }
+
+        static std::shared_ptr<WindowManager> get_instance(void)
+        {
+            static std::shared_ptr<WindowManager> instance = std::shared_ptr<WindowManager>(new WindowManager);
             return instance;
         }
 
@@ -62,7 +72,7 @@ namespace tmk
             }
 
             // Hide curor
-            std::wcout << "\033[?25l\033[0;0H";
+            std::wcout << L"\e[?25l\e[0;0H";
             // Need to print char by char to avoid weird chars at the end
             for (uint64_t i = 0; i < width_ * height_; ++i)
                 std::wcout << buffer_[i];
@@ -136,10 +146,14 @@ namespace tmk
                 buffer_[i].character = TChar::U_SPACE;
                 id_show_layer_[i] = 0;
             }
-        }
 
-        ~WindowManager()
-        {
+            // Buffered input off
+            tcgetattr(STDIN_FILENO, &old_term_);
+            term_ = old_term_;
+            term_.c_cc[VMIN] = 1;
+            term_.c_cc[VTIME] = 0;
+            term_.c_lflag &= (~ICANON & ~ECHO);
+            tcsetattr(STDIN_FILENO, TCSANOW, &term_);
         }
 
         template <class T1, class T2>
@@ -150,6 +164,8 @@ namespace tmk
 
         int width_;
         int height_;
+        struct termios old_term_;
+        struct termios term_;
         WindowPtr<Window> root_win_;
         WindowPtr<Window> selected_win_;
         std::map<WindowId, WindowPtr<Window>> window_map_;

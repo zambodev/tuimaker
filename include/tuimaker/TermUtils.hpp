@@ -7,7 +7,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <clocale>
-#include <termios.h>
+
 #elif _WIN32
 #include <windows.h>
 #include <io.h>
@@ -64,24 +64,6 @@ namespace tmk
             ++id;
 
             return id;
-        }
-
-        void enable_buff_input(void)
-        {
-            struct termios t;
-
-            tcgetattr(STDIN_FILENO, &t);
-            t.c_lflag &= (~ICANON & ~ECHO);
-            tcsetattr(STDIN_FILENO, TCSANOW, &t);
-        }
-
-        void disable_buff_input(void)
-        {
-            struct termios t;
-
-            tcgetattr(STDIN_FILENO, &t);
-            t.c_lflag |= (ICANON & ECHO);
-            tcsetattr(STDIN_FILENO, TCSANOW, &t);
         }
     }
 }
