@@ -9,7 +9,7 @@ namespace tmk
     class LoadingBar : public Window
     {
     public:
-        LoadingBar(WindowSize wsize)
+        LoadingBar(Size wsize)
             : Window(wsize),
               perc_(0) {
               };

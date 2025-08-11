@@ -9,7 +9,7 @@ namespace tmk
     class InputBox : public TextBox
     {
     public:
-        InputBox(WindowSize wsize)
+        InputBox(Size wsize)
             : TextBox(wsize) {
               };
 

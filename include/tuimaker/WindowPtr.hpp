@@ -39,6 +39,9 @@ namespace tmk
 
         ~WindowPtr()
         {
+            if (!counter_)
+                return;
+
             if (*counter_ == 1)
             {
                 delete instance_;

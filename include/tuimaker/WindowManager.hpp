@@ -29,12 +29,13 @@ namespace tmk
 
         static std::shared_ptr<WindowManager> get_instance(void)
         {
-            static std::shared_ptr<WindowManager> instance = std::shared_ptr<WindowManager>(new WindowManager);
+            static auto instance = std::shared_ptr<WindowManager>(new WindowManager());
+
             return instance;
         }
 
         template <typename T>
-        WindowPtr<T> create_window(WindowSize wsize)
+        WindowPtr<T> create_window(Window::Size wsize)
         {
             if (!std::is_base_of<Window, T>::value)
             {
@@ -42,7 +43,7 @@ namespace tmk
             }
 
             auto window = WindowPtr<T>(wsize);
-            WindowId id = window->get_id();
+            Window::Id id = window->get_id();
             window_map_.emplace(id, window);
 
             for (uint64_t h = 0; h < wsize.height; ++h)
@@ -80,7 +81,7 @@ namespace tmk
             std::fflush(stdout);
         }
 
-        void set_on_top(WindowId id)
+        void set_on_top(Window::Id id)
         {
             selected_win_ = window_map_.find(id)->second;
             auto wsize = selected_win_->get_size();
@@ -90,12 +91,12 @@ namespace tmk
                     id_show_layer_[(wsize.y + h) * width_ + (wsize.x + w)] = id;
         }
 
-        void set_root(WindowId id)
+        void set_root(Window::Id id)
         {
             root_win_ = window_map_.find(id)->second;
         }
 
-        void select_window(WindowId id)
+        void select_window(Window::Id id)
         {
             selected_win_ = window_map_.find(id)->second;
             selected_win_->select(true);
@@ -124,7 +125,7 @@ namespace tmk
         }
 
     private:
-        void render_buffer(WindowId id)
+        void render_buffer(Window::Id id)
         {
             auto window = window_map_.find(id)->second;
             auto wsize = window->get_size();
@@ -139,7 +140,7 @@ namespace tmk
             : width_(TermUtils::get_term_width()), height_(TermUtils::get_term_height())
         {
             buffer_ = std::make_shared<TChar[]>(width_ * height_);
-            id_show_layer_ = std::make_unique<WindowId[]>(width_ * height_);
+            id_show_layer_ = std::make_unique<Window::Id[]>(width_ * height_);
 
             for (unsigned int i = 0; i < width_ * height_; ++i)
             {
@@ -168,8 +169,8 @@ namespace tmk
         struct termios term_;
         WindowPtr<Window> root_win_;
         WindowPtr<Window> selected_win_;
-        std::map<WindowId, WindowPtr<Window>> window_map_;
-        std::unique_ptr<WindowId[]> id_show_layer_;
+        std::map<Window::Id, WindowPtr<Window>> window_map_;
+        std::unique_ptr<Window::Id[]> id_show_layer_;
         std::shared_ptr<TChar[]> buffer_;
     };
 }
