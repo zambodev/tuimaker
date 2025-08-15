@@ -113,6 +113,11 @@ namespace tmk
             return buffer_[y * size_.width + x];
         }
 
+        void show_cursor(void)
+        {
+            std::wcout << std::format(L"\e[{};{}H\e[?25h", size_.y + cursor_.y + 1, size_.x + cursor_.x + 1);
+        }
+
         void set_bg_color(const wchar_t *color)
         {
             for (uint64_t h = 0; h < size_.height; ++h)

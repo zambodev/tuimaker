@@ -26,199 +26,177 @@ namespace tmk
 
         void write_char(char c)
         {
-            static uint64_t word_len = 0;
-            const uint64_t cur_default_x = (conf_.border_visible ? 1 : 0);
-            const uint64_t cur_default_y = (conf_.border_visible ? 1 : 0);
+            [[maybe_unused]] auto [cur_def_x, cur_def_y] = size_.get_loop_start(conf_.border_visible);
             [[maybe_unused]] auto [width_lim, height_lim] = size_.get_loop_end(conf_.border_visible);
 
             switch (c)
             {
             // Backspace
             case 127:
-                if (cursor_.x == cur_default_x && cursor_.y == cur_default_y)
+            {
+                if (current_line_it_->empty())
                 {
-                    return;
+                    delete_line();
+
+                    uint64_t curr_line_pos_buff = std::distance(text_buffer_.begin(), current_line_it_);
+
+                    scroll_up(false);
+
+                    refresh_buffer(cur_def_y);
+                    cursor_.x = current_line_it_->length() + cur_def_x;
                 }
-                else if (cursor_.x == cur_default_x && cursor_.y > cur_default_y)
+                else
                 {
-                    scroll_up();
-                    return;
-                }
 
-                --cursor_.x;
-                --word_len;
+                    if (cursor_.x > cur_def_x)
+                        --cursor_.x;
 
-                buffer_[(cursor_.y * size_.width) + cursor_.x].character = TChar::U_SPACE;
-                if (!(*current_line_it_).empty())
                     (*current_line_it_).pop_back();
 
+                    buffer_[(cursor_.y * size_.width) + cursor_.x].character = TChar::U_SPACE;
+                }
+
                 return;
-                break;
-            case ' ':
-                word_len = 0;
-                c = TChar::U_SPACE;
-                break;
+            }
+            break;
             case '\n':
-                word_len = 0;
-
-                if (cursor_.y + 1 >= height_lim)
-                {
-                    scroll_down();
-                }
-                else
-                {
-                    text_buffer_.push_back(L"");
-                    current_line_it_ = text_buffer_.end() - 1;
-                    ++last_show_line_idx_;
-                    ++cursor_.y;
-                }
-
-                cursor_.reset_x(conf_.border_visible);
-
-                return;
-                break;
-            case '\r':
-                cursor_.reset_x(conf_.border_visible);
-                return;
-                break;
-            }
-
-            if (cursor_.x == size_.width - 1)
             {
-                uint64_t cursor_tmp = cur_default_x;
-
-                text_buffer_.push_back(L"");
-                current_line_it_ = text_buffer_.end() - 1;
-
-                if ((cursor_.y + 1) >= size_.height - cur_default_y)
-                    scroll_down(false);
-
-                if (word_len > 0 && word_len < (size_.width - cur_default_x - 1))
-                {
-                    wrap_current_line();
-                }
+                if (cursor_.y < (height_lim - cur_def_y))
+                    ++cursor_.y;
                 else
-                {
-                    cursor_.reset_x(conf_.border_visible);
-                    word_len = 1;
-                }
-            }
-            else if (cursor_.y >= height_lim)
-                scroll_down();
+                    ++first_show_line_idx_;
 
-            buffer_[(cursor_.y * size_.width) + cursor_.x].character = c;
+                cursor_.reset_x(conf_.border_visible);
+
+                add_line();
+                refresh_buffer(cur_def_y);
+
+                return;
+            }
+            break;
+            case '\r':
+            {
+                //! Implement
+
+                return;
+            }
+            break;
+            }
+
             *current_line_it_ += c;
 
-            ++word_len;
-            ++cursor_.x;
+            if (cursor_.x < width_lim)
+            {
+                buffer_[(cursor_.y * size_.width) + cursor_.x].character = c;
+                ++cursor_.x;
+            }
+            else
+            {
+                if (cursor_.y == (height_lim - 1))
+                {
+                    ++first_show_line_idx_;
+                }
+
+                refresh_buffer(first_show_line_idx_);
+            }
         }
 
-        void scroll_up(bool reset_cursor_x = true)
+        void add_line(void)
+        {
+            current_line_it_ = text_buffer_.insert(current_line_it_ + 1, L"");
+        }
+
+        void delete_line(void)
+        {
+            if (current_line_it_ != text_buffer_.begin())
+                current_line_it_ = text_buffer_.erase(current_line_it_);
+        }
+
+        void scroll_up(const bool &refresh = true)
         {
             [[maybe_unused]] auto [w, h] = size_.get_loop_start(conf_.border_visible);
             [[maybe_unused]] auto [width_lim, height_lim] = size_.get_loop_end(conf_.border_visible);
-            std::deque<std::wstring>::reverse_iterator it(current_line_it_ - (height_lim - 1));
+            std::deque<std::wstring>::reverse_iterator it(current_line_it_);
+            if (first_show_line_idx_ > 0)
+                --first_show_line_idx_;
+            else if (cursor_.y > h) [[likely]]
+                --cursor_.y;
 
-            if (++it == text_buffer_.rend())
-            {
-                text_buffer_.push_front(L"");
-                ++last_show_line_idx_;
-            }
+            if (current_line_it_ > text_buffer_.begin())
+                --current_line_it_;
 
-            --current_line_it_;
-            --last_show_line_idx_;
-            cursor_.y = h;
-
-            if (reset_cursor_x)
-                cursor_.reset_x(conf_.border_visible);
-            else
-                cursor_.y = get_last_word_len(std::distance(text_buffer_.begin(), current_line_it_));
-
-            refresh_buffer();
+            if (refresh)
+                refresh_buffer(h);
         }
 
-        void scroll_down(bool reset_cursor_x = true)
+        void
+        scroll_down(const bool &alterate_buffer = true)
         {
+            [[maybe_unused]] auto [w, h] = size_.get_loop_start(conf_.border_visible);
             [[maybe_unused]] auto [width_lim, height_lim] = size_.get_loop_end(conf_.border_visible);
 
-            if (++current_line_it_ == text_buffer_.end())
+            if (cursor_.y < (height_lim - h))
+                ++cursor_.y;
+
+            if (alterate_buffer && ++current_line_it_ == text_buffer_.end())
             {
                 text_buffer_.push_back(L"");
                 current_line_it_ = text_buffer_.end() - 1;
             }
 
-            ++last_show_line_idx_;
-            cursor_.y = height_lim - 1;
-
-            if (reset_cursor_x)
-                cursor_.reset_x(conf_.border_visible);
-            else
-                cursor_.y = get_last_word_len(std::distance(text_buffer_.begin(), current_line_it_));
-
-            refresh_buffer();
-        }
-
-        void wrap_current_line(void)
-        {
-            uint64_t last_word_len = get_last_word_len(std::distance(text_buffer_.begin(), current_line_it_));
-            std::wstring str = L"";
-            std::wstring current_str = *current_line_it_;
-            auto it = current_str.rbegin();
-
-            for (uint64_t i = 0; i < last_word_len; ++i)
-            {
-                str += *it;
-                current_str.pop_back();
-                ++it;
-            }
-
-            text_buffer_.insert(current_line_it_ + 1, str);
-            cursor_.reset_x(conf_.border_visible);
-
-            cursor_.x = last_word_len;
-            ++current_line_it_;
-            ++cursor_.y;
-
-            refresh_buffer();
+            if (text_buffer_.size() > (height_lim - h))
+                ++first_show_line_idx_;
         }
 
     private:
-        void refresh_buffer(void)
+        void refresh_buffer(const uint64_t &buff_line_offset = 0)
         {
             [[maybe_unused]] auto [w, h] = size_.get_loop_start(conf_.border_visible);
             [[maybe_unused]] auto [width_lim, height_lim] = size_.get_loop_end(conf_.border_visible);
-            uint64_t count = (last_show_line_idx_ > (height_lim - 1)
-                                  ? (last_show_line_idx_ - (last_show_line_idx_ - (height_lim - 1)))
-                                  : last_show_line_idx_);
-            auto it = text_buffer_.begin() + last_show_line_idx_ - 1;
+            auto it = text_buffer_.begin() + first_show_line_idx_;
+            uint64_t offset = h;
+            uint64_t x = w;
 
-            for (uint64_t i = 0; i < count; ++i)
+            for (; it != text_buffer_.end() && offset < height_lim; ++it)
             {
-                uint64_t x = w;
-                --height_lim;
+                uint64_t line_char_count = 0;
+                uint64_t word_len = 0;
+
+                x = w;
 
                 for (char c : *it)
                 {
-                    buffer_[height_lim * size_.width + x].character = c;
+                    if (c == ' ')
+                        word_len = 1;
+
+                    if (x >= width_lim)
+                    {
+                        for (uint64_t i = 0; i < word_len; ++i)
+                        {
+                            wchar_t c = buffer_[offset * size_.width + width_lim - i - w].character;
+                            buffer_[offset * size_.width + width_lim - i - w].character = TChar::U_SPACE;
+                            buffer_[(offset + 1) * size_.width + word_len - i].character = c;
+                        }
+
+                        line_char_count = 0;
+                        x = word_len;
+                        ++offset;
+                    }
+
+                    buffer_[offset * size_.width + x].character = c;
+                    ++word_len;
+                    ++line_char_count;
                     ++x;
                 }
-                // Clear the rest of the line
-                for (; x < width_lim; ++x)
-                    buffer_[height_lim * size_.width + x].character = TChar::U_SPACE;
 
-                --it;
+                for (; line_char_count < (width_lim - h); ++line_char_count)
+                    buffer_[offset * size_.width + line_char_count + w].character = TChar::U_SPACE;
+
+                ++offset;
             }
         }
 
-        uint64_t get_last_word_len(uint64_t line)
-        {
-            auto str = text_buffer_.at(line);
-            size_t idx = str.find_last_of(L" ");
-
-            return (idx != std::wstring::npos ? str.length() - idx - 1 : str.length());
-        }
-
-        uint64_t last_show_line_idx_ = 0;
+        uint64_t first_show_line_idx_ = 0;
         std::deque<std::wstring> text_buffer_;
         std::deque<std::wstring>::iterator current_line_it_;
     };

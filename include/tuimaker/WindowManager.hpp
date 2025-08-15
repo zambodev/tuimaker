@@ -55,10 +55,10 @@ namespace tmk
 
         void delete_window(WindowPtr<Window> &window)
         {
-            //! Implement
+            std::wcout << L"\e[?25h";
         }
 
-        void render(void)
+        void render(const bool &show_cursor = false)
         {
             // Fill the frame buffer
             //! Implement something better, this is temporary
@@ -77,6 +77,8 @@ namespace tmk
             // Need to print char by char to avoid weird chars at the end
             for (uint64_t i = 0; i < width_ * height_; ++i)
                 std::wcout << buffer_[i];
+            if (show_cursor)
+                selected_win_->show_cursor();
             // Flush the buffer for instant render
             std::fflush(stdout);
         }
