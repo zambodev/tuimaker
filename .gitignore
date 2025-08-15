@@ -1,10 +1,9 @@
 .vscode
 CMakeFiles/
-Out/
+build/
+out/
 
+*.cmake
 CMakeCache.txt
 Makefile
-
-*.so
-*.cmake
-*.log
+tests/tests_main
