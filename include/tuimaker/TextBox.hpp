@@ -97,9 +97,8 @@ namespace tmk
 
                 if (cursor_.y == (height_lim - 1))
                 {
-                    add_line();
                     ++first_show_line_idx_;
-                    cursor_.reset_x(conf_.border_visible);
+                    cursor_.x = (len - get_line_wrap_idx(current_line_it_, 0, len - 1));
                 }
                 else
                 {
@@ -186,18 +185,23 @@ namespace tmk
                 // Check if current line need wrapping
                 if (len > (width_lim - w))
                 {
-                    for (uint64_t i = 0; i < len && offset < height_lim; ++i)
+                    for (uint64_t i = 0; i < len && offset < height_lim;)
                     {
+                        uint64_t limit = (i + (width_lim - w));
+                        uint64_t res = get_line_wrap_idx(it, i, limit);
+
                         line_char_count = 0;
                         x = w;
 
-                        uint64_t limit = (i + (width_lim - w));
-                        for (; i < get_line_wrap_idx(it, i, limit); ++i)
+                        for (; i < res; ++i)
                         {
                             buffer_[offset * size_.width + x].character = it->at(i);
                             ++line_char_count;
                             ++x;
                         }
+
+                        if (res < limit && res != len)
+                            ++i;
 
                         for (; line_char_count < (width_lim - w); ++line_char_count)
                             buffer_[offset * size_.width + line_char_count + w].character = TChar::U_SPACE;
