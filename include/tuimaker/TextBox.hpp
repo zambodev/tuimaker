@@ -1,6 +1,7 @@
 #pragma once
 
 #include <deque>
+#include <cmath>
 #include <tuimaker/Window.hpp>
 
 namespace tmk
@@ -11,8 +12,8 @@ namespace tmk
         TextBox(Size wsize)
             : Window(wsize)
         {
-            text_buffer_.push_back(L"");
-            current_line_it_ = text_buffer_.end() - 1;
+            text_buffer_.push_front(L"");
+            current_line_it_ = text_buffer_.begin();
         };
 
         ~TextBox() {
@@ -43,7 +44,7 @@ namespace tmk
                     scroll_up(false);
 
                     refresh_buffer(cur_def_y);
-                    cursor_.x = current_line_it_->length() + cur_def_x;
+                    cursor_.x = (current_line_it_->length() + cur_def_x) % (width_lim - cur_def_x);
                 }
                 else
                 {
@@ -92,12 +93,21 @@ namespace tmk
             }
             else
             {
+                uint64_t len = current_line_it_->length();
+
                 if (cursor_.y == (height_lim - 1))
                 {
+                    add_line();
                     ++first_show_line_idx_;
+                    cursor_.reset_x(conf_.border_visible);
+                }
+                else
+                {
+                    ++cursor_.y;
+                    cursor_.x = (len - get_line_wrap_idx(current_line_it_, 0, len - 1));
                 }
 
-                refresh_buffer(first_show_line_idx_);
+                refresh_buffer();
             }
         }
 
@@ -117,6 +127,7 @@ namespace tmk
             [[maybe_unused]] auto [w, h] = size_.get_loop_start(conf_.border_visible);
             [[maybe_unused]] auto [width_lim, height_lim] = size_.get_loop_end(conf_.border_visible);
             std::deque<std::wstring>::reverse_iterator it(current_line_it_);
+
             if (first_show_line_idx_ > 0)
                 --first_show_line_idx_;
             else if (cursor_.y > h) [[likely]]
@@ -129,70 +140,85 @@ namespace tmk
                 refresh_buffer(h);
         }
 
-        void
-        scroll_down(const bool &alterate_buffer = true)
+        void scroll_down(const bool &refresh = true)
         {
             [[maybe_unused]] auto [w, h] = size_.get_loop_start(conf_.border_visible);
             [[maybe_unused]] auto [width_lim, height_lim] = size_.get_loop_end(conf_.border_visible);
 
-            if (cursor_.y < (height_lim - h))
-                ++cursor_.y;
-
-            if (alterate_buffer && ++current_line_it_ == text_buffer_.end())
-            {
-                text_buffer_.push_back(L"");
-                current_line_it_ = text_buffer_.end() - 1;
-            }
-
             if (text_buffer_.size() > (height_lim - h))
                 ++first_show_line_idx_;
+            else if (cursor_.y < (height_lim - h))
+                ++cursor_.y;
+
+            if (current_line_it_ < (text_buffer_.end() - 1))
+                ++current_line_it_;
+
+            if (refresh)
+                refresh_buffer(h);
         }
 
-    private:
-        void refresh_buffer(const uint64_t &buff_line_offset = 0)
+        uint64_t get_line_wrap_idx(const std::deque<std::wstring>::iterator &it,
+                                   uint64_t first_char_idx, uint64_t last_char_idx)
+        {
+            if (last_char_idx > it->length())
+                last_char_idx = it->length();
+
+            for (uint64_t i = (last_char_idx - 1); i >= first_char_idx && i != UINT64_MAX; --i)
+                if (it->at(i) == ' ')
+                    return i;
+
+            return last_char_idx;
+        }
+
+        void refresh_buffer(const bool &set_cursor = false)
         {
             [[maybe_unused]] auto [w, h] = size_.get_loop_start(conf_.border_visible);
             [[maybe_unused]] auto [width_lim, height_lim] = size_.get_loop_end(conf_.border_visible);
             auto it = text_buffer_.begin() + first_show_line_idx_;
             uint64_t offset = h;
-            uint64_t x = w;
 
             for (; it != text_buffer_.end() && offset < height_lim; ++it)
             {
                 uint64_t line_char_count = 0;
-                uint64_t word_len = 0;
+                uint64_t len = it->length();
+                uint64_t x = w;
 
-                x = w;
-
-                for (char c : *it)
+                // Check if current line need wrapping
+                if (len > (width_lim - w))
                 {
-                    if (c == ' ')
-                        word_len = 1;
-
-                    if (x >= width_lim)
+                    for (uint64_t i = 0; i < len && offset < height_lim; ++i)
                     {
-                        for (uint64_t i = 0; i < word_len; ++i)
+                        line_char_count = 0;
+                        x = w;
+
+                        uint64_t limit = (i + (width_lim - w));
+                        for (; i < get_line_wrap_idx(it, i, limit); ++i)
                         {
-                            wchar_t c = buffer_[offset * size_.width + width_lim - i - w].character;
-                            buffer_[offset * size_.width + width_lim - i - w].character = TChar::U_SPACE;
-                            buffer_[(offset + 1) * size_.width + word_len - i].character = c;
+                            buffer_[offset * size_.width + x].character = it->at(i);
+                            ++line_char_count;
+                            ++x;
                         }
 
-                        line_char_count = 0;
-                        x = word_len;
+                        for (; line_char_count < (width_lim - w); ++line_char_count)
+                            buffer_[offset * size_.width + line_char_count + w].character = TChar::U_SPACE;
+
                         ++offset;
                     }
-
-                    buffer_[offset * size_.width + x].character = c;
-                    ++word_len;
-                    ++line_char_count;
-                    ++x;
                 }
+                else
+                {
+                    for (char c : *it)
+                    {
+                        buffer_[offset * size_.width + x].character = c;
+                        ++line_char_count;
+                        ++x;
+                    }
 
-                for (; line_char_count < (width_lim - h); ++line_char_count)
-                    buffer_[offset * size_.width + line_char_count + w].character = TChar::U_SPACE;
+                    for (; line_char_count < (width_lim - h); ++line_char_count)
+                        buffer_[offset * size_.width + line_char_count + w].character = TChar::U_SPACE;
 
-                ++offset;
+                    ++offset;
+                }
             }
         }
 
