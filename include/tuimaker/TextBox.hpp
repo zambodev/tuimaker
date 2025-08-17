@@ -188,7 +188,9 @@ namespace tmk
                     for (uint64_t i = 0; i < len && offset < height_lim;)
                     {
                         uint64_t limit = (i + (width_lim - w));
-                        uint64_t res = get_line_wrap_idx(it, i, limit);
+                        uint64_t res = ((len - i) < (width_lim - w)
+                                            ? len
+                                            : get_line_wrap_idx(it, i, limit));
 
                         line_char_count = 0;
                         x = w;
