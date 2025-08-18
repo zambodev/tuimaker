@@ -39,24 +39,30 @@ namespace tmk
                 {
                     delete_line();
 
-                    uint64_t curr_line_pos_buff = std::distance(text_buffer_.begin(), current_line_it_);
+                    scroll_up(true);
 
-                    scroll_up(false);
-
-                    refresh_buffer(cur_def_y);
-                    cursor_.x = (current_line_it_->length() + cur_def_x) % (width_lim - cur_def_x);
+                    uint64_t len = current_line_it_->length();
+                    uint64_t res = (len < (width_lim - cur_def_x)
+                                        ? len
+                                        : get_line_wrap_idx(current_line_it_, 0, len));
+                    cursor_.x = (res < len ? (len - res) : (len + cur_def_x));
                 }
                 else
                 {
+                    uint64_t old_len = current_line_it_->length();
+                    current_line_it_->pop_back();
 
-                    if (cursor_.x > cur_def_x)
-                        --cursor_.x;
+                    uint64_t len = current_line_it_->length();
+                    uint64_t res = (len <= (width_lim - cur_def_x)
+                                        ? len
+                                        : get_line_wrap_idx(current_line_it_, 0, len));
+                    cursor_.x = (res < len ? (len - res) : (len + cur_def_x));
 
-                    (*current_line_it_).pop_back();
-
-                    buffer_[(cursor_.y * size_.width) + cursor_.x].character = TChar::U_SPACE;
+                    if (old_len > (width_lim - cur_def_x) && len <= (width_lim - cur_def_x))
+                        --cursor_.y;
                 }
 
+                refresh_buffer();
                 return;
             }
             break;
@@ -70,7 +76,7 @@ namespace tmk
                 cursor_.reset_x(conf_.border_visible);
 
                 add_line();
-                refresh_buffer(cur_def_y);
+                refresh_buffer();
 
                 return;
             }
@@ -135,8 +141,14 @@ namespace tmk
             if (current_line_it_ > text_buffer_.begin())
                 --current_line_it_;
 
+            uint64_t len = current_line_it_->length();
+            uint64_t res = (len < (width_lim - w)
+                                ? len
+                                : get_line_wrap_idx(current_line_it_, 0, len));
+            cursor_.x = (res < (len - 1) ? (len - res) : (len + w));
+
             if (refresh)
-                refresh_buffer(h);
+                refresh_buffer();
         }
 
         void scroll_down(const bool &refresh = true)
@@ -152,8 +164,14 @@ namespace tmk
             if (current_line_it_ < (text_buffer_.end() - 1))
                 ++current_line_it_;
 
+            uint64_t len = current_line_it_->length();
+            uint64_t res = (len < (width_lim - w)
+                                ? len
+                                : get_line_wrap_idx(current_line_it_, 0, len));
+            cursor_.x = (res < (len - 1) ? (len - res) : (len + w));
+
             if (refresh)
-                refresh_buffer(h);
+                refresh_buffer();
         }
 
         uint64_t get_line_wrap_idx(const std::deque<std::wstring>::iterator &it,
@@ -169,8 +187,9 @@ namespace tmk
             return last_char_idx;
         }
 
-        void refresh_buffer(const bool &set_cursor = false)
+        void refresh_buffer(void)
         {
+            static uint64_t old_line_count = 0;
             [[maybe_unused]] auto [w, h] = size_.get_loop_start(conf_.border_visible);
             [[maybe_unused]] auto [width_lim, height_lim] = size_.get_loop_end(conf_.border_visible);
             auto it = text_buffer_.begin() + first_show_line_idx_;
@@ -226,6 +245,13 @@ namespace tmk
                     ++offset;
                 }
             }
+
+            if (offset < old_line_count)
+                for (uint64_t i = offset; i < old_line_count; ++i)
+                    for (uint64_t x = w; x < width_lim; ++x)
+                        buffer_[i * size_.width + x].character = TChar::U_SPACE;
+
+            old_line_count = offset;
         }
 
         uint64_t first_show_line_idx_ = 0;
