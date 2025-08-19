@@ -38,28 +38,12 @@ namespace tmk
                 if (current_line_it_->empty())
                 {
                     delete_line();
-
-                    scroll_up(true);
-
-                    uint64_t len = current_line_it_->length();
-                    uint64_t res = (len < (width_lim - cur_def_x)
-                                        ? len
-                                        : get_line_wrap_idx(current_line_it_, 0, len));
-                    cursor_.x = (res < len ? (len - res) : (len + cur_def_x));
+                    scroll_up(false);
                 }
                 else
                 {
                     uint64_t old_len = current_line_it_->length();
                     current_line_it_->pop_back();
-
-                    uint64_t len = current_line_it_->length();
-                    uint64_t res = (len <= (width_lim - cur_def_x)
-                                        ? len
-                                        : get_line_wrap_idx(current_line_it_, 0, len));
-                    cursor_.x = (res < len ? (len - res) : (len + cur_def_x));
-
-                    if (old_len > (width_lim - cur_def_x) && len <= (width_lim - cur_def_x))
-                        --cursor_.y;
                 }
 
                 refresh_buffer();
@@ -102,15 +86,7 @@ namespace tmk
                 uint64_t len = current_line_it_->length();
 
                 if (cursor_.y == (height_lim - 1))
-                {
                     ++first_show_line_idx_;
-                    cursor_.x = (len - get_line_wrap_idx(current_line_it_, 0, len - 1));
-                }
-                else
-                {
-                    ++cursor_.y;
-                    cursor_.x = (len - get_line_wrap_idx(current_line_it_, 0, len - 1));
-                }
 
                 refresh_buffer();
             }
@@ -135,17 +111,9 @@ namespace tmk
 
             if (first_show_line_idx_ > 0)
                 --first_show_line_idx_;
-            else if (cursor_.y > h) [[likely]]
-                --cursor_.y;
 
             if (current_line_it_ > text_buffer_.begin())
                 --current_line_it_;
-
-            uint64_t len = current_line_it_->length();
-            uint64_t res = (len < (width_lim - w)
-                                ? len
-                                : get_line_wrap_idx(current_line_it_, 0, len));
-            cursor_.x = (res < (len - 1) ? (len - res) : (len + w));
 
             if (refresh)
                 refresh_buffer();
@@ -158,22 +126,15 @@ namespace tmk
 
             if (text_buffer_.size() > (height_lim - h))
                 ++first_show_line_idx_;
-            else if (cursor_.y < (height_lim - h))
-                ++cursor_.y;
 
             if (current_line_it_ < (text_buffer_.end() - 1))
                 ++current_line_it_;
-
-            uint64_t len = current_line_it_->length();
-            uint64_t res = (len < (width_lim - w)
-                                ? len
-                                : get_line_wrap_idx(current_line_it_, 0, len));
-            cursor_.x = (res < (len - 1) ? (len - res) : (len + w));
 
             if (refresh)
                 refresh_buffer();
         }
 
+    private:
         uint64_t get_line_wrap_idx(const std::deque<std::wstring>::iterator &it,
                                    uint64_t first_char_idx, uint64_t last_char_idx)
         {
@@ -243,6 +204,13 @@ namespace tmk
                         buffer_[offset * size_.width + line_char_count + w].character = TChar::U_SPACE;
 
                     ++offset;
+                }
+
+                // Set cursor position
+                if (it == current_line_it_)
+                {
+                    cursor_.x = x;
+                    cursor_.y = (offset - 1);
                 }
             }
 
