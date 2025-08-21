@@ -10,6 +10,7 @@
 #include <tuimaker/TextBox.hpp>
 #include <tuimaker/LoadingBar.hpp>
 #include <tuimaker/InputBox.hpp>
+#include <tuimaker/Button.hpp>
 
 int main(void)
 {
@@ -20,6 +21,13 @@ int main(void)
     auto w2 = wm->create_window<tmk::TextBox>({10, 5, 60, 20});
     auto w3 = wm->create_window<tmk::LoadingBar>({10, 25, 32, 5});
     auto w4 = wm->create_window<tmk::InputBox>({70, 5, 32, 16});
+    auto b1 = wm->create_window<tmk::Button>(tmk::Window::Size{120, 10, 10, 2},
+                                             tmk::Window::Conf{true, tmk::TChar::TC_WHITE, tmk::TChar::BGC_BLACK},
+                                             'a',
+                                             [&w2]() -> void
+                                             {
+                                                 w2->write(L"Ciao");
+                                             });
 
     // for (uint64_t i = 0; i < 10; ++i)
     // {
@@ -43,7 +51,7 @@ int main(void)
     {
         // if (((++counter) % 10) == 0)
         //      w3->set(++perc);
-        wm->input();
+        wm->command();
         wm->render(true);
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
     }

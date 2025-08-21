@@ -3,13 +3,15 @@
 #include <vector>
 #include <deque>
 #include <memory>
-#include <map>
+#include <unordered_map>
 #include <cstring>
+#include <utility>
 #include <termios.h>
 #include <tuimaker/Window.hpp>
 #include <tuimaker/InputBox.hpp>
 #include <tuimaker/TermUtils.hpp>
 #include <tuimaker/WindowPtr.hpp>
+#include <tuimaker/Button.hpp>
 
 namespace tmk
 {
@@ -34,17 +36,22 @@ namespace tmk
             return instance;
         }
 
-        template <typename T>
-        WindowPtr<T> create_window(Window::Size wsize)
+        template <typename T, class... Args>
+        WindowPtr<T> create_window(Window::Size wsize, Args &&...args)
         {
             if (!std::is_base_of<Window, T>::value)
             {
                 throw std::runtime_error("Type should derive from Window!");
             }
 
-            auto window = WindowPtr<T>(wsize);
+            auto window = WindowPtr<T>(wsize, std::forward<Args>(args)...);
             Window::Id id = window->get_id();
             window_map_.emplace(id, window);
+
+            if (std::is_same<Button, T>::value)
+            {
+                button_map_.emplace(window.template get<Button>()->get_key(), window);
+            }
 
             for (uint64_t h = 0; h < wsize.height; ++h)
                 for (uint64_t w = 0; w < wsize.width; ++w)
@@ -66,9 +73,12 @@ namespace tmk
             {
                 for (uint64_t w = 0; w < width_; ++w)
                 {
-                    auto window = window_map_.find(id_show_layer_[h * width_ + w])->second;
-                    auto wsize = window->get_size();
-                    buffer_[h * width_ + w] = window->get_char_at(w - wsize.x, h - wsize.y);
+                    if (auto it = window_map_.find(id_show_layer_[h * width_ + w]); it != window_map_.end())
+                    {
+                        auto window = it->second;
+                        auto wsize = window->get_size();
+                        buffer_[h * width_ + w] = window->get_char_at(w - wsize.x, h - wsize.y);
+                    }
                 }
             }
 
@@ -85,23 +95,31 @@ namespace tmk
 
         void set_on_top(Window::Id id)
         {
-            selected_win_ = window_map_.find(id)->second;
-            auto wsize = selected_win_->get_size();
 
-            for (uint64_t h = 0; h < wsize.height; ++h)
-                for (uint64_t w = 0; w < wsize.width; ++w)
-                    id_show_layer_[(wsize.y + h) * width_ + (wsize.x + w)] = id;
+            if (auto it = window_map_.find(id); it != window_map_.end())
+            {
+                selected_win_ = it->second;
+                auto wsize = selected_win_->get_size();
+
+                for (uint64_t h = 0; h < wsize.height; ++h)
+                    for (uint64_t w = 0; w < wsize.width; ++w)
+                        id_show_layer_[(wsize.y + h) * width_ + (wsize.x + w)] = id;
+            }
         }
 
         void set_root(Window::Id id)
         {
-            root_win_ = window_map_.find(id)->second;
+            if (auto it = window_map_.find(id); it != window_map_.end())
+                root_win_ = it->second;
         }
 
         void select_window(Window::Id id)
         {
-            selected_win_ = window_map_.find(id)->second;
-            selected_win_->select(true);
+            if (auto it = window_map_.find(id); it != window_map_.end())
+            {
+                selected_win_ = it->second;
+                selected_win_->select(true);
+            }
         }
 
         void input(void)
@@ -126,16 +144,39 @@ namespace tmk
             selected_win_.get<InputBox>()->write_char(c);
         }
 
+        void command(void)
+        {
+            fd_set sigfd;
+            struct timeval tv;
+
+            FD_ZERO(&sigfd);
+            FD_SET(0, &sigfd);
+
+            tv.tv_sec = 0;
+            tv.tv_usec = 10000; // 10ms
+
+            if (!select(1, &sigfd, NULL, NULL, &tv))
+                return;
+
+            char c = getchar();
+
+            if (auto it = button_map_.find(c); it != button_map_.end())
+                it->second();
+        }
+
     private:
         void render_buffer(Window::Id id)
         {
-            auto window = window_map_.find(id)->second;
-            auto wsize = window->get_size();
-            auto wbuffer = window->get_buffer();
+            if (auto it = window_map_.find(id); it != window_map_.end())
+            {
+                auto window = it->second;
+                auto wsize = window->get_size();
+                auto wbuffer = window->get_buffer();
 
-            for (int h = 0; h < wsize.height; ++h)
-                for (int w = 0; w < wsize.width; ++w)
-                    buffer_[(wsize.y + h) * width_ + (wsize.x + w)] = wbuffer[h * wsize.width + w];
+                for (int h = 0; h < wsize.height; ++h)
+                    for (int w = 0; w < wsize.width; ++w)
+                        buffer_[(wsize.y + h) * width_ + (wsize.x + w)] = wbuffer[h * wsize.width + w];
+            }
         }
 
         WindowManager()
@@ -171,7 +212,8 @@ namespace tmk
         struct termios term_;
         WindowPtr<Window> root_win_;
         WindowPtr<Window> selected_win_;
-        std::map<Window::Id, WindowPtr<Window>> window_map_;
+        std::unordered_map<Window::Id, WindowPtr<Window>> window_map_;
+        std::unordered_map<char, WindowPtr<Button>> button_map_;
         std::unique_ptr<Window::Id[]> id_show_layer_;
         std::shared_ptr<TChar[]> buffer_;
     };

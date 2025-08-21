@@ -1,5 +1,6 @@
 #pragma once
 
+#include <utility>
 #include <tuimaker/Window.hpp>
 
 namespace tmk
@@ -17,9 +18,9 @@ namespace tmk
         }
 
         template <class... Args>
-        WindowPtr(Args... args)
+        WindowPtr(const Window::Size &wsize, Args... args)
         {
-            instance_ = new T(args...);
+            instance_ = new T(wsize, std::forward<Args>(args)...);
             counter_ = new InstanceCounter(0);
             ++(*counter_);
         }
@@ -60,6 +61,11 @@ namespace tmk
             ++(*counter_);
 
             return *this;
+        }
+
+        auto operator()(void)
+        {
+            (*instance_)();
         }
 
         T *operator->()

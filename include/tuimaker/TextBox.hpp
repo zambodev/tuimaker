@@ -9,8 +9,8 @@ namespace tmk
     class TextBox : public Window
     {
     public:
-        TextBox(Size wsize)
-            : Window(wsize)
+        TextBox(Size wsize, const Conf &conf = {true, TChar::TC_DEFAULT, TChar::BGC_DEFAULT})
+            : Window(wsize, conf)
         {
             text_buffer_.push_front(L"");
             current_line_it_ = text_buffer_.begin();
