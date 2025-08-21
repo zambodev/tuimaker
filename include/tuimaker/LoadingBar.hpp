@@ -9,8 +9,8 @@ namespace tmk
     class LoadingBar : public Window
     {
     public:
-        LoadingBar(Size wsize, const Conf &conf = {true, TChar::TC_DEFAULT, TChar::BGC_DEFAULT})
-            : Window(wsize, conf),
+        LoadingBar(const std::string &title, Size wsize, const Conf &conf)
+            : Window(title, wsize, conf),
               perc_(0) {
               };
 

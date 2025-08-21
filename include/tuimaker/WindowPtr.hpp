@@ -18,9 +18,9 @@ namespace tmk
         }
 
         template <class... Args>
-        WindowPtr(const Window::Size &wsize, Args... args)
+        WindowPtr(const std::string &title, const Window::Size &wsize, const Window::Conf &conf, Args &&...args)
         {
-            instance_ = new T(wsize, std::forward<Args>(args)...);
+            instance_ = new T(title, wsize, conf, std::forward<Args>(args)...);
             counter_ = new InstanceCounter(0);
             ++(*counter_);
         }

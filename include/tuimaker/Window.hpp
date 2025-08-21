@@ -63,23 +63,34 @@ namespace tmk
         struct Conf
         {
             bool border_visible;
+            const wchar_t *border_color;
             const wchar_t *text_color;
             const wchar_t *bg_color;
         };
 
         Window() = delete;
-        Window(const Size &wsize, const Conf &conf = {true, TChar::TC_DEFAULT, TChar::BGC_DEFAULT})
+        Window(const std::string &title, const Size &wsize, const Conf &conf)
             : buffer_(std::make_shared<TChar[]>(size_.width * size_.height)),
               size_(wsize),
               conf_(conf),
               id_(TermUtils::get_progressive_id()),
-              cursor_(conf_.border_visible)
+              title_(title)
         {
+            // Set cursor position
             cursor_.reset_x(conf_.border_visible);
             cursor_.reset_y(conf_.border_visible);
-
+            // Color text and background
+            for (uint64_t h = 0; h < size_.height; ++h)
+            {
+                for (uint64_t w = 0; w < size_.width; ++w)
+                {
+                    buffer_[h * size_.width + w].text_color = conf_.text_color;
+                    buffer_[h * size_.width + w].bg_color = conf_.bg_color;
+                }
+            }
+            // Draw borders
             if (conf_.border_visible)
-                draw_borders(conf_.text_color);
+                draw_borders(conf_.border_color);
         }
 
         virtual ~Window()
@@ -90,10 +101,7 @@ namespace tmk
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
-            if (id_ == window.get_id())
-                return true;
-            else
-                return false;
+            return (id_ == window.get_id());
         }
 
         const Size &get_size(void) const
@@ -177,6 +185,7 @@ namespace tmk
     protected:
         mutable std::mutex mtx_;
         bool is_selected_ = false;
+        std::string title_ = "";
         Cursor cursor_;
         Size size_;
         Conf conf_;
@@ -211,6 +220,19 @@ namespace tmk
             buffer_[(size_.height - 1) * size_.width].text_color = color;
             buffer_[(size_.height - 1) * size_.width + (size_.width - 1)].character = TChar::U_CRN_BOTTOM_RIGHT;
             buffer_[(size_.height - 1) * size_.width + (size_.width - 1)].text_color = color;
+            // Draw title
+            if (title_ != "")
+            {
+                auto [w, h] = size_.get_loop_start(conf_.border_visible);
+                auto [width_lim, height_lim] = size_.get_loop_end(conf_.border_visible);
+                uint64_t x = (((width_lim - w) - title_.length()) / 2) + 1;
+
+                for (char c : title_)
+                {
+                    buffer_[x].character = c;
+                    ++x;
+                }
+            }
         }
     };
 }

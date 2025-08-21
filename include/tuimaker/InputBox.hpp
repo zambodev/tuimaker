@@ -9,8 +9,8 @@ namespace tmk
     class InputBox : public TextBox
     {
     public:
-        InputBox(Size wsize, const Conf &conf = {true, TChar::TC_DEFAULT, TChar::BGC_DEFAULT})
-            : TextBox(wsize, conf) {
+        InputBox(const std::string &title, Size wsize, const Conf &conf)
+            : TextBox(title, wsize, conf) {
               };
 
         ~InputBox() {

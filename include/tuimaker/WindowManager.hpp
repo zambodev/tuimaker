@@ -38,7 +38,7 @@ namespace tmk
         }
 
         template <typename T, class... Args>
-        WindowPtr<T> create_window(Window::Size wsize, Args &&...args)
+        WindowPtr<T> create_window(const std::string &title, const Window::Size &wsize, const Window::Conf &conf, Args &&...args)
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
@@ -47,7 +47,7 @@ namespace tmk
                 throw std::runtime_error("Type should derive from Window!");
             }
 
-            auto window = WindowPtr<T>(wsize, std::forward<Args>(args)...);
+            auto window = WindowPtr<T>(title, wsize, conf, std::forward<Args>(args)...);
             Window::Id id = window->get_id();
             window_map_.emplace(id, window);
 

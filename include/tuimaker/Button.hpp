@@ -9,9 +9,9 @@ namespace tmk
     class Button : public Window
     {
     public:
-        Button(Size wsize, const Conf &conf, const char key, std::function<void(void)> f)
+        Button(const std::string &title, Size wsize, const Conf &conf, const char key, std::function<void(void)> f)
             : key_(key),
-              Window(wsize, conf)
+              Window(title, wsize, conf)
         {
             func_ = f;
         }
