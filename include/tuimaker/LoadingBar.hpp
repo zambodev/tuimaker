@@ -19,6 +19,8 @@ namespace tmk
 
         void set(uint64_t percentage)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             constexpr uint8_t MAX_DECIMAL = 9;
             constexpr uint8_t MAX_LB_RANGE = 7;
             constexpr uint8_t MIN_LB_RANGE = 1;

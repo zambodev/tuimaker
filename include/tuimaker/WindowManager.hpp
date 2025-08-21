@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <cstring>
 #include <utility>
+#include <mutex>
 #include <termios.h>
 #include <tuimaker/Window.hpp>
 #include <tuimaker/InputBox.hpp>
@@ -39,6 +40,8 @@ namespace tmk
         template <typename T, class... Args>
         WindowPtr<T> create_window(Window::Size wsize, Args &&...args)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             if (!std::is_base_of<Window, T>::value)
             {
                 throw std::runtime_error("Type should derive from Window!");
@@ -62,11 +65,15 @@ namespace tmk
 
         void delete_window(WindowPtr<Window> &window)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             std::wcout << L"\e[?25h";
         }
 
         void render(const bool &show_cursor = false)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             // Fill the frame buffer
             //! Implement something better, this is temporary
             for (uint64_t h = 0; h < height_; ++h)
@@ -95,6 +102,7 @@ namespace tmk
 
         void set_on_top(Window::Id id)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
 
             if (auto it = window_map_.find(id); it != window_map_.end())
             {
@@ -109,12 +117,16 @@ namespace tmk
 
         void set_root(Window::Id id)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             if (auto it = window_map_.find(id); it != window_map_.end())
                 root_win_ = it->second;
         }
 
         void select_window(Window::Id id)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             if (auto it = window_map_.find(id); it != window_map_.end())
             {
                 selected_win_ = it->second;
@@ -124,6 +136,8 @@ namespace tmk
 
         void input(void)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             if (!selected_win_.get())
                 return;
 
@@ -146,6 +160,8 @@ namespace tmk
 
         void command(void)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             fd_set sigfd;
             struct timeval tv;
 
@@ -206,6 +222,7 @@ namespace tmk
             return std::is_base_of<T1, T2>::value;
         }
 
+        mutable std::mutex mtx_;
         int width_;
         int height_;
         struct termios old_term_;

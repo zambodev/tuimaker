@@ -42,6 +42,8 @@ namespace tmk
                 }
                 else
                 {
+                    std::lock_guard<std::mutex> lock(mtx_);
+
                     uint64_t old_len = current_line_it_->length();
                     current_line_it_->pop_back();
                 }
@@ -52,12 +54,15 @@ namespace tmk
             break;
             case '\n':
             {
-                if (cursor_.y < (height_lim - cur_def_y))
-                    ++cursor_.y;
-                else
-                    ++first_show_line_idx_;
+                { // Mutex lock
+                    std::lock_guard<std::mutex> lock(mtx_);
+                    if (cursor_.y < (height_lim - cur_def_y))
+                        ++cursor_.y;
+                    else
+                        ++first_show_line_idx_;
 
-                cursor_.reset_x(conf_.border_visible);
+                    cursor_.reset_x(conf_.border_visible);
+                } // Mutex lock end
 
                 add_line();
                 refresh_buffer();
@@ -74,6 +79,7 @@ namespace tmk
             break;
             }
 
+            std::lock_guard<std::mutex> lock(mtx_);
             *current_line_it_ += c;
 
             if (cursor_.x < width_lim)
@@ -94,17 +100,23 @@ namespace tmk
 
         void add_line(void)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             current_line_it_ = text_buffer_.insert(current_line_it_ + 1, L"");
         }
 
         void delete_line(void)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             if (current_line_it_ != text_buffer_.begin())
                 current_line_it_ = text_buffer_.erase(current_line_it_);
         }
 
         void scroll_up(const bool &refresh = true)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             [[maybe_unused]] auto [w, h] = size_.get_loop_start(conf_.border_visible);
             [[maybe_unused]] auto [width_lim, height_lim] = size_.get_loop_end(conf_.border_visible);
             std::deque<std::wstring>::reverse_iterator it(current_line_it_);
@@ -121,6 +133,8 @@ namespace tmk
 
         void scroll_down(const bool &refresh = true)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             [[maybe_unused]] auto [w, h] = size_.get_loop_start(conf_.border_visible);
             [[maybe_unused]] auto [width_lim, height_lim] = size_.get_loop_end(conf_.border_visible);
 

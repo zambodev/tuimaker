@@ -4,6 +4,7 @@
 #include <array>
 #include <vector>
 #include <memory>
+#include <mutex>
 #include <tuimaker/TChar.hpp>
 #include <tuimaker/TermUtils.hpp>
 
@@ -87,6 +88,8 @@ namespace tmk
 
         bool operator==(Window &window)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             if (id_ == window.get_id())
                 return true;
             else
@@ -95,6 +98,8 @@ namespace tmk
 
         const Size &get_size(void) const
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             return size_;
         }
 
@@ -105,6 +110,8 @@ namespace tmk
 
         std::shared_ptr<const TChar[]> get_buffer(void)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             return buffer_;
         }
 
@@ -115,11 +122,15 @@ namespace tmk
 
         void show_cursor(void)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             std::wcout << std::format(L"\e[{};{}H\e[?25h", size_.y + cursor_.y + 1, size_.x + cursor_.x + 1);
         }
 
         void set_bg_color(const wchar_t *color)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             for (uint64_t h = 0; h < size_.height; ++h)
                 for (uint64_t w = 0; w < size_.width; ++w)
                     buffer_[h * size_.width + w].bg_color = color;
@@ -127,6 +138,8 @@ namespace tmk
 
         void set_text_color(const wchar_t *color)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             auto [w, h] = size_.get_loop_start(conf_.border_visible);
             auto [width_lim, height_lim] = size_.get_loop_end(conf_.border_visible);
 
@@ -137,17 +150,22 @@ namespace tmk
 
         void set_border_color(const wchar_t *color)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             draw_borders(color);
         }
 
         void set_cursor_pos(int x, int y)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             cursor_.x = x;
             cursor_.y = y;
         }
 
         void select(bool state)
         {
+            std::lock_guard<std::mutex> lock(mtx_);
             is_selected_ = state;
         }
 
@@ -157,6 +175,7 @@ namespace tmk
         }
 
     protected:
+        mutable std::mutex mtx_;
         bool is_selected_ = false;
         Cursor cursor_;
         Size size_;

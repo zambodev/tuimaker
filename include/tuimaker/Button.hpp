@@ -27,6 +27,8 @@ namespace tmk
 
         void operator()(void) const
         {
+            std::lock_guard<std::mutex> lock(mtx_);
+
             func_();
         }
 
