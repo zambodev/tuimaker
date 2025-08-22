@@ -22,14 +22,14 @@ int main(void)
     wm->set_root(root->get_id());
     auto w2 = wm->create_window<tmk::TextBox>("", {10, 5, 60, 20}, {true, tmk::TChar::TC_BLACK, tmk::TChar::TC_WHITE, tmk::TChar::BGC_YELLOW});
     auto w3 = wm->create_window<tmk::LoadingBar>("Something", {10, 25, 32, 5}, default_conf);
-    auto w4 = wm->create_window<tmk::InputBox>("wtf", {70, 5, 32, 16}, default_conf);
+    auto w4 = wm->create_window<tmk::InputBox>("wtf", {60, 5, 32, 16}, default_conf);
     auto b1 = wm->create_window<tmk::Button>("Btn1",
                                              tmk::Window::Size{120, 10, 10, 2},
                                              default_conf,
                                              'a',
-                                             [&w2]() -> void
+                                             [&wm, &w2]() -> void
                                              {
-                                                 w2->write(L"Ciao");
+                                                 wm->set_on_top(w2->get_id());
                                              });
 
     wm->select_window(w4->get_id());

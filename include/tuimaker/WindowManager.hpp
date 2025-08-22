@@ -218,21 +218,25 @@ namespace tmk
          */
         auto command(void) -> void
         {
-            std::lock_guard<std::mutex> lock(mtx_);
+            char c = 0;
 
-            fd_set sigfd;
-            struct timeval tv;
+            { // Mutex lock
+                std::lock_guard<std::mutex> lock(mtx_);
 
-            FD_ZERO(&sigfd);
-            FD_SET(0, &sigfd);
+                fd_set sigfd;
+                struct timeval tv;
 
-            tv.tv_sec = 0;
-            tv.tv_usec = 10000; // 10ms
+                FD_ZERO(&sigfd);
+                FD_SET(0, &sigfd);
 
-            if (!select(1, &sigfd, NULL, NULL, &tv))
-                return;
+                tv.tv_sec = 0;
+                tv.tv_usec = 10000; // 10ms
 
-            char c = getchar();
+                if (!select(1, &sigfd, NULL, NULL, &tv))
+                    return;
+
+                c = getchar();
+            } // Mutex lock end
 
             if (auto it = button_map_.find(c); it != button_map_.end())
                 it->second();
