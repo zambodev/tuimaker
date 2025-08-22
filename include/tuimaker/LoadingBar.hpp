@@ -6,18 +6,39 @@
 
 namespace tmk
 {
+    /**
+     * @class LoadingBar
+     * @brief Loading bar based on percentage
+     *
+     */
     class LoadingBar : public Window
     {
     public:
+        /**
+         * @brief Construct a new Loading Bar object
+         *
+         * @param title Window title
+         * @param wsize Window size
+         * @param conf Window configuration
+         */
         LoadingBar(const std::string &title, Size wsize, const Conf &conf)
             : Window(title, wsize, conf),
               perc_(0) {
               };
 
+        /**
+         * @brief Destroy the Loading Bar object
+         *
+         */
         ~LoadingBar() {
         };
 
-        void set(uint64_t percentage)
+        /**
+         * @brief Set loading bar satatus
+         *
+         * @param percentage Loading bar new percentage
+         */
+        auto set(uint64_t percentage) -> void
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
@@ -77,6 +98,11 @@ namespace tmk
         }
 
     private:
+        /**
+         * @brief Loading bar unicode characters
+         * Each cell has 8 steps for a fluent loading animation
+         * (ex. 10 terminal cells have 80 possible positions)
+         */
         enum : wchar_t
         {
             LB_L_0 = TChar::U_SPACE,

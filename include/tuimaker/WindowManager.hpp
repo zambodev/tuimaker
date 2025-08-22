@@ -16,11 +16,20 @@
 
 namespace tmk
 {
+    /**
+     * @class WindowManager
+     * @brief Window manager singleton class
+     *
+     */
     class WindowManager
     {
     public:
         WindowManager(const WindowManager &obj) = delete;
 
+        /**
+         * @brief Destroy the Window Manager object
+         *
+         */
         ~WindowManager()
         {
             // Buffered input on
@@ -30,15 +39,31 @@ namespace tmk
             std::wcout << L"\e[?25h";
         }
 
-        static std::shared_ptr<WindowManager> get_instance(void)
+        /**
+         * @brief Get the instance object
+         *
+         * @return std::shared_ptr<WindowManager>
+         */
+        static auto get_instance(void) -> std::shared_ptr<WindowManager>
         {
             static auto instance = std::shared_ptr<WindowManager>(new WindowManager());
 
             return instance;
         }
 
+        /**
+         * @brief Create a window object
+         *
+         * @tparam T Window type
+         * @tparam Args Window parameters types
+         * @param title Window title
+         * @param wsize Window size
+         * @param conf Window configuration
+         * @param args Window arguments
+         * @return WindowPtr<T>
+         */
         template <typename T, class... Args>
-        WindowPtr<T> create_window(const std::string &title, const Window::Size &wsize, const Window::Conf &conf, Args &&...args)
+        auto create_window(const std::string &title, const Window::Size &wsize, const Window::Conf &conf, Args &&...args) -> WindowPtr<T>
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
@@ -63,14 +88,24 @@ namespace tmk
             return window;
         }
 
-        void delete_window(WindowPtr<Window> &window)
+        /**
+         * @brief Delete window
+         *
+         * @param window Window instance
+         */
+        auto delete_window(WindowPtr<Window> &window) -> void
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
             std::wcout << L"\e[?25h";
         }
 
-        void render(const bool &show_cursor = false)
+        /**
+         * @brief Render the screen buffer to screen
+         *
+         * @param show_cursor
+         */
+        auto render(const bool &show_cursor = false) -> void
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
@@ -100,7 +135,12 @@ namespace tmk
             std::fflush(stdout);
         }
 
-        void set_on_top(Window::Id id)
+        /**
+         * @brief Set a window on top
+         *
+         * @param id Window id
+         */
+        auto set_on_top(Window::Id id) -> void
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
@@ -115,7 +155,12 @@ namespace tmk
             }
         }
 
-        void set_root(Window::Id id)
+        /**
+         * @brief Set root window
+         *
+         * @param id Window id
+         */
+        auto set_root(Window::Id id) -> void
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
@@ -123,7 +168,12 @@ namespace tmk
                 root_win_ = it->second;
         }
 
-        void select_window(Window::Id id)
+        /**
+         * @brief Select a window
+         *
+         * @param id Window id
+         */
+        auto select_window(Window::Id id) -> void
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
@@ -134,7 +184,11 @@ namespace tmk
             }
         }
 
-        void input(void)
+        /**
+         * @brief Get user text input
+         * Send the user input to selected window
+         */
+        auto input(void) -> void
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
@@ -158,7 +212,11 @@ namespace tmk
             selected_win_.get<InputBox>()->write_char(c);
         }
 
-        void command(void)
+        /**
+         * @brief Get command text input
+         * Run the corresponding key -> command
+         */
+        auto command(void) -> void
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
@@ -181,23 +239,13 @@ namespace tmk
         }
 
     private:
-        void render_buffer(Window::Id id)
-        {
-            if (auto it = window_map_.find(id); it != window_map_.end())
-            {
-                auto window = it->second;
-                auto wsize = window->get_size();
-                auto wbuffer = window->get_buffer();
-
-                for (int h = 0; h < wsize.height; ++h)
-                    for (int w = 0; w < wsize.width; ++w)
-                        buffer_[(wsize.y + h) * width_ + (wsize.x + w)] = wbuffer[h * wsize.width + w];
-            }
-        }
-
+        /**
+         * @brief Construct a new Window Manager object
+         *
+         */
         WindowManager()
-            : width_(TermUtils::get_term_width()), height_(TermUtils::get_term_height())
         {
+            std::tie(width_, height_) = TermUtils::get_term_size();
             buffer_ = std::make_shared<TChar[]>(width_ * height_);
             id_show_layer_ = std::make_unique<Window::Id[]>(width_ * height_);
 
@@ -214,12 +262,6 @@ namespace tmk
             term_.c_cc[VTIME] = 0;
             term_.c_lflag &= (~ICANON & ~ECHO);
             tcsetattr(STDIN_FILENO, TCSANOW, &term_);
-        }
-
-        template <class T1, class T2>
-        bool is_sub_of(void)
-        {
-            return std::is_base_of<T1, T2>::value;
         }
 
         mutable std::mutex mtx_;

@@ -4,9 +4,15 @@
 
 namespace tmk
 {
+    /**
+     * @struct TChar
+     * @brief Terminal character structure that holds the character
+     * the text color and the background color for each cell
+     *
+     */
     struct TChar
     {
-        // Window borders
+        // Window borders unicode characters
         static constexpr wchar_t U_BAR_HORIZONTAL = u'\u2501';
         static constexpr wchar_t U_BAR_VERTICAL = u'\u2503';
         static constexpr wchar_t U_CRN_TOP_LEFT = u'\u250f';
@@ -44,6 +50,10 @@ namespace tmk
         const wchar_t *bg_color;
         wchar_t character;
 
+        /**
+         * @brief Construct a new TChar object
+         *
+         */
         TChar()
         {
             text_color = TC_DEFAULT;
@@ -51,11 +61,21 @@ namespace tmk
             character = U_SPACE;
         }
 
+        /**
+         * @brief Destroy the TChar object
+         *
+         */
         ~TChar()
         {
         }
 
-        TChar &operator=(const TChar &obj)
+        /**
+         * @brief Copy constructor
+         *
+         * @param obj TChar object
+         * @return TChar&
+         */
+        auto operator=(const TChar &obj) -> TChar &
         {
             text_color = obj.text_color;
             bg_color = obj.bg_color;
@@ -65,7 +85,14 @@ namespace tmk
         }
     };
 
-    std::wostream &operator<<(std::wostream &out, const TChar &obj)
+    /**
+     * @brief Operator<< overload for wide stdout
+     *
+     * @param out std::wostream
+     * @param obj TChar object
+     * @return std::wostream&
+     */
+    auto operator<<(std::wostream &out, const TChar &obj) -> std::wostream &
     {
         out << obj.text_color << obj.bg_color << obj.character;
 

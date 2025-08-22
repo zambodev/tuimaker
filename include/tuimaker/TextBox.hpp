@@ -6,9 +6,21 @@
 
 namespace tmk
 {
+    /**
+     * @class TextBox
+     * @brief Text window
+     *
+     */
     class TextBox : public Window
     {
     public:
+        /**
+         * @brief Construct a new Text Box object
+         *
+         * @param title Window title
+         * @param wsize Window size
+         * @param conf Window configuration
+         */
         TextBox(const std::string &title, Size wsize, const Conf &conf)
             : Window(title, wsize, conf)
         {
@@ -16,16 +28,30 @@ namespace tmk
             current_line_it_ = text_buffer_.begin();
         };
 
+        /**
+         * @brief Destroy the Text Box object
+         *
+         */
         ~TextBox() {
         };
 
-        void write(const std::wstring &str)
+        /**
+         * @brief Write a string
+         *
+         * @param str
+         */
+        auto write(const std::wstring &str) -> void
         {
             for (int i = 0; i < str.length(); ++i)
                 write_char(str[i]);
         }
 
-        void write_char(char c)
+        /**
+         * @brief Write a single char
+         * It has line wrap and left align
+         * @param c
+         */
+        auto write_char(char c) -> void
         {
             [[maybe_unused]] auto [cur_def_x, cur_def_y] = size_.get_loop_start(conf_.border_visible);
             [[maybe_unused]] auto [width_lim, height_lim] = size_.get_loop_end(conf_.border_visible);
@@ -98,14 +124,22 @@ namespace tmk
             }
         }
 
-        void add_line(void)
+        /**
+         * @brief Add a new line in the text buffer after the current line
+         *
+         */
+        auto add_line(void) -> void
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
             current_line_it_ = text_buffer_.insert(current_line_it_ + 1, L"");
         }
 
-        void delete_line(void)
+        /**
+         * @brief Delete the current line
+         *
+         */
+        auto delete_line(void) -> void
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
@@ -113,7 +147,12 @@ namespace tmk
                 current_line_it_ = text_buffer_.erase(current_line_it_);
         }
 
-        void scroll_up(const bool &refresh = true)
+        /**
+         * @brief Scroll up by one line
+         *
+         * @param refresh
+         */
+        auto scroll_up(const bool &refresh = true) -> void
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
@@ -131,7 +170,12 @@ namespace tmk
                 refresh_buffer();
         }
 
-        void scroll_down(const bool &refresh = true)
+        /**
+         * @brief Scroll down by one line
+         *
+         * @param refresh
+         */
+        auto scroll_down(const bool &refresh = true) -> void
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
@@ -149,8 +193,16 @@ namespace tmk
         }
 
     private:
-        uint64_t get_line_wrap_idx(const std::deque<std::wstring>::iterator &it,
-                                   uint64_t first_char_idx, uint64_t last_char_idx)
+        /**
+         * @brief Calculate the next point of wrap of the line
+         *
+         * @param it Buffer iterator to the line to wrap
+         * @param first_char_idx Index of the first char of the line
+         * @param last_char_idx Index of the last char in the line
+         * @return uint64_t
+         */
+        auto get_line_wrap_idx(const std::deque<std::wstring>::iterator &it,
+                               uint64_t first_char_idx, uint64_t last_char_idx) -> uint64_t
         {
             if (last_char_idx > it->length())
                 last_char_idx = it->length();
@@ -162,7 +214,11 @@ namespace tmk
             return last_char_idx;
         }
 
-        void refresh_buffer(void)
+        /**
+         * @brief Update the window buffer with the text buffer
+         *
+         */
+        auto refresh_buffer(void) -> void
         {
             static uint64_t old_line_count = 0;
             [[maybe_unused]] auto [w, h] = size_.get_loop_start(conf_.border_visible);

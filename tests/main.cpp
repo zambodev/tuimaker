@@ -17,7 +17,8 @@ int main(void)
     auto wm = tmk::WindowManager::get_instance();
     auto default_conf = tmk::Window::Conf{true, tmk::TChar::TC_DEFAULT, tmk::TChar::TC_DEFAULT, tmk::TChar::BGC_DEFAULT};
 
-    auto root = wm->create_window<tmk::Window>("root", {0, 0, tmk::TermUtils::get_term_width(), tmk::TermUtils::get_term_height()}, default_conf);
+    auto [term_w, term_h] = tmk::TermUtils::get_term_size();
+    auto root = wm->create_window<tmk::Window>("root", {0, 0, term_w, term_h}, default_conf);
     wm->set_root(root->get_id());
     auto w2 = wm->create_window<tmk::TextBox>("", {10, 5, 60, 20}, {true, tmk::TChar::TC_BLACK, tmk::TChar::TC_WHITE, tmk::TChar::BGC_YELLOW});
     auto w3 = wm->create_window<tmk::LoadingBar>("Something", {10, 25, 32, 5}, default_conf);
