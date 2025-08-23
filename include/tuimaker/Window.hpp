@@ -193,7 +193,7 @@ namespace tmk
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
-            std::wcout << std::format(L"\e[{};{}H\e[?25h", size_.y + cursor_.y + 1, size_.x + cursor_.x + 1);
+            std::wcout << std::format(L"\x1b[{};{}H\x1b[?25h", size_.y + cursor_.y + 1, size_.x + cursor_.x + 1);
         }
 
         /**

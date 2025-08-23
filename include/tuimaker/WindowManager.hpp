@@ -36,7 +36,7 @@ namespace tmk
             tcsetattr(STDIN_FILENO, TCSANOW, &old_term_);
 
             // Show cursor
-            std::wcout << L"\e[?25h";
+            std::wcout << L"\x1b[?25h";
         }
 
         /**
@@ -97,7 +97,7 @@ namespace tmk
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
-            std::wcout << L"\e[?25h";
+            std::wcout << L"\x1b[?25h";
         }
 
         /**
@@ -125,7 +125,7 @@ namespace tmk
             }
 
             // Hide curor
-            std::wcout << L"\e[?25l\e[0;0H";
+            std::wcout << L"\x1b[?25l\x1b[0;0H";
             // Need to print char by char to avoid weird chars at the end
             for (uint64_t i = 0; i < width_ * height_; ++i)
                 std::wcout << buffer_[i];

@@ -26,25 +26,25 @@ namespace tmk
         static constexpr wchar_t U_T_BOTTOM = u'\u253B';
         static constexpr wchar_t U_SPACE = u'\u0020';
         // Text color
-        static constexpr const wchar_t *TC_BLACK = L"\e[30m";
-        static constexpr const wchar_t *TC_RED = L"\e[31m";
-        static constexpr const wchar_t *TC_GREEN = L"\e[32m";
-        static constexpr const wchar_t *TC_YELLOW = L"\e[33m";
-        static constexpr const wchar_t *TC_BLUE = L"\e[34m";
-        static constexpr const wchar_t *TC_MAGENTA = L"\e[35m";
-        static constexpr const wchar_t *TC_CYAN = L"\e[36m";
-        static constexpr const wchar_t *TC_WHITE = L"\e[37m";
-        static constexpr const wchar_t *TC_DEFAULT = L"\e[39m";
+        static constexpr const wchar_t *TC_BLACK = L"\x1b[30m";
+        static constexpr const wchar_t *TC_RED = L"\x1b[31m";
+        static constexpr const wchar_t *TC_GREEN = L"\x1b[32m";
+        static constexpr const wchar_t *TC_YELLOW = L"\x1b[33m";
+        static constexpr const wchar_t *TC_BLUE = L"\x1b[34m";
+        static constexpr const wchar_t *TC_MAGENTA = L"\x1b[35m";
+        static constexpr const wchar_t *TC_CYAN = L"\x1b[36m";
+        static constexpr const wchar_t *TC_WHITE = L"\x1b[37m";
+        static constexpr const wchar_t *TC_DEFAULT = L"\x1b[39m";
         // Background color
-        static constexpr const wchar_t *BGC_BLACK = L"\e[40m";
-        static constexpr const wchar_t *BGC_RED = L"\e[41m";
-        static constexpr const wchar_t *BGC_GREEN = L"\e[42m";
-        static constexpr const wchar_t *BGC_YELLOW = L"\e[43m";
-        static constexpr const wchar_t *BGC_BLUE = L"\e[44m";
-        static constexpr const wchar_t *BGC_MAGENTA = L"\e[45m";
-        static constexpr const wchar_t *BGC_CYAN = L"\e[46m";
-        static constexpr const wchar_t *BGC_WHITE = L"\e[47m";
-        static constexpr const wchar_t *BGC_DEFAULT = L"\e[49m";
+        static constexpr const wchar_t *BGC_BLACK = L"\x1b[40m";
+        static constexpr const wchar_t *BGC_RED = L"\x1b[41m";
+        static constexpr const wchar_t *BGC_GREEN = L"\x1b[42m";
+        static constexpr const wchar_t *BGC_YELLOW = L"\x1b[43m";
+        static constexpr const wchar_t *BGC_BLUE = L"\x1b[44m";
+        static constexpr const wchar_t *BGC_MAGENTA = L"\x1b[45m";
+        static constexpr const wchar_t *BGC_CYAN = L"\x1b[46m";
+        static constexpr const wchar_t *BGC_WHITE = L"\x1b[47m";
+        static constexpr const wchar_t *BGC_DEFAULT = L"\x1b[49m";
 
         const wchar_t *text_color;
         const wchar_t *bg_color;
