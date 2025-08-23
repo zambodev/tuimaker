@@ -42,6 +42,7 @@ namespace tmk
 #ifdef __linux__
             tcsetattr(STDIN_FILENO, TCSANOW, &old_term_);
 #elif _WIN32
+            WSACleanup();
             DWORD mode = 0;
             GetConsoleMode(term_, &mode);
             SetConsoleMode(term_, (mode & ENABLE_ECHO_INPUT));
@@ -288,6 +289,7 @@ namespace tmk
             term_.c_lflag &= (~ICANON & ~ECHO);
             tcsetattr(STDIN_FILENO, TCSANOW, &term_);
 #elif _WIN32
+            WSAStartup(MAKEWORD(2, 2), &wsa_data_);
             term_ = GetStdHandle(STD_INPUT_HANDLE);
             DWORD mode = 0;
             GetConsoleMode(term_, &mode);
@@ -302,6 +304,7 @@ namespace tmk
         struct termios old_term_;
         struct termios term_;
 #elif _WIN32
+        WSADATA wsa_data_;
         HANDLE term_;
 #endif
         WindowPtr<Window> root_win_;

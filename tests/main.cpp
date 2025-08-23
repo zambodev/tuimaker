@@ -4,9 +4,9 @@
 #include <thread>
 #include <tuple>
 
+#include <tuimaker/WindowManager.hpp>
 #include <tuimaker/TChar.hpp>
 #include <tuimaker/TermUtils.hpp>
-#include <tuimaker/WindowManager.hpp>
 #include <tuimaker/TextBox.hpp>
 #include <tuimaker/LoadingBar.hpp>
 #include <tuimaker/InputBox.hpp>
@@ -41,7 +41,7 @@ int main(void)
     {
         // if (((++counter) % 10) == 0)
         //      w3->set(++perc);
-        wm->command();
+        wm->input();
         wm->render(true);
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
     }
