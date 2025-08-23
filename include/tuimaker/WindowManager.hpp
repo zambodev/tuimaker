@@ -7,7 +7,11 @@
 #include <cstring>
 #include <utility>
 #include <mutex>
+#ifdef __linux__
 #include <termios.h>
+#elif _WIN32
+#include <conio.h>
+#endif
 #include <tuimaker/Window.hpp>
 #include <tuimaker/InputBox.hpp>
 #include <tuimaker/TermUtils.hpp>
@@ -207,7 +211,11 @@ namespace tmk
             if (!select(1, &sigfd, NULL, NULL, &tv))
                 return;
 
+#ifdef __linux__
             char c = getchar();
+#elif _WIN32
+            char c = getch();
+#endif
 
             selected_win_.get<InputBox>()->write_char(c);
         }
@@ -235,7 +243,11 @@ namespace tmk
                 if (!select(1, &sigfd, NULL, NULL, &tv))
                     return;
 
+#ifdef __linux__
                 c = getchar();
+#elif _WIN32
+                c = getch();
+#endif
             } // Mutex lock end
 
             if (auto it = button_map_.find(c); it != button_map_.end())
