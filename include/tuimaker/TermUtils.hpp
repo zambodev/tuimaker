@@ -16,9 +16,18 @@
 
 namespace tmk
 {
+    /**
+     * @brief Terminal utilities namespace
+     *
+     */
     namespace TermUtils
     {
-        uint64_t get_term_width(void)
+        /**
+         * @brief Get the term size
+         *
+         * @return std::pair<uint64_t, uint64_t>
+         */
+        auto get_term_size(void) -> std::pair<uint64_t, uint64_t>
         {
 #ifdef __linux__
             setlocale(LC_ALL, "");
@@ -26,44 +35,30 @@ namespace tmk
             struct winsize w;
 
             ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-            return w.ws_col;
+
+            return {w.ws_col, w.ws_row};
 #elif _WIN32
             _setmode(_fileno(stdout), _O_U16TEXT);
 
             CONSOLE_SCREEN_BUFFER_INFO csbi;
 
             GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-            return csbi.srWindow.Right - csbi.srWindow.Left + 1;
+
+            return {(csbi.srWindow.Right - csbi.srWindow.Left + 1),
+                    (csbi.srWindow.Bottom - csbi.srWindow.Top + 1)};
 #endif
         }
 
-        uint64_t get_term_height(void)
+        /**
+         * @brief Get the progressive id object
+         * @note This should be changed
+         * @return uint64_t
+         */
+        auto get_progressive_id(void) -> uint64_t
         {
-#ifdef __linux__
-            setlocale(LC_ALL, "");
-
-            struct winsize w;
-
-            ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
-            return w.ws_row;
-#elif _WIN32
-            _setmode(_fileno(stdout), _O_U16TEXT);
-
-            CONSOLE_SCREEN_BUFFER_INFO csbi;
-
-            GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-            return csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-#endif
-        }
-
-        uint64_t get_progressive_id(void)
-        {
-            // Skip id 0
             static uint64_t id = 0;
-
-            ++id;
-
-            return id;
+            // Skip id 0
+            return ++id;
         }
     }
 }
