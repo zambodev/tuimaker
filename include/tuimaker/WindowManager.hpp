@@ -10,6 +10,8 @@
 #ifdef __linux__
 #include <termios.h>
 #elif _WIN32
+#include <winsock2.h>
+#include <windows.h>
 #include <conio.h>
 #endif
 #include <tuimaker/Window.hpp>
@@ -37,7 +39,13 @@ namespace tmk
         ~WindowManager()
         {
             // Buffered input on
+#ifdef __linux__
             tcsetattr(STDIN_FILENO, TCSANOW, &old_term_);
+#elif _WIN32
+            DWORD mode = 0;
+            GetConsoleMode(term_, &mode);
+            SetConsoleMode(term_, (mode & ENABLE_ECHO_INPUT));
+#endif
 
             // Show cursor
             std::wcout << L"\x1b[?25h";
@@ -271,6 +279,7 @@ namespace tmk
                 id_show_layer_[i] = 0;
             }
 
+#ifdef __linux__
             // Buffered input off
             tcgetattr(STDIN_FILENO, &old_term_);
             term_ = old_term_;
@@ -278,13 +287,23 @@ namespace tmk
             term_.c_cc[VTIME] = 0;
             term_.c_lflag &= (~ICANON & ~ECHO);
             tcsetattr(STDIN_FILENO, TCSANOW, &term_);
+#elif _WIN32
+            term_ = GetStdHandle(STD_INPUT_HANDLE);
+            DWORD mode = 0;
+            GetConsoleMode(term_, &mode);
+            SetConsoleMode(term_, mode & (~ENABLE_ECHO_INPUT));
+#endif
         }
 
         mutable std::mutex mtx_;
         int width_;
         int height_;
+#ifdef __linux__
         struct termios old_term_;
         struct termios term_;
+#elif _WIN32
+        HANDLE term_;
+#endif
         WindowPtr<Window> root_win_;
         WindowPtr<Window> selected_win_;
         std::unordered_map<Window::Id, WindowPtr<Window>> window_map_;
