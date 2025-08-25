@@ -7,6 +7,7 @@
 #include <cstring>
 #include <utility>
 #include <mutex>
+#include <algorithm>
 #ifdef __linux__
 #include <termios.h>
 #elif _WIN32
@@ -88,15 +89,10 @@ namespace tmk
             auto window = WindowPtr<T>(title, wsize, conf, std::forward<Args>(args)...);
             Window::Id id = window->get_id();
             window_map_.emplace(id, window);
+            window_stack_.push_front(id);
 
             if (std::is_same<Button, T>::value)
-            {
                 button_map_.emplace(window.template get<Button>()->get_key(), window);
-            }
-
-            for (uint64_t h = 0; h < wsize.height; ++h)
-                for (uint64_t w = 0; w < wsize.width; ++w)
-                    id_show_layer_[(wsize.y + h) * width_ + (wsize.x + w)] = id;
 
             return window;
         }
@@ -124,17 +120,18 @@ namespace tmk
 
             // Fill the frame buffer
             //! Implement something better, this is temporary
-            for (uint64_t h = 0; h < height_; ++h)
+            for (auto it = window_stack_.rbegin(); it != window_stack_.rend(); ++it)
             {
-                for (uint64_t w = 0; w < width_; ++w)
-                {
-                    if (auto it = window_map_.find(id_show_layer_[h * width_ + w]); it != window_map_.end())
-                    {
-                        auto window = it->second;
-                        auto wsize = window->get_size();
-                        buffer_[h * width_ + w] = window->get_char_at(w - wsize.x, h - wsize.y);
-                    }
-                }
+                auto window_it = window_map_.find(*it);
+                if (window_it == window_map_.end())
+                    continue;
+
+                auto window = window_it->second;
+                auto size = window->get_size();
+
+                for (uint64_t x = 0; x < size.width; ++x)
+                    for (uint64_t y = 0; y < size.height; ++y)
+                        buffer_[(size.y + y) * width_ + (size.x + x)] = window->get_char_at(x, y);
             }
 
             // Hide curor
@@ -157,15 +154,12 @@ namespace tmk
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
-            if (auto it = window_map_.find(id); it != window_map_.end())
-            {
-                selected_win_ = it->second;
-                auto wsize = selected_win_->get_size();
+            auto it = std::find(window_stack_.begin(), window_stack_.end(), id);
+            if (it == window_stack_.end())
+                return;
 
-                for (uint64_t h = 0; h < wsize.height; ++h)
-                    for (uint64_t w = 0; w < wsize.width; ++w)
-                        id_show_layer_[(wsize.y + h) * width_ + (wsize.x + w)] = id;
-            }
+            window_stack_.erase(it);
+            window_stack_.push_front(*it);
         }
 
         /**
@@ -272,13 +266,9 @@ namespace tmk
         {
             std::tie(width_, height_) = TermUtils::get_term_size();
             buffer_ = std::make_shared<TChar[]>(width_ * height_);
-            id_show_layer_ = std::make_unique<Window::Id[]>(width_ * height_);
 
             for (unsigned int i = 0; i < width_ * height_; ++i)
-            {
                 buffer_[i].character = TChar::U_SPACE;
-                id_show_layer_[i] = 0;
-            }
 
 #ifdef __linux__
             // Buffered input off
@@ -309,9 +299,9 @@ namespace tmk
 #endif
         WindowPtr<Window> root_win_;
         WindowPtr<Window> selected_win_;
+        std::deque<Window::Id> window_stack_;
         std::unordered_map<Window::Id, WindowPtr<Window>> window_map_;
         std::unordered_map<char, WindowPtr<Button>> button_map_;
-        std::unique_ptr<Window::Id[]> id_show_layer_;
         std::shared_ptr<TChar[]> buffer_;
     };
 }
