@@ -7,6 +7,7 @@
 #include <mutex>
 #include <tuimaker/TChar.hpp>
 #include <tuimaker/TermUtils.hpp>
+#include <tuimaker/WindowManager.hpp>
 
 namespace tmk
 {
@@ -17,6 +18,8 @@ namespace tmk
      */
     class Window
     {
+        friend class WindowManager;
+
     public:
         /**
          * @brief Window id
@@ -286,6 +289,18 @@ namespace tmk
         std::shared_ptr<TChar[]> buffer_ = nullptr;
 
     private:
+        /**
+         * @brief Move window to new global position
+         *
+         * @param x New window X position
+         * @param y New window Y position
+         */
+        auto move(uint64_t x, uint64_t y) -> void
+        {
+            size_.x = x;
+            size_.y = y;
+        }
+
         /**
          * @brief Draw window borders
          *

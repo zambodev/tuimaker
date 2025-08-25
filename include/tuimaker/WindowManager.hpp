@@ -192,6 +192,24 @@ namespace tmk
         }
 
         /**
+         * @brief Move a window to new position
+         *
+         * @param window Window shared pointer
+         * @param x New window X poistion
+         * @param y New window Y position
+         */
+        auto move_window(WindowPtr<Window> window, uint64_t x, uint64_t y) -> void
+        {
+            std::lock_guard<std::mutex> lock(mtx_);
+
+            auto size = window->get_size();
+            if ((x + size.width) >= width_)
+                return;
+
+            window->move(x, y);
+        }
+
+        /**
          * @brief Get user text input
          * Send the user input to selected window
          */

@@ -22,7 +22,7 @@ int main(void)
     wm->set_root(root->get_id());
     auto w2 = wm->create_window<tmk::TextBox>("", {10, 5, 60, 20}, {true, tmk::TChar::TC_BLACK, tmk::TChar::TC_WHITE, tmk::TChar::BGC_YELLOW});
     auto w3 = wm->create_window<tmk::LoadingBar>("Something", {10, 25, 32, 5}, default_conf);
-    auto w4 = wm->create_window<tmk::InputBox>("wtf", {60, 5, 32, 16}, default_conf);
+    auto w4 = wm->create_window<tmk::InputBox>("wtf", {10, 5, 32, 16}, default_conf);
     auto b1 = wm->create_window<tmk::Button>("Btn1",
                                              tmk::Window::Size{120, 10, 10, 2},
                                              default_conf,
@@ -39,8 +39,12 @@ int main(void)
 
     while (true)
     {
-        // if (((++counter) % 10) == 0)
-        //      w3->set(++perc);
+        if (((++counter) % 2) == 0)
+        {
+            auto size = w4->get_size();
+            wm->move_window(w4, size.x + 1, size.y);
+        }
+
         wm->input();
         wm->render(true);
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
