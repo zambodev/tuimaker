@@ -29,7 +29,7 @@ int main(void)
                                              'a',
                                              [&wm, &w2]() -> void
                                              {
-                                                 wm->set_on_top(w2->get_id());
+                                                 w2->toggle_visibility();
                                              });
 
     wm->select_window(w4->get_id());
@@ -45,7 +45,7 @@ int main(void)
             wm->move_window(w4->get_id(), x + 1, y);
         }
 
-        wm->input();
+        wm->command();
         wm->render(true);
         std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 60));
     }

@@ -290,9 +290,31 @@ namespace tmk
             return conf_.border_visible;
         }
 
+        /**
+         * @brief Set the window visibility
+         *
+         * @param is_visible
+         */
+        auto set_visibility(bool is_visible) -> void
+        {
+            std::lock_guard<std::mutex> lock(mtx_);
+            is_hidden_ = is_visible;
+        }
+
+        /**
+         * @brief Toggle the window visibility
+         *
+         */
+        auto toggle_visibility(void) -> void
+        {
+            std::lock_guard<std::mutex> lock(mtx_);
+            is_hidden_ = !is_hidden_;
+        }
+
     protected:
         mutable std::mutex mtx_;
         bool is_selected_ = false;
+        bool is_hidden_ = false;
         std::string title_ = "";
         Cursor cursor_;
         Size size_;

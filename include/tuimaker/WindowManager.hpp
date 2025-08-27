@@ -131,6 +131,10 @@ namespace tmk
                     continue;
 
                 auto window = window_it->second;
+
+                if (window->is_hidden_)
+                    continue;
+
                 auto [w_width, w_height] = window->get_size();
                 auto [w_x, w_y] = window->get_coords();
 
