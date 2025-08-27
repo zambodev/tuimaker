@@ -41,8 +41,8 @@ int main(void)
     {
         if (((++counter) % 2) == 0)
         {
-            auto size = w4->get_size();
-            wm->move_window(w4->get_id(), size.x + 1, size.y);
+            auto [x, y] = w4->get_coords();
+            wm->move_window(w4->get_id(), x + 1, y);
         }
 
         wm->input();

@@ -131,11 +131,12 @@ namespace tmk
                     continue;
 
                 auto window = window_it->second;
-                auto size = window->get_size();
+                auto [w_width, w_height] = window->get_size();
+                auto [w_x, w_y] = window->get_coords();
 
-                for (uint64_t x = 0; x < size.width; ++x)
-                    for (uint64_t y = 0; y < size.height; ++y)
-                        buffer_[(size.y + y) * width_ + (size.x + x)] = window->get_char_at(x, y);
+                for (uint64_t x = 0; x < w_width; ++x)
+                    for (uint64_t y = 0; y < w_height; ++y)
+                        buffer_[(w_y + y) * width_ + (w_x + x)] = window->get_char_at(x, y);
             }
 
             // Hide curor
@@ -211,9 +212,9 @@ namespace tmk
                 return;
 
             auto window = it->second;
-            auto size = window->get_size();
+            auto [w_width, w_height] = window->get_size();
 
-            if ((x + size.width) >= width_)
+            if ((x + w_width) >= width_)
                 return;
 
             window->move(x, y);

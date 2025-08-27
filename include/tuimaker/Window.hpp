@@ -143,15 +143,27 @@ namespace tmk
         }
 
         /**
-         * @brief Get the Window size
+         * @brief Get the widnow size (width, height)
          *
-         * @return const Size&
+         * @return std::pair<uint64_t, uint64_t>
          */
-        auto get_size(void) const -> const Size &
+        auto get_size(void) const -> std::pair<uint64_t, uint64_t>
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
-            return size_;
+            return {size_.width, size_.height};
+        }
+
+        /**
+         * @brief Get the window coords (X, Y)
+         *
+         * @return std::pair<uint64_t, uint64_t>
+         */
+        auto get_coords(void) const -> std::pair<uint64_t, uint64_t>
+        {
+            std::lock_guard<std::mutex> lock(mtx_);
+
+            return {size_.x, size_.y};
         }
 
         /**
