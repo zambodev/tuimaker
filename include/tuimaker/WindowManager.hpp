@@ -102,11 +102,15 @@ namespace tmk
          *
          * @param window Window instance
          */
-        auto delete_window(WindowPtr<Window> &window) -> void
+        auto delete_window(const Window::Id id) -> void
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
-            std::wcout << L"\x1b[?25h";
+            // Erase window from map
+            window_map_.erase(id);
+            // Erase window from stack
+            if (auto it = std::find(window_stack_.begin(), window_stack_.end(), id); it != window_stack_.end())
+                window_stack_.erase(it);
         }
 
         /**
@@ -150,7 +154,7 @@ namespace tmk
          *
          * @param id Window id
          */
-        auto set_on_top(Window::Id id) -> void
+        auto set_on_top(const Window::Id id) -> void
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
@@ -167,7 +171,7 @@ namespace tmk
          *
          * @param id Window id
          */
-        auto set_root(Window::Id id) -> void
+        auto set_root(const Window::Id id) -> void
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
@@ -180,7 +184,7 @@ namespace tmk
          *
          * @param id Window id
          */
-        auto select_window(Window::Id id) -> void
+        auto select_window(const Window::Id id) -> void
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
@@ -198,11 +202,17 @@ namespace tmk
          * @param x New window X poistion
          * @param y New window Y position
          */
-        auto move_window(WindowPtr<Window> window, uint64_t x, uint64_t y) -> void
+        auto move_window(const Window::Id id, uint64_t x, uint64_t y) -> void
         {
             std::lock_guard<std::mutex> lock(mtx_);
+            auto it = window_map_.find(id);
 
+            if (it == window_map_.end())
+                return;
+
+            auto window = it->second;
             auto size = window->get_size();
+
             if ((x + size.width) >= width_)
                 return;
 

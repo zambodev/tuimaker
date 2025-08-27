@@ -42,7 +42,7 @@ int main(void)
         if (((++counter) % 2) == 0)
         {
             auto size = w4->get_size();
-            wm->move_window(w4, size.x + 1, size.y);
+            wm->move_window(w4->get_id(), size.x + 1, size.y);
         }
 
         wm->input();
