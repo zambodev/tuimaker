@@ -7,6 +7,7 @@
 #include <mutex>
 #include <tuimaker/TChar.hpp>
 #include <tuimaker/TermUtils.hpp>
+#include <tuimaker/WindowManager.hpp>
 
 namespace tmk
 {
@@ -17,6 +18,8 @@ namespace tmk
      */
     class Window
     {
+        friend class WindowManager;
+
     public:
         /**
          * @brief Window id
@@ -140,15 +143,27 @@ namespace tmk
         }
 
         /**
-         * @brief Get the Window size
+         * @brief Get the widnow size (width, height)
          *
-         * @return const Size&
+         * @return std::pair<uint64_t, uint64_t>
          */
-        auto get_size(void) const -> const Size &
+        auto get_size(void) const -> std::pair<uint64_t, uint64_t>
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
-            return size_;
+            return {size_.width, size_.height};
+        }
+
+        /**
+         * @brief Get the window coords (X, Y)
+         *
+         * @return std::pair<uint64_t, uint64_t>
+         */
+        auto get_coords(void) const -> std::pair<uint64_t, uint64_t>
+        {
+            std::lock_guard<std::mutex> lock(mtx_);
+
+            return {size_.x, size_.y};
         }
 
         /**
@@ -193,7 +208,7 @@ namespace tmk
         {
             std::lock_guard<std::mutex> lock(mtx_);
 
-            std::wcout << std::format(L"\e[{};{}H\e[?25h", size_.y + cursor_.y + 1, size_.x + cursor_.x + 1);
+            std::wcout << std::format(L"\x1b[{};{}H\x1b[?25h", size_.y + cursor_.y + 1, size_.x + cursor_.x + 1);
         }
 
         /**
@@ -275,9 +290,31 @@ namespace tmk
             return conf_.border_visible;
         }
 
+        /**
+         * @brief Set the window visibility
+         *
+         * @param is_visible
+         */
+        auto set_visibility(bool is_visible) -> void
+        {
+            std::lock_guard<std::mutex> lock(mtx_);
+            is_hidden_ = is_visible;
+        }
+
+        /**
+         * @brief Toggle the window visibility
+         *
+         */
+        auto toggle_visibility(void) -> void
+        {
+            std::lock_guard<std::mutex> lock(mtx_);
+            is_hidden_ = !is_hidden_;
+        }
+
     protected:
         mutable std::mutex mtx_;
         bool is_selected_ = false;
+        bool is_hidden_ = false;
         std::string title_ = "";
         Cursor cursor_;
         Size size_;
@@ -286,6 +323,18 @@ namespace tmk
         std::shared_ptr<TChar[]> buffer_ = nullptr;
 
     private:
+        /**
+         * @brief Move window to new global position
+         *
+         * @param x New window X position
+         * @param y New window Y position
+         */
+        auto move(uint64_t x, uint64_t y) -> void
+        {
+            size_.x = x;
+            size_.y = y;
+        }
+
         /**
          * @brief Draw window borders
          *

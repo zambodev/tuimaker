@@ -7,7 +7,6 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 #include <clocale>
-
 #elif _WIN32
 #include <windows.h>
 #include <io.h>
